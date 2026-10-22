@@ -1,0 +1,3 @@
+Heo Con Club card deck - CC0 1.0 (public domain), drawn in code by tools/gen_cards.py.
+Suit pips and J/Q/K faces are Microsoft Fluent Emoji (MIT): keep emoji-fluent-3d/LICENSE.txt with it.
+Rank font: Grandstander (SIL OFL 1.1).

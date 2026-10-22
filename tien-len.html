@@ -1,0 +1,945 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>Tiến Lên Miền Nam · Heo Con Club</title>
+<style>
+@font-face{font-family:"Grandstander Black";src:url("assets/fonts/GrandstanderBlack-Regular.ttf") format("truetype");font-display:swap}
+@font-face{font-family:"Baloo 2";src:url("assets/fonts/Baloo2%5Bwght%5D.ttf") format("truetype");font-weight:400 800;font-display:swap}
+@font-face{font-family:"Nunito";src:url("assets/fonts/Nunito%5Bwght%5D.ttf") format("truetype");font-weight:200 1000;font-display:swap}
+:root{--pink:#ff6fa8;--pinkd:#c2407a;--ink:#5a2342}
+*{box-sizing:border-box;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:radial-gradient(circle at 15% 15%,rgba(255,255,255,.55),transparent 35%),radial-gradient(circle at 85% 85%,rgba(255,255,255,.45),transparent 40%),linear-gradient(135deg,#ffc9e0,#e3d4ff 50%,#c4e3ff);overflow:hidden;font-family:Nunito,system-ui,sans-serif;color:var(--ink);touch-action:none}
+#wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+#stage{position:relative;flex:none;width:1920px;height:1080px;overflow:hidden;border-radius:28px;background:#ffd6e8;box-shadow:0 30px 80px rgba(120,50,110,.35),0 0 0 6px rgba(255,255,255,.6)}
+img{-webkit-user-drag:none}
+.screen{position:absolute;inset:0;display:none}.screen.on{display:block}
+.bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.abs{position:absolute}
+.cb{font-family:"Grandstander Black","Baloo 2",sans-serif;font-weight:400}
+.stroke{paint-order:stroke fill}
+.btn{cursor:pointer;transition:transform .12s ease,filter .12s}
+.btn:hover{transform:translateY(-3px) scale(1.04)}.btn:active{transform:scale(.96)}
+/* top bar */
+.topbtn{position:absolute;top:18px;width:92px;height:92px;cursor:pointer;z-index:400;transition:transform .12s}
+.topbtn:hover{transform:scale(1.07)}.topbtn:active{transform:scale(.95)}
+.pill{position:absolute;height:80px;padding:0 74px 0 90px;border-radius:40px;background:linear-gradient(#fff,#fff3f8);box-shadow:0 6px 0 #f3b8cf,0 10px 18px rgba(120,30,70,.18);display:flex;align-items:center;font:800 38px "Baloo 2";color:#c08f00;white-space:nowrap;z-index:400}
+.pill img.ic{position:absolute;left:8px;top:2px;width:76px;height:76px}
+.pill img.plus{position:absolute;right:10px;top:11px;width:58px;cursor:pointer}
+.roompill{position:absolute;left:126px;top:26px;height:70px;padding:0 26px 0 72px;border-radius:35px;background:rgba(255,255,255,.88);box-shadow:0 5px 0 #f0bcd2;display:flex;align-items:center;gap:10px;font:800 30px "Baloo 2";color:#9b2c5e;z-index:400}
+.roompill img{position:absolute;left:6px;top:4px;width:62px}
+/* seats */
+.seat{position:absolute;width:0;height:0;z-index:20}
+.av{position:absolute;left:-90px;top:-90px;width:180px;height:180px;transition:transform .25s}
+.av .pic{position:absolute;left:28px;top:28px;width:124px;height:124px;border-radius:50%;object-fit:cover;background:#fff}
+.av .fr{position:absolute;inset:0;width:180px;height:180px;pointer-events:none}
+.seat.active .av{transform:scale(1.08)}
+.seat.out .av .pic{filter:grayscale(.2) brightness(1.05)}
+.ring{position:absolute;left:-104px;top:-104px;width:208px;height:208px;pointer-events:none;transform:rotate(-90deg);opacity:0;transition:opacity .2s}
+.seat.active .ring{opacity:1}
+.ring circle{fill:none;stroke-width:12;stroke-linecap:round}
+.ring .track{stroke:rgba(255,255,255,.55)}
+.ring .bar{stroke:#3ccf9b;stroke-dasharray:597;stroke-dashoffset:0}
+.ring .bar.warn{stroke:#ffc93c}.ring .bar.danger{stroke:#ff5a5a}
+.tsec{position:absolute;left:52px;top:-104px;width:56px;height:56px;border-radius:50%;background:#fff;box-shadow:0 4px 0 #f0bcd2;font:800 30px "Baloo 2";color:#c2407a;display:none;align-items:center;justify-content:center;z-index:3}
+.seat.active.me .tsec{display:flex}
+.nc{position:absolute;background:rgba(255,255,255,.94);border-radius:26px;padding:6px 20px 8px;box-shadow:0 6px 0 #f3b8cf;min-width:210px;text-align:center;white-space:nowrap}
+.nc .nm{font:400 28px "Grandstander Black";color:#9b2c5e;line-height:1.1}
+.nc .mn{font:800 25px "Baloo 2";color:#c08f00;display:flex;align-items:center;justify-content:center;gap:6px;line-height:1}
+.nc .mn img{width:30px}
+.backs{position:absolute;width:96px;height:132px}
+.backs img{position:absolute;width:84px;filter:drop-shadow(0 4px 4px rgba(80,20,50,.25))}
+.cnt{position:absolute;right:-22px;top:-22px;width:54px;height:54px;border-radius:50%;background:linear-gradient(#ff9cc4,#ff5c9a);border:4px solid #fff;color:#fff;font:800 28px "Baloo 2";display:flex;align-items:center;justify-content:center;box-shadow:0 4px 8px rgba(0,0,0,.2)}
+.cnt.warn{background:linear-gradient(#ffb3a8,#ff3b3b);animation:pulse .7s infinite}
+.stamp{position:absolute;left:-80px;top:-150px;width:160px;text-align:center;padding:6px 0;border-radius:24px;background:#fff;font:400 28px "Grandstander Black";color:#8a8496;box-shadow:0 6px 14px rgba(80,20,50,.2);animation:popin .3s cubic-bezier(.2,1.6,.4,1) both;z-index:5}
+.rankb{position:absolute;left:-95px;top:40px;width:190px;pointer-events:none;z-index:6;animation:popin .4s cubic-bezier(.2,1.6,.4,1) both}
+.reveal{position:absolute;display:flex;z-index:25}
+.reveal img{width:62px;margin-left:-30px;border-radius:8px;filter:drop-shadow(0 3px 3px rgba(60,20,40,.3))}
+.reveal img:first-child{margin-left:0}
+/* cards */
+.card{position:absolute;left:0;top:0;width:150px;height:216px;perspective:900px;transition:transform .34s cubic-bezier(.2,1.1,.3,1),opacity .3s;will-change:transform}
+.card .in{position:relative;width:100%;height:100%;transition:transform .36s ease;transform-style:preserve-3d}
+.card.down .in{transform:rotateY(180deg)}
+.card img{position:absolute;inset:0;width:100%;height:100%;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:14px;filter:drop-shadow(0 5px 6px rgba(70,20,50,.28))}
+.card img.b{transform:rotateY(180deg)}
+.card img.f,.card img.b{transition:visibility 0s .17s}
+.card.down img.f{visibility:hidden}
+.card:not(.down) img.b{visibility:hidden}
+.card.mine{cursor:pointer}
+.card.sel img.f{filter:drop-shadow(0 0 12px #ffd23a) drop-shadow(0 0 4px #fff) drop-shadow(0 6px 6px rgba(70,20,50,.3))}
+.card.hint img.f{filter:drop-shadow(0 0 12px #3ccf9b) drop-shadow(0 6px 6px rgba(70,20,50,.3))}
+.card.old{opacity:.55}
+.card.bad{animation:bad .35s}
+@keyframes bad{0%,100%{margin-left:0}25%{margin-left:-14px}75%{margin-left:14px}}
+#lbl{position:absolute;left:960px;top:610px;transform:translateX(-50%);padding:6px 24px;border-radius:24px;background:rgba(255,255,255,.85);font:800 28px "Baloo 2";color:#9b2c5e;box-shadow:0 4px 0 #f0bcd2;white-space:nowrap;display:none;z-index:15}
+#status{position:absolute;left:960px;top:700px;transform:translateX(-50%);font:400 30px "Grandstander Black";color:#fff;-webkit-text-stroke:6px #c2407a;paint-order:stroke fill;white-space:nowrap;z-index:15;pointer-events:none}
+#deck{position:absolute;left:885px;top:372px;width:150px;height:216px;z-index:12;display:none}
+#deck img{position:absolute;width:150px;border-radius:14px;filter:drop-shadow(0 4px 4px rgba(70,20,50,.25))}
+/* action buttons */
+.gbtn{position:absolute;width:220px;height:92px;cursor:pointer;z-index:300;transition:transform .12s,filter .2s,opacity .2s}
+.gbtn img{width:100%;height:100%}
+.gbtn .t{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding-bottom:10px;font:400 38px "Grandstander Black";color:#fff;-webkit-text-stroke:7px var(--sc,#c2407a);paint-order:stroke fill;line-height:1}
+.gbtn .t small{font:800 18px "Baloo 2";-webkit-text-stroke:4px var(--sc);margin-top:2px}
+.gbtn:hover{transform:translateY(-4px) scale(1.03)}.gbtn:active{transform:scale(.95)}
+.gbtn.off{filter:grayscale(.85) brightness(1.05);opacity:.6;pointer-events:none}
+.gbtn.glow{animation:glow 1s ease-in-out infinite}
+.gbtn kbd{position:absolute;right:16px;top:8px;font:800 14px "Baloo 2";color:rgba(255,255,255,.85)}
+@keyframes glow{0%,100%{filter:drop-shadow(0 0 0 rgba(255,210,60,0))}50%{filter:drop-shadow(0 0 16px rgba(255,220,80,.95))}}
+#emobtn{position:absolute;left:1830px;top:780px;width:76px;z-index:300}
+#emopick{position:absolute;right:30px;top:420px;width:470px;padding:16px;border-radius:32px;background:rgba(255,255,255,.97);box-shadow:0 10px 0 #f0bcd2,0 20px 40px rgba(80,20,50,.25);display:none;grid-template-columns:repeat(6,1fr);gap:6px;z-index:500}
+#emopick.on{display:grid}
+#emopick img{width:66px;height:66px;cursor:pointer;transition:transform .12s}#emopick img:hover{transform:scale(1.2)}
+.emote{position:absolute;width:150px;height:150px;pointer-events:none;z-index:600;animation:popin .35s cubic-bezier(.2,1.6,.4,1) both;filter:drop-shadow(0 8px 10px rgba(80,20,50,.25))}
+/* fx */
+#fx{position:absolute;inset:0;pointer-events:none;z-index:900;overflow:hidden}
+.callout{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);pointer-events:none}
+.confetti{position:absolute;top:-30px;width:16px;height:26px;border-radius:5px}
+.plustxt{position:absolute;font:400 40px "Grandstander Black";color:#fff27a;-webkit-text-stroke:7px #a5205a;paint-order:stroke fill;pointer-events:none;white-space:nowrap;animation:rise 1.4s ease-out forwards}
+.plustxt.neg{color:#d9e4ff;-webkit-text-stroke-color:#3a4c80}
+@keyframes rise{0%{transform:translateY(10px) scale(.6);opacity:0}15%{transform:translateY(0) scale(1.1);opacity:1}100%{transform:translateY(-110px) scale(1);opacity:0}}
+@keyframes popin{0%{transform:scale(.3);opacity:0}100%{transform:scale(1);opacity:1}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.float{animation:float 3s ease-in-out infinite}
+.shake{animation:shk .5s linear}
+@keyframes shk{0%,100%{transform:translate(0,0)}20%{transform:translate(-14px,6px) rotate(-.6deg)}40%{transform:translate(12px,-8px) rotate(.6deg)}60%{transform:translate(-10px,4px)}80%{transform:translate(8px,-4px)}}
+#toast{position:absolute;left:50%;top:300px;transform:translateX(-50%);padding:14px 34px;border-radius:30px;background:rgba(255,255,255,.97);font:800 30px "Baloo 2";color:#9b2c5e;box-shadow:0 8px 0 #f0bcd2;z-index:950;display:none;white-space:nowrap}
+/* rooms */
+#rooms .title{position:absolute;left:660px;top:22px;width:600px;height:130px}
+#rooms .title img{width:100%;height:100%}
+#rooms .title span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding-bottom:22px;font:400 48px "Grandstander Black";color:#fff;-webkit-text-stroke:8px #c2407a;paint-order:stroke fill}
+.rooms{position:absolute;left:90px;top:200px;width:1740px;display:grid;grid-template-columns:repeat(4,1fr);gap:34px}
+.room{position:relative;border-radius:48px;padding:18px 18px 22px;cursor:pointer;transition:transform .18s cubic-bezier(.2,1.5,.4,1);animation:popin .45s cubic-bezier(.2,1.6,.4,1) both}
+.room:hover{transform:translateY(-12px) rotate(-1deg)}
+.room .thumb{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:32px;box-shadow:inset 0 0 0 4px rgba(255,255,255,.6)}
+.room .nm{margin-top:12px;text-align:center;font:400 46px "Grandstander Black";color:#fff;-webkit-text-stroke:8px var(--rc);paint-order:stroke fill}
+.room .info{display:flex;justify-content:center;align-items:center;gap:10px;margin-top:6px;font:800 30px "Baloo 2";color:#fff;text-shadow:0 2px 0 var(--rc)}
+.room .info img{width:64px}
+.room .min{text-align:center;font:800 22px "Baloo 2";color:rgba(255,255,255,.95);margin-top:4px}
+.room .online{position:absolute;left:34px;top:34px;font:800 20px "Baloo 2";color:#fff;background:rgba(60,207,155,.95);border-radius:14px;padding:0 12px;box-shadow:0 3px 0 #1f9a70}
+.room .go{margin:14px auto 0;width:240px;height:84px;position:relative}
+.room .go img{width:100%;height:100%}
+.room .go span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding-bottom:8px;font:400 34px "Grandstander Black";color:#fff;-webkit-text-stroke:6px #1f9a70;paint-order:stroke fill}
+.room.lock{filter:grayscale(.75);opacity:.8}
+.room.lock .go span{-webkit-text-stroke-color:#8a8496}
+.room .lockic{position:absolute;right:30px;top:24px;width:70px;display:none}
+.room.lock .lockic{display:block}
+#quick{position:absolute;left:690px;top:870px;width:540px;height:150px}
+#quick img{width:100%;height:100%}
+#quick span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding-bottom:16px;font:400 66px "Grandstander Black";color:#fff;-webkit-text-stroke:10px #c2407a;paint-order:stroke fill}
+/* modal */
+.cv3{position:absolute;left:0;top:0;width:1920px;height:1080px;pointer-events:none}
+#cvRooms{z-index:5}#roomMascot{position:absolute;left:372px;top:776px;width:300px;height:300px;z-index:6;cursor:pointer}
+#cv3d{z-index:650}
+.seat.c0 .nc{background:linear-gradient(#fff0f6,#ffc2dc);box-shadow:0 6px 0 #e07aa6,0 10px 16px rgba(120,30,70,.18)}.seat.c0 .nc .nm{color:#b8336f}
+.seat.c1 .nc{background:linear-gradient(#e6fff5,#a6efcf);box-shadow:0 6px 0 #34b483,0 10px 16px rgba(20,90,60,.18)}.seat.c1 .nc .nm{color:#1b8a60}
+.seat.c2 .nc{background:linear-gradient(#e8f4ff,#b4dbff);box-shadow:0 6px 0 #4a8fd6,0 10px 16px rgba(20,60,120,.18)}.seat.c2 .nc .nm{color:#2368c4}
+.seat.c3 .nc{background:linear-gradient(#fffae0,#ffe596);box-shadow:0 6px 0 #d9a520,0 10px 16px rgba(120,90,10,.18)}.seat.c3 .nc .nm{color:#a77400}
+.seat.c1 .ring .bar{stroke:#2fd59a}.seat.c2 .ring .bar{stroke:#4fb3ff}.seat.c3 .ring .bar{stroke:#ffb800}.seat.c0 .ring .bar{stroke:#ff6fa8}
+#resMascot{position:absolute;left:18px;top:560px;width:360px;height:440px;z-index:1001;pointer-events:none}
+#resBubble{position:absolute;left:60px;top:500px;padding:10px 24px;border-radius:26px;background:#fff;box-shadow:0 8px 18px rgba(110,40,90,.25);font:400 30px "Grandstander Black";color:#c2407a;z-index:1002;white-space:nowrap;animation:popin .4s cubic-bezier(.2,1.6,.4,1) both}
+#modal{position:absolute;inset:0;background:rgba(60,20,50,.5);display:none;align-items:center;justify-content:center;z-index:1000;backdrop-filter:blur(3px)}
+#modal.on{display:flex}
+.panel{position:relative;width:1180px;border-radius:56px;background:linear-gradient(#ffd1e3,#ff8fbf);box-shadow:0 14px 0 #c2407a,0 30px 60px rgba(60,10,40,.4);padding:100px 40px 40px;animation:popin .38s cubic-bezier(.2,1.6,.4,1) both}
+.panel.result{width:1120px;margin-left:270px}
+.panel.sky{background:linear-gradient(#d3ecff,#6fbfff);box-shadow:0 14px 0 #2a7fd0,0 30px 60px rgba(10,40,80,.35)}
+.panel.mint{background:linear-gradient(#c9f6e6,#5fd9ac);box-shadow:0 14px 0 #1f9a70,0 30px 60px rgba(10,60,40,.35)}
+.panel .inner{background:linear-gradient(#fffdf8,#fff3ea);border-radius:40px;padding:26px 30px;box-shadow:inset 0 4px 10px rgba(160,80,110,.12);max-height:700px;overflow:auto}
+.panel .ttl{position:absolute;left:50%;top:-38px;transform:translateX(-50%);width:640px;height:132px}
+.panel .ttl img{width:100%;height:100%}
+.panel .ttl span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding-bottom:22px;font:400 48px "Grandstander Black";color:#fff;-webkit-text-stroke:8px #c2407a;paint-order:stroke fill;white-space:nowrap}
+.panel .x{position:absolute;right:-24px;top:-24px;width:96px;cursor:pointer}
+.panel .row{display:flex;align-items:center;justify-content:space-between;margin:14px 6px;font:800 34px "Baloo 2";color:#7a3a5c}
+.panel .row img.tg{height:70px;cursor:pointer}
+.seg{display:flex;gap:8px}
+.seg span{padding:6px 22px;border-radius:24px;background:#fff;box-shadow:0 4px 0 #f0bcd2;font:400 28px "Grandstander Black";color:#c2407a;cursor:pointer}
+.seg span.on{background:linear-gradient(#ff9cc4,#ff6fa8);color:#fff;box-shadow:0 4px 0 #c2407a}
+.res{display:flex;align-items:center;gap:18px;padding:10px 18px;border-radius:30px;margin:10px 0;background:#fff;box-shadow:0 5px 0 #f0d1df}
+.res.me{background:linear-gradient(#fff8d6,#ffeaa6);box-shadow:0 5px 0 #f0c860}
+.res .rk{width:150px;flex:none;text-align:center}.res .rk img{max-width:150px;max-height:74px}
+.res .ra{position:relative;width:90px;height:90px;flex:none}
+.res .ra .pic{position:absolute;left:14px;top:14px;width:62px;height:62px;border-radius:50%;object-fit:cover}
+.res .ra .fr{position:absolute;inset:0;width:90px}
+.res .who{flex:1;min-width:0}
+.res .who b{display:block;font:400 32px "Grandstander Black";color:#9b2c5e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.res .who small{display:block;font:700 20px Nunito;color:#a07090;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.res .left{display:flex;max-width:250px;flex:none}
+.res .left img{width:32px;margin-left:-21px;border-radius:5px;box-shadow:-2px 0 4px #0002}
+.res .left img:first-child{margin-left:0}
+.res .dl{width:190px;flex:none;text-align:right;font:800 40px "Baloo 2";color:#2fae7a}
+.res .dl.neg{color:#d24a6a}
+.mbtns{display:flex;justify-content:center;gap:30px;margin-top:22px}
+.mbtn{position:relative;width:300px;height:100px;cursor:pointer;transition:transform .12s}
+.mbtn:hover{transform:translateY(-4px)}
+.mbtn img{width:100%;height:100%}
+.mbtn span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding-bottom:10px;font:400 38px "Grandstander Black";color:#fff;-webkit-text-stroke:7px var(--sc);paint-order:stroke fill}
+.rules h3{font:400 32px "Grandstander Black";color:#c2407a;margin:14px 0 4px}
+.rules p,.rules li{font:600 24px Nunito;color:#5a2342;margin:4px 0;line-height:1.35}
+.rules ul{margin:4px 0 8px;padding-left:28px}
+.rules b{color:#c2407a}
+</style>
+</head>
+<body>
+<div id="wrap"><div id="stage">
+
+<!-- ROOM SELECT -->
+<div id="rooms" class="screen on">
+  <img class="bg" src="assets/ui-premium-generated/lobby-backgrounds/lobby_dream_1920x1080.png">
+  <img class="topbtn" id="toLobby" src="assets/ui-jelly-pzuh/buttons-pastel/pink/icon_home_pink.png" style="left:22px" title="Về thị trấn">
+  <div class="title"><img src="assets/ui-premium-generated/ribbons/ribbon_pink.png"><span>Tiến Lên Miền Nam</span></div>
+  <div class="pill" style="left:1380px;top:24px"><img class="ic" src="assets/emoji-fluent-3d/game/coin.png"><span class="coinTxt">0</span><img class="plus" src="assets/ui-jelly-pzuh/buttons-pastel/mint/icon_plus_mint.png" id="relief" title="Nhận xu cứu trợ"></div>
+  <img class="topbtn" data-open="rules" src="assets/ui-jelly-pzuh/buttons-pastel/yellow/icon_question_yellow.png" style="left:1700px" title="Luật chơi">
+  <img class="topbtn" data-open="settings" src="assets/ui-jelly-pzuh/buttons-pastel/pink/icon_settings_pink.png" style="left:1806px" title="Cài đặt">
+  <div class="rooms" id="roomList"></div>
+  <canvas class="cv3" id="cvRooms" width="1920" height="1080"></canvas>
+  <canvas id="roomMascot" width="300" height="300" title="Bấm vào linh vật!"></canvas>
+  <div id="quick" class="btn pulseSlow"><img src="assets/ui-premium-generated/buttons/pill_pink.png"><span>Chơi ngay!</span></div>
+</div>
+
+<!-- TABLE -->
+<div id="table" class="screen">
+  <img class="bg" id="tbg">
+  <img class="topbtn" id="leave" src="assets/ui-jelly-pzuh/buttons-pastel/pink/icon_back_pink.png" style="left:20px" title="Rời bàn (Esc)">
+  <div class="roompill"><img src="assets/games/card-shared/chips/chip_10k.png" id="roomChip"><span id="roomTxt"></span></div>
+  <div class="pill" style="left:1430px;top:24px;transform:scale(.92);transform-origin:left top"><img class="ic" src="assets/emoji-fluent-3d/game/coin.png"><span class="coinTxt">0</span><img class="plus" src="assets/ui-jelly-pzuh/buttons-pastel/mint/icon_plus_mint.png" data-open="relief"></div>
+  <img class="topbtn" data-open="rules" src="assets/ui-jelly-pzuh/buttons-pastel/yellow/icon_question_yellow.png" style="left:1718px;width:80px;top:24px">
+  <img class="topbtn" data-open="settings" src="assets/ui-jelly-pzuh/buttons-pastel/pink/icon_settings_pink.png" style="left:1814px;width:86px;top:22px">
+  <div id="seats"></div>
+  <div id="deck"></div>
+  <div id="pile"></div>
+  <div id="hand"></div>
+  <div id="lbl"></div>
+  <div id="status"></div>
+  <div class="gbtn" id="bHint" style="left:1452px;top:858px;--sc:#c08f00"><img src="assets/ui-premium-generated/buttons/pill_lemon.png"><div class="t">Gợi ý</div><kbd>H</kbd></div>
+  <div class="gbtn" id="bSort" style="left:1684px;top:858px;--sc:#2a7fd0"><img src="assets/ui-premium-generated/buttons/pill_sky.png"><div class="t">Xếp bài</div><kbd>S</kbd></div>
+  <div class="gbtn" id="bPass" style="left:1452px;top:962px;--sc:#8a8496"><img src="assets/ui-premium-generated/buttons/pill_grey.png"><div class="t">Bỏ lượt</div><kbd>P</kbd></div>
+  <div class="gbtn" id="bPlay" style="left:1684px;top:962px;--sc:#c2407a"><img src="assets/ui-premium-generated/buttons/pill_pink.png"><div class="t">Đánh<small id="playSub"></small></div><kbd>␣</kbd></div>
+  <img id="emobtn" class="btn" src="assets/ui-jelly-pzuh/buttons-pastel/yellow/icon_like_yellow.png" title="Thả cảm xúc">
+  <div id="emopick"></div>
+  <canvas class="cv3" id="cv3d" width="1920" height="1080"></canvas>
+</div>
+
+<div id="modal"></div>
+<div id="toast"></div>
+<div id="fx"></div>
+</div></div>
+
+<script src="js/vendor/three.min.js"></script>
+<script src="js/vendor/GLTFLoader.js"></script>
+<script src="js/vendor/SkeletonUtils.js"></script>
+<script src="js/hc3d.js"></script>
+<script src="js/tienlen-engine.js"></script>
+<script src="js/hc-core.js"></script>
+<script>
+'use strict';
+// ================================================================== helpers
+const Q = new URLSearchParams(location.search);
+const SHOT = !!Q.get('shot'), AUTO = !!Q.get('auto');
+if (SHOT) document.head.appendChild(Object.assign(document.createElement('style'), { textContent: '.panel,#resBubble{animation:none!important}' }));
+if (SHOT) Element.prototype.animate = function (kf, o) { o = typeof o === 'number' ? { duration: o } : (o || {}); let cb = null; const t = setTimeout(() => cb && cb(), (o.duration || 0) + (o.delay || 0)); return { set onfinish(f) { cb = f; }, get onfinish() { return cb; }, cancel() { clearTimeout(t); }, pause() { clearTimeout(t); }, finished: Promise.resolve() }; };
+const $ = (s, el = document) => el.querySelector(s);
+const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+const A = p => 'assets/' + p.split('/').map(encodeURIComponent).join('/');
+const rnd = (a, b) => a + Math.random() * (b - a);
+const ri = (a, b) => Math.floor(rnd(a, b + 1));
+const pick = a => a[Math.floor(Math.random() * a.length)];
+const fmt = n => Math.round(n).toLocaleString('vi-VN');
+const short = n => n >= 1e6 ? (n / 1e6).toFixed(n % 1e6 ? 1 : 0).replace('.', ',') + 'M' : n >= 1e3 ? Math.round(n / 1e3) + 'K' : '' + n;
+function el(tag, attrs = {}, parent) {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === 'style') e.style.cssText = v; else if (k === 'html') e.innerHTML = v; else if (k === 'text') e.textContent = v; else if (k === 'class') e.className = v;
+    else if (k.startsWith('on')) e.addEventListener(k.slice(2), v); else e.setAttribute(k, v);
+  }
+  if (parent) parent.appendChild(e);
+  return e;
+}
+const img = (src, style = '', parent, cls = '') => el('img', { src: A(src), style, class: cls }, parent);
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(window.HC ? HC.key(k) : 'heocon_' + k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(window.HC ? HC.key(k) : 'heocon_' + k, JSON.stringify(v)); } catch (e) {} },
+};
+let SPEED = 1;
+const sleep = ms => new Promise(r => setTimeout(r, ms / SPEED));
+let timers = [];
+const later = (fn, ms) => { const h = setTimeout(fn, ms / SPEED); timers.push(h); return h; };
+function clearTimers() { timers.forEach(clearTimeout); timers = []; }
+function fit() { $('#stage').style.transform = `scale(${Math.min(innerWidth / 1920, innerHeight / 1080)})`; }
+addEventListener('resize', fit); fit();
+function stagePt(ev) { const r = $('#stage').getBoundingClientRect(), s = r.width / 1920; return { x: (ev.clientX - r.left) / s, y: (ev.clientY - r.top) / s }; }
+window.__errors = [];
+addEventListener('error', e => { window.__errors.push(String(e.message)); });
+
+// ================================================================== settings, audio
+const S = Object.assign({ music: true, sfx: true, vibe: true, speed: 1, must3s: true, autoSort: true }, store.get('tl_settings', {}));
+SPEED = Q.get('speed') === 'turbo' ? 12 : Q.get('speed') === 'fast' ? 3 : S.speed;
+const SFX = {
+  click: 'audio-ui-kenney/Audio/click1.ogg', pop: 'audio-sfx-ninja/Elemental/Bubble.wav', pop2: 'audio-sfx-ninja/Elemental/Bubble2.wav',
+  card: 'audio-casino-kenney/Audio/card-place-1.ogg', card2: 'audio-casino-kenney/Audio/card-place-2.ogg', card3: 'audio-casino-kenney/Audio/card-place-3.ogg',
+  slide: 'audio-casino-kenney/Audio/card-slide-1.ogg', slide2: 'audio-casino-kenney/Audio/card-slide-3.ogg', shuffle: 'audio-casino-kenney/Audio/card-shuffle.ogg',
+  fan: 'audio-casino-kenney/Audio/card-fan-1.ogg', chip: 'audio-casino-kenney/Audio/chip-lay-1.ogg', coin: 'audio-sfx-ninja/Bonus/Coin.wav', gold: 'audio-sfx-ninja/Bonus/Gold1.wav',
+  slash: 'audio-sfx-ninja/Whoosh & Slash/Slash.wav', boom: 'audio-sfx-ninja/Elemental/Explosion.wav', win: 'audio-sfx-ninja/Jingles/Success1.wav',
+  lose: 'audio-sfx-ninja/Jingles/GameOver.wav', turn: 'audio-sfx-ninja/Alert/Alert.wav', alert: 'audio-sfx-ninja/Alert/Alert3.wav', cancel: 'audio-sfx-ninja/Menu/Cancel.wav',
+  accept: 'audio-sfx-ninja/Menu/Accept.wav', tick: 'audio-interface-kenney/Audio/tick_001.ogg', pass: 'audio-interface-kenney/Audio/drop_001.ogg',
+  error: 'audio-interface-kenney/Audio/error_004.ogg', power: 'audio-digital-kenney/Audio/powerUp2.ogg', jingle: 'audio-jingles-kenney/Audio/Pizzicato jingles/jingles_PIZZI00.ogg',
+};
+function sfx(n, v = .7) { if (!S.sfx || !SFX[n] || SHOT || AUTO && SPEED > 3) return; try { const a = new Audio(A(SFX[n])); a.volume = v; a.play().catch(() => {}); } catch (e) {} }
+let bgm = null;
+function music(on = S.music) {
+  if (!on) { if (bgm) bgm.pause(); return; }
+  if (!bgm) { bgm = new Audio(A('music-bgm/opengameart/happy-clappy-loop__OwlishMedia.wav')); bgm.loop = true; bgm.volume = .3; }
+  bgm.play().catch(() => {});
+}
+document.addEventListener('pointerdown', () => { if (S.music && bgm === null) music(); }, { once: true });
+
+// ================================================================== player data
+const ME = { name: store.get('name', 'Bạn Heo Con'), av: store.get('av', 'avatars-dicebear/fun-emoji/png/bong.png'), fr: store.get('fr', 'gold') };
+let coins = store.get('coins', 1250000);
+function setCoins(v, anim = true) {
+  const from = coins; coins = Math.max(0, Math.round(v)); store.set('coins', coins);
+  const els = $$('.coinTxt');
+  if (!anim || SHOT) { els.forEach(e => e.textContent = fmt(coins)); return; }
+  const t0 = performance.now();
+  const step = t => { const k = Math.min(1, (t - t0) / 700), x = from + (coins - from) * (1 - Math.pow(1 - k, 3)); els.forEach(e => e.textContent = fmt(x)); if (k < 1) requestAnimationFrame(step); };
+  requestAnimationFrame(step);
+}
+const BOT_NAMES = ['Heo Hồng', 'Mèo Mập', 'Gấu Bông', 'Thỏ Ngọc', 'Cún Con', 'Bé Na', 'Bin Bon', 'Sữa Chua', 'Bánh Bao', 'Kem Dâu', 'Mít Ướt', 'Bơ Sáp', 'Tí Nị', 'Su Su', 'Bắp Rang', 'Kẹo Mút'];
+const SEEDS = ['heo', 'meo', 'ti', 'teo', 'mit', 'na', 'bo', 'sua', 'kem', 'banh', 'mochi', 'com', 'xoai', 'dau', 'bin', 'bon', 'su', 'gau', 'tho', 'cun', 'miu', 'bi'];
+const BOT_AVS = [...['adv_mage', 'adv_knight', 'adv_rogue_hooded', 'adv_ranger', 'adv_barbarian', 'adv_rogue', 'mini_bear', 'mini_dog', 'mini_duck'].map(k => `3d/renders/avatars/${k}.png`), ...SEEDS.map(s => `avatars-dicebear/fun-emoji/png/${s}.png`), ...SEEDS.slice(0, 10).map(s => `avatars-dicebear/big-smile/png/${s}.png`), ...SEEDS.slice(0, 10).map(s => `avatars-dicebear/avataaars/png/${s}.png`),
+  ...['pig', 'rabbit', 'chick', 'panda', 'penguin', 'bear', 'frog', 'owl', 'monkey', 'duck'].map(a => `avatars-animals-remastered-kenney/PNG/Round/${a}.png`),
+  ...['ninja', 'princess', 'prince', 'woman_fairy', 'person_mage', 'woman_astronaut', 'teddy_bear', 'unicorn', 'robot', 'santa_claus'].map(c => `emoji-fluent-3d/characters/${c}.png`)];
+const FRAMES = ['pink', 'mint', 'sky', 'lavender', 'silver', 'rainbow', 'gold', 'tet'];
+const ROOMS = [
+  { name: 'Tập Sự', bet: 1000, min: 20000, theme: 'mint', ai: 0, color: '#1f9a70', grad: ['#c9f6e6', '#5fd9ac'], chip: '1k' },
+  { name: 'Bình Dân', bet: 10000, min: 200000, theme: 'sakura', ai: 1, color: '#c2407a', grad: ['#ffd1e3', '#ff8fbf'], chip: '10k' },
+  { name: 'Cao Thủ', bet: 50000, min: 1000000, theme: 'lavender', ai: 2, color: '#6c4bd1', grad: ['#e6dcff', '#ad8cff'], chip: '50k' },
+  { name: 'Đại Gia', bet: 200000, min: 4000000, theme: 'tet', ai: 2, color: '#c22f3a', grad: ['#ffe0a0', '#ff7a6b'], chip: '500k' },
+];
+
+// ================================================================== FX
+const FX = $('#fx');
+function callout(slug, o = {}) {
+  const ms = (o.ms || 1300) / Math.min(SPEED, 3), x = o.x, y = o.y, w = o.w || 820;
+  const c = img(`ui-premium-generated/callouts/${slug}.png`, `max-width:${w}px;${x != null ? `left:${x}px;top:${y}px` : ''}`, FX, 'callout');
+  c.animate([{ transform: 'translate(-50%,-50%) scale(.2) rotate(-12deg)', opacity: 0 }, { transform: 'translate(-50%,-50%) scale(1.15) rotate(3deg)', opacity: 1, offset: .3 },
+    { transform: 'translate(-50%,-50%) scale(1)', opacity: 1, offset: .5 }, { transform: 'translate(-50%,-50%) scale(1)', opacity: 1, offset: .85 }, { transform: 'translate(-50%,-75%) scale(1.06)', opacity: 0 }],
+  { duration: ms, easing: 'ease-out' }).onfinish = () => c.remove();
+}
+function confetti(n = 90) {
+  if (SHOT) return;
+  const cols = ['#ff6fa8', '#ffc93c', '#3ccf9b', '#4fb3ff', '#a07bff', '#ff9e6b', '#fff'];
+  for (let i = 0; i < n; i++) {
+    const c = el('div', { class: 'confetti', style: `left:${rnd(0, 1920)}px;background:${pick(cols)};${Math.random() < .4 ? 'border-radius:50%;width:18px;height:18px' : ''}` }, FX);
+    c.animate([{ transform: 'translate(0,0) rotate(0)' }, { transform: `translate(${rnd(-200, 200)}px,${rnd(1100, 1300)}px) rotate(${rnd(-900, 900)}deg)` }], { duration: rnd(1600, 2800), delay: rnd(0, 400), easing: 'cubic-bezier(.3,.6,.6,1)' }).onfinish = () => c.remove();
+  }
+}
+function flyCoins(from, to, n = 10) {
+  if (SHOT || SPEED > 4) return;
+  for (let i = 0; i < n; i++) {
+    const c = img('emoji-fluent-3d/game/coin.png', `position:absolute;width:54px;left:${from.x - 27}px;top:${from.y - 27}px`, FX);
+    const mx = (from.x + to.x) / 2 + rnd(-150, 150), my = Math.min(from.y, to.y) - rnd(60, 200);
+    c.animate([{ transform: 'translate(0,0) scale(.6)' }, { transform: `translate(${mx - from.x}px,${my - from.y}px) scale(1.1)`, offset: .45 }, { transform: `translate(${to.x - from.x}px,${to.y - from.y}px) scale(.7)` }],
+      { duration: rnd(650, 900) / Math.min(SPEED, 2), delay: i * 45 / Math.min(SPEED, 2), easing: 'ease-in-out' }).onfinish = () => { c.remove(); if (i % 3 === 0) sfx('coin', .35); };
+  }
+}
+function plusText(x, y, amt) { const p = el('div', { class: 'plustxt' + (amt < 0 ? ' neg' : ''), text: (amt > 0 ? '+' : '−') + fmt(Math.abs(amt)), style: `left:${x}px;top:${y}px;transform-origin:left` }, FX); setTimeout(() => p.remove(), 1500); }
+function toast(msg, ms = 1800) { const t = $('#toast'); t.textContent = msg; t.style.display = 'block'; clearTimeout(t._h); t._h = setTimeout(() => t.style.display = 'none', ms); }
+function shake() { if (!S.vibe || SHOT) return; const s = $('#table'); s.classList.remove('shake'); void s.offsetWidth; s.classList.add('shake'); }
+function emote(p, key, ms = 2600) {
+  const s = SEAT[p];
+  const e = img(`emoji-noto-animated/${key}/512.webp`, `left:${s.x + (p === 2 ? 110 : p === 1 ? -230 : 40)}px;top:${s.y - (p === 2 ? 70 : 200)}px`, $('#table'), 'emote');
+  setTimeout(() => { e.animate([{ opacity: 1 }, { opacity: 0, transform: 'translateY(-40px)' }], { duration: 300 }).onfinish = () => e.remove(); }, ms);
+}
+
+// ================================================================== table geometry
+const SEAT = [
+  { x: 128, y: 892, nc: [22, 990], back: null, ring: true },
+  { x: 1796, y: 452, nc: [1690, 552], back: [1648, 452] },
+  { x: 960, y: 118, nc: [1062, 76], back: [806, 118] },
+  { x: 126, y: 452, nc: [20, 552], back: [272, 452] },
+];
+const CW = 150, CH = 216, HAND_Y = 932, HAND_X = 880, PILE = { x: 960, y: 470 };
+const RF = ['03', '04', '05', '06', '07', '08', '09', '10', 'J', 'Q', 'K', 'A', '02'];
+const SN = ['spades', 'clubs', 'diamonds', 'hearts'];
+const face = id => `cards-heocon/cards/card_${SN[id & 3]}_${RF[id >> 2]}.png`;
+const BACK = 'cards-heocon/cards/card_back_pink.png';
+function mkCard(id, down = false, parent = $('#hand')) {
+  const c = el('div', { class: 'card' + (down ? ' down' : '') }, parent);
+  const inn = el('div', { class: 'in' }, c);
+  img(id == null ? BACK : face(id), '', inn, 'f'); img(BACK, '', inn, 'b');
+  c.dataset.id = id == null ? '' : id;
+  return c;
+}
+function place(c, x, y, rot = 0, sc = 1, z) { c.style.transform = `translate(${x - CW / 2}px,${y - CH / 2}px) rotate(${rot}deg) scale(${sc})`; if (z != null) c.style.zIndex = z; }
+
+// ================================================================== state
+let room = null, G = null, players = [], gameNo = 0, starter = null, firstGame = true, handEls = new Map(), sel = new Set(), sortMode = 'rank', hintIdx = -1, myTurn = false, timerH = null, pileStack = [], inGame = false, autoNext = null;
+function bot(i) {
+  const name = pick(BOT_NAMES.filter(n => !players.some(p => p && p.name === n)));
+  return { name, av: pick(BOT_AVS), fr: pick(FRAMES), coins: Math.round(room.min * rnd(1.3, 9) / 1000) * 1000, ai: room.ai };
+}
+
+// ================================================================== rooms screen
+function renderRooms() {
+  const list = $('#roomList'); list.innerHTML = '';
+  ROOMS.forEach((r, i) => {
+    const lock = coins < r.min;
+    const d = el('div', { class: 'room' + (lock ? ' lock' : ''), style: `--rc:${r.color};background:linear-gradient(${r.grad[0]},${r.grad[1]});box-shadow:0 14px 0 ${r.color},0 24px 40px rgba(80,20,60,.25);animation-delay:${i * 70}ms` }, list);
+    img(`bg-tables-generated/with-table/table_scene_${r.theme}.png`, '', d, 'thumb');
+    el('div', { class: 'online', text: '● ' + fmt(ri(80, 4200)) + ' người' }, d);
+    img('ui-jelly-pzuh/buttons/square_locked.png', '', d, 'lockic');
+    el('div', { class: 'nm', text: r.name }, d);
+    const info = el('div', { class: 'info' }, d); img(`games/card-shared/chips/chip_${r.chip}.png`, '', info); el('span', { text: 'Cược ' + short(r.bet) }, info);
+    el('div', { class: 'min', text: 'Tối thiểu ' + short(r.min) + ' xu · AI ' + ['dễ', 'vừa', 'khó'][r.ai] }, d);
+    const go = el('div', { class: 'go' }, d); img(lock ? 'ui-premium-generated/buttons/pill_grey.png' : 'ui-premium-generated/buttons/pill_mint.png', '', go); el('span', { text: lock ? 'Thiếu xu' : 'Vào bàn' }, go);
+    d.onclick = () => { if (lock) { sfx('error'); toast(`Cần ít nhất ${short(r.min)} xu cho bàn này`); return; } sfx('accept'); joinRoom(i); };
+  });
+  setCoins(coins, false);
+}
+$('#quick').onclick = () => { const i = ROOMS.map((r, i) => coins >= r.min ? i : -1).filter(i => i >= 0).pop(); if (i == null) { openModal('relief'); return; } sfx('accept'); joinRoom(Math.min(i, 1)); };
+$('#toLobby').onclick = () => { sfx('click'); HC.from() === 'map' ? HC.goto('lobby.html', 'Đang mở bản đồ…') : HC.goto('index.html', 'Đang về thị trấn…'); };
+$('#relief').onclick = () => openModal('relief');
+
+// ================================================================== table setup
+function joinRoom(i) {
+  room = ROOMS[i]; gameNo = 0; starter = null; firstGame = true;
+  players = [{ name: ME.name, av: ME.av, fr: ME.fr, me: true }];
+  for (let k = 1; k < 4; k++) players[k] = bot(k);
+  $('#tbg').src = A(`bg-tables-generated/with-table/table_scene_${room.theme}.png`);
+  $('#roomChip').src = A(`games/card-shared/chips/chip_${room.chip}.png`);
+  $$('.screen').forEach(s => s.classList.remove('on')); $('#table').classList.add('on');
+  buildSeats(); setCoins(coins, false); music(); initTable3D();
+  later(startGame, 450);
+}
+function buildSeats() {
+  const root = $('#seats'); root.innerHTML = '';
+  players.forEach((p, i) => {
+    const s = SEAT[i];
+    const seat = el('div', { class: 'seat c' + i + (i === 0 ? ' me' : ''), id: 'seat' + i, style: `left:${s.x}px;top:${s.y}px` }, root);
+    const av = el('div', { class: 'av' }, seat); img(p.av, '', av, 'pic'); img(`ui-premium-generated/avatar-frames/frame_${p.fr}.png`, '', av, 'fr');
+    seat.insertAdjacentHTML('beforeend', `<svg class="ring" viewBox="0 0 208 208"><circle class="track" cx="104" cy="104" r="95"/><circle class="bar" cx="104" cy="104" r="95"/></svg><div class="tsec"></div>`);
+    const nc = el('div', { class: 'nc', style: `left:${s.nc[0] - s.x}px;top:${s.nc[1] - s.y}px` }, seat);
+    el('div', { class: 'nm', text: p.name }, nc);
+    const mn = el('div', { class: 'mn' }, nc); img('emoji-fluent-3d/game/coin.png', '', mn); el('span', { class: i === 0 ? 'coinTxt' : 'bc', text: fmt(i === 0 ? coins : p.coins) }, mn);
+    if (s.back) {
+      const b = el('div', { class: 'backs', style: `left:${s.back[0] - s.x - 48}px;top:${s.back[1] - s.y - 66}px;display:none` }, seat);
+      for (let k = 0; k < 3; k++) img(BACK, `left:${k * 6}px;top:${-k * 4}px`, b);
+      el('div', { class: 'cnt', text: '13' }, b);
+    }
+  });
+}
+function seatEl(p) { return $('#seat' + p); }
+function setCount(p, n) {
+  const b = seatEl(p) && seatEl(p).querySelector('.backs'); if (!b) return;
+  b.style.display = n > 0 ? 'block' : 'none';
+  const c = b.querySelector('.cnt'); c.textContent = n; c.classList.toggle('warn', n <= 2);
+}
+function botCoins(p) { const e = seatEl(p).querySelector('.bc'); if (e) e.textContent = fmt(players[p].coins); }
+function setStatus(t) { $('#status').textContent = t || ''; }
+
+// ================================================================== game flow
+async function startGame() {
+  clearTimers(); clearInterval(autoNext); closeModal(true);
+  gameNo++; inGame = true; sel.clear(); hintIdx = -1; pileStack = [];
+  $('#hand').innerHTML = ''; $('#pile').innerHTML = ''; handEls.clear(); $('#lbl').style.display = 'none';
+  $$('.stamp,.rankb,.reveal').forEach(e => e.remove()); $$('.seat').forEach(s => s.classList.remove('active', 'out'));
+  $('#roomTxt').textContent = `${room.name} · Cược ${short(room.bet)} · Ván ${gameNo}`;
+  controls(false);
+  G = new TL.Game({ seed: Q.get('seed') ? +Q.get('seed') + gameNo : undefined, firstGame, starter, mustPlay3s: S.must3s });
+  const ev = G.deal();
+  await dealAnim();
+  await run(ev);
+  loop();
+}
+async function dealAnim() {
+  setStatus('Đang chia bài…');
+  const deck = $('#deck'); deck.innerHTML = ''; deck.style.display = 'block';
+  for (let k = 0; k < 6; k++) img(BACK, `left:${k * 1.5}px;top:${-k * 1.5}px`, deck);
+  sfx('shuffle');
+  await sleep(450);
+  const order = [0, 1, 2, 3].map(k => ((starter ?? 0) + k) % 4);
+  const counts = [0, 0, 0, 0];
+  const fly = [];
+  for (let n = 0; n < 52; n++) {
+    const p = order[n % 4];
+    const c = mkCard(null, true, $('#pile'));
+    place(c, PILE.x, PILE.y, 0, .7, 40 + n);
+    fly.push(c);
+    const tgt = p === 0 ? { x: HAND_X + (counts[0] - 6) * 30, y: HAND_Y } : { x: SEAT[p].back[0], y: SEAT[p].back[1] };
+    counts[p]++;
+    requestAnimationFrame(() => requestAnimationFrame(() => place(c, tgt.x, tgt.y, rnd(-10, 10), p === 0 ? .9 : .55)));
+    if (p !== 0) { const cnt = counts[p]; setTimeout(() => setCount(p, cnt), 260 / SPEED); }
+    if (n % 4 === 0) sfx('slide2', .25);
+    await sleep(SHOT ? 0 : 24);
+  }
+  await sleep(380);
+  fly.forEach(c => c.remove()); deck.style.display = 'none';
+  for (let p = 1; p < 4; p++) setCount(p, 13);
+  // my hand: face-down then flip
+  G.hands[0].forEach(id => { const c = mkCard(id, true); c.classList.add('mine'); handEls.set(id, c); });
+  layoutHand(true);
+  await sleep(150);
+  [...orderedHand()].forEach((id, i) => setTimeout(() => { const c = handEls.get(id); if (c) c.classList.remove('down'); if (i % 3 === 0) sfx('fan', .2); }, i * 35 / SPEED));
+  await sleep(600);
+  setStatus('');
+}
+function orderedHand() {
+  const h = G ? [...G.hands[0]] : [];
+  if (sortMode === 'group') return TL.decompose(h).sort((a, b) => (TL.isBomb(b) - TL.isBomb(a)) || (b.n - a.n) || (a.cards[0] - b.cards[0])).flatMap(g => g.cards);
+  return h.sort((a, b) => a - b);
+}
+function layoutHand(instant = false) {
+  const ids = orderedHand(); const n = ids.length;
+  const sp = Math.min(80, 1020 / Math.max(1, n - 1));
+  ids.forEach((id, i) => {
+    const c = handEls.get(id); if (!c) return;
+    const t = i - (n - 1) / 2;
+    if (instant) c.style.transition = 'none';
+    place(c, HAND_X + t * sp, HAND_Y + t * t * .75 - (sel.has(id) ? 38 : 0), t * 1.5, 1, 100 + i);
+    c.classList.toggle('sel', sel.has(id));
+    if (instant) { void c.offsetWidth; c.style.transition = ''; }
+  });
+  updatePlayBtn();
+}
+async function run(list) { for (const e of list) await onEvent(e); }
+function loop() {
+  if (!G || G.over || window.__freeze) return;
+  const p = G.turn;
+  activeSeat(p);
+  if (p === 0 && !AUTO) { myTurn = true; controls(true); startTimer(0, 20); if (!G.current) setStatus('Bạn đánh trước'); else setStatus(''); return; }
+  myTurn = false; controls(false);
+  const think = p === 0 ? 400 : rnd(650, 1250) * (G.current && TL.isHeo(G.current.combo) ? 1.3 : 1);
+  startTimer(p, think / 1000 / SPEED + .2);
+  setStatus(p === 0 ? '' : `${players[p].name} đang nghĩ…`);
+  later(async () => {
+    const m = G.aiMove(p, p === 0 ? 2 : players[p].ai);
+    const ev = m.action === 'play' ? G.play(p, m.cards) : G.pass(p);
+    if (ev[0] && ev[0].type === 'invalid') { window.__errors.push('AI invalid ' + ev[0].reason); return; }
+    stopTimer(); await run(ev); loop();
+  }, think);
+}
+function activeSeat(p) { $$('.seat').forEach((s, i) => s.classList.toggle('active', i === p)); hourglassAt(p); }
+function startTimer(p, sec) {
+  stopTimer();
+  const bar = seatEl(p).querySelector('.bar'); const ts = seatEl(p).querySelector('.tsec');
+  bar.style.transition = 'none'; bar.style.strokeDashoffset = '0'; bar.classList.remove('warn', 'danger'); void bar.getBoundingClientRect();
+  bar.style.transition = `stroke-dashoffset ${sec}s linear`; bar.style.strokeDashoffset = '597';
+  if (p !== 0 || AUTO) return;
+  let left = sec; ts.textContent = left;
+  timerH = setInterval(() => {
+    left--; ts.textContent = Math.max(0, left);
+    if (left <= 8) bar.classList.add('warn'); if (left <= 4) { bar.classList.add('danger'); sfx('tick', .5); }
+    if (left <= 0) { stopTimer(); timeUp(); }
+  }, 1000);
+}
+function stopTimer() { clearInterval(timerH); timerH = null; }
+async function timeUp() {
+  if (!myTurn) return;
+  callout('het_gio', { w: 420, ms: 900 });
+  if (!G.current) { const o = G.options(0); await humanPlay(o[0].combo.cards); }
+  else await humanPass();
+}
+function controls(on) {
+  ['bPass', 'bPlay', 'bHint'].forEach(id => $('#' + id).classList.toggle('off', !on));
+  $('#bPass').classList.toggle('off', !on || !G || !G.current);
+  updatePlayBtn();
+}
+function updatePlayBtn() {
+  const b = $('#bPlay'), sub = $('#playSub');
+  if (!G || !myTurn) { b.classList.remove('glow'); sub.textContent = ''; return; }
+  const ids = [...sel]; const v = ids.length ? G.check(0, ids) : null;
+  b.classList.toggle('glow', !!(v && v.ok));
+  sub.textContent = v && v.ok ? TL.describe(v.combo) + (v.cut ? ' · CHẶT!' : '') : ids.length ? '' : '';
+}
+
+// ---------------------------------------------------------------- human actions
+async function humanPlay(ids) {
+  if (!myTurn) return;
+  const v = G.check(0, ids);
+  if (!v.ok) { sfx('error'); toast(v.reason); ids.forEach(id => { const c = handEls.get(id); if (c) { c.classList.remove('bad'); void c.offsetWidth; c.classList.add('bad'); } }); return; }
+  myTurn = false; stopTimer(); controls(false); sel.clear(); hintIdx = -1;
+  const ev = G.play(0, ids);
+  await run(ev); loop();
+}
+async function humanPass() {
+  if (!myTurn) return;
+  if (!G.current) { toast('Bạn đi đầu vòng, phải đánh 1 bộ'); sfx('error'); return; }
+  myTurn = false; stopTimer(); controls(false); sel.clear(); hintIdx = -1; layoutHand();
+  const ev = G.pass(0);
+  await run(ev); loop();
+}
+$('#bPlay').onclick = () => { sfx('click'); humanPlay([...sel]); };
+$('#bPass').onclick = () => { sfx('click'); humanPass(); };
+$('#bSort').onclick = () => { if (!G) return; sortMode = sortMode === 'rank' ? 'group' : 'rank'; sfx('fan', .5); layoutHand(); toast(sortMode === 'rank' ? 'Xếp theo số' : 'Xếp theo bộ (hàng, sảnh, đôi, rác)', 1100); };
+$('#bHint').onclick = () => {
+  if (!myTurn) return;
+  const o = G.options(0);
+  if (!o.length) { toast('Không có bài chặn được, bỏ lượt nhé 🙈'); return; }
+  hintIdx = (hintIdx + 1) % Math.min(o.length, 8);
+  sel = new Set(o[hintIdx].combo.cards); sfx('slide', .4); layoutHand();
+};
+// select by click or by dragging across the hand
+let dragMode = null;
+$('#hand').addEventListener('pointerdown', e => {
+  const c = e.target.closest('.card.mine'); if (!c || c.classList.contains('down')) return;
+  const id = +c.dataset.id; dragMode = !sel.has(id); toggle(id, dragMode); e.preventDefault();
+});
+document.addEventListener('pointermove', e => {
+  if (dragMode === null) return;
+  const t = document.elementFromPoint(e.clientX, e.clientY); const c = t && t.closest && t.closest('.card.mine');
+  if (c) toggle(+c.dataset.id, dragMode);
+});
+document.addEventListener('pointerup', () => dragMode = null);
+function toggle(id, on) {
+  if (!handEls.has(id) || sel.has(id) === on) return;
+  on ? sel.add(id) : sel.delete(id); hintIdx = -1; sfx('slide', .3); layoutHand();
+}
+document.addEventListener('keydown', e => {
+  if ($('#modal').classList.contains('on')) { if (e.key === 'Escape') closeModal(); return; }
+  if (!$('#table').classList.contains('on')) return;
+  if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); $('#bPlay').click(); }
+  else if (e.key === 'p' || e.key === 'P') $('#bPass').click();
+  else if (e.key === 'h' || e.key === 'H') $('#bHint').click();
+  else if (e.key === 's' || e.key === 'S') $('#bSort').click();
+  else if (e.key === 'Escape') { if (sel.size) { sel.clear(); layoutHand(); } else $('#leave').click(); }
+});
+
+// ---------------------------------------------------------------- event rendering
+async function onEvent(e) {
+  switch (e.type) {
+    case 'deal': return;
+    case 'round':
+      $$('.stamp').forEach(s => s.remove());
+      if (!e.first) await clearPile();
+      if (e.first) { if (e.leader === 0) callout('ban_di_truoc', { w: 640, ms: 1300 }); else toast(`${players[e.leader].name} đi trước${firstGame ? ' (có 3♠)' : ''}`, 1500); await sleep(e.leader === 0 ? 700 : 300); }
+      return;
+    case 'turn': activeSeat(e.p); if (e.p === 0 && !AUTO) sfx('turn', .35); return;
+    case 'play': return playAnim(e);
+    case 'pass': {
+      sfx('pass', .5);
+      el('div', { class: 'stamp', text: 'Bỏ lượt' }, seatEl(e.p));
+      if (e.p === 0) setStatus('');
+      return sleep(260);
+    }
+    case 'round_end': return sleep(420);
+    case 'pay': return payAnim(e.from, e.to, e.units * room.bet, e.why);
+    case 'finish': {
+      seatEl(e.p).classList.add('out'); setCount(e.p, 0);
+      const slug = ['nhat', 'nhi', 'ba', 'bet'][e.rank - 1];
+      img(`ui-premium-generated/callouts/${slug}.png`, '', seatEl(e.p), 'rankb');
+      if (e.p === 0) { callout(e.rank === 1 ? 'nhat' : 'het_bai', { w: 700 }); sfx(e.rank === 1 ? 'win' : 'jingle'); if (e.rank === 1) confetti(60); }
+      else if (e.rank === 1) { emote(e.p, 'partying-face_1f973'); sfx('jingle', .5); }
+      return sleep(700);
+    }
+    case 'cong': {
+      seatEl(e.p).classList.add('out');
+      callout('cong', { x: SEAT[e.p].x + (e.p === 1 ? -120 : e.p === 3 ? 120 : 0), y: SEAT[e.p].y + (e.p === 0 ? -170 : 60), w: 360, ms: 1600 });
+      img('ui-premium-generated/callouts/cong.png', '', seatEl(e.p), 'rankb');
+      if (e.p !== 0) emote(e.p, 'loudly-crying_1f62d'); sfx('lose', .5);
+      return sleep(800);
+    }
+    case 'thoi': {
+      const hasHeo = e.items.some(t => t.startsWith('Heo'));
+      callout(hasHeo ? 'thoi_heo' : 'thoi_hang', { x: SEAT[e.p].x + (e.p === 1 ? -170 : e.p === 3 ? 170 : 0), y: SEAT[e.p].y + (e.p === 0 ? -200 : e.p === 2 ? 120 : -10), w: 460, ms: 1700 });
+      sfx('boom', .4); return sleep(700);
+    }
+    case 'toi_trang': {
+      await revealHand(e.p, true);
+      callout('toi_trang', { ms: 1700 });
+      await sleep(1100);
+      const map = { tu_quy_heo: 'tu_quy_heo', sanh_rong: 'sanh_rong', '5_doi_thong': '5_doi_thong', '6_doi': '6_doi', dong_mau: 'dong_mau', tu_quy_3: 'tu_quy' };
+      callout(map[e.kind] || 'toi_trang', { ms: 1600, w: 700 }); sfx(e.p === 0 ? 'win' : 'lose'); if (e.p === 0) confetti();
+      return sleep(1300);
+    }
+    case 'game_over': return gameOver(e);
+    case 'invalid': window.__errors.push('invalid ' + e.reason); return;
+  }
+}
+async function clearPile() {
+  const cards = $$('#pile .card');
+  cards.forEach(c => { c.style.opacity = '0'; c.style.transform += ' translateY(-30px) scale(.8)'; });
+  await sleep(250); cards.forEach(c => c.remove()); pileStack = []; $('#lbl').style.display = 'none';
+}
+async function playAnim(e) {
+  const { p, combo } = e;
+  // age previous combos
+  pileStack.forEach((grp, k) => grp.forEach((c, i) => { c.classList.add('old'); const n = grp.length, sp = Math.min(44, 520 / n); place(c, PILE.x + (i - (n - 1) / 2) * sp, PILE.y - 64 - k * 12, c._rot || 0, .62, 20 + i); }));
+  if (pileStack.length > 1) { pileStack.pop().forEach(c => c.remove()); }
+  const n = combo.n, sp = Math.min(70, 760 / n), els = [];
+  combo.cards.forEach((id, i) => {
+    let c;
+    if (p === 0) { c = handEls.get(id); handEls.delete(id); c.classList.remove('mine', 'sel'); $('#pile').appendChild(c); }
+    else { c = mkCard(id, true, $('#pile')); c.style.transition = 'none'; place(c, SEAT[p].back[0], SEAT[p].back[1], 0, .5, 60 + i); void c.offsetWidth; c.style.transition = ''; }
+    c._rot = rnd(-5, 5);
+    requestAnimationFrame(() => { place(c, PILE.x + (i - (n - 1) / 2) * sp, PILE.y + Math.abs(i - (n - 1) / 2) * 2, c._rot, .9, 60 + i); c.classList.remove('down'); });
+    els.push(c);
+  });
+  pileStack.unshift(els);
+  if (p === 0) { sel.clear(); layoutHand(); } else setCount(p, e.left);
+  sfx(pick(['card', 'card2', 'card3']));
+  const lb = $('#lbl'); lb.style.display = 'block'; lb.textContent = `${TL.describe(combo)} · ${players[p].name}`;
+  $$('.stamp', seatEl(p)).forEach(s => s.remove());
+  await sleep(330);
+  if (e.cut) {
+    const heo = TL.isHeo(e.cut.victimCombo);
+    callout(e.cut.stacked ? 'chat_chong' : heo ? 'chat_heo' : 'chat', { ms: 1700 });
+    sfx('slash'); setTimeout(() => { sfx('boom'); shake(); }, 180 / SPEED);
+    emote(p, pick(['sunglasses-face_1f60e', 'smirk_1f60f', 'money-face_1f911']));
+    later(() => emote(e.cut.victim, pick(['loudly-crying_1f62d', 'rage_1f621', 'mind-blown_1f92f'])), 500);
+    await sleep(1100);
+  } else if (TL.isBomb(combo)) {
+    callout(combo.type === 'quad' ? 'tu_quy' : combo.len >= 4 ? '4_doi_thong' : '3_doi_thong', { ms: 1300 }); sfx('power'); await sleep(700);
+  } else if (combo.type === 'straight' && combo.len >= 6) { callout('sanh', { w: 520, ms: 1100 }); await sleep(400); }
+  else if (TL.isHeo(combo)) { sfx('gold', .5); if (p !== 0 && Math.random() < .35) emote(p, pick(['smirk_1f60f', 'pig_1f416'])); }
+  if (e.left === 1 || e.left === 2) {
+    callout(e.left === 1 ? 'bao_1_la' : 'bao_2_la', { x: SEAT[p].x + (p === 1 ? -160 : p === 3 ? 160 : p === 0 ? 260 : 230), y: SEAT[p].y + (p === 0 ? -150 : p === 2 ? 40 : -110), w: 340, ms: 1500 });
+    sfx('alert', .45);
+  }
+  if (Math.random() < .06 && p !== 0) emote(p, pick(['joy_1f602', 'thinking-face_1f914', 'zany-face_1f92a', 'star-struck_1f929']));
+}
+async function payAnim(from, to, amt, why) {
+  const pf = SEAT[from], pt = SEAT[to];
+  const n = Math.min(18, 5 + Math.round(amt / room.bet) * 2);
+  if (T3 && SPEED <= 4) { await Promise.race([HC3D.coinBurst(T3.st, { x: pf.x, y: pf.y }, { x: pt.x, y: pt.y }, n, { size: 46, duration: .8 / Math.min(SPEED, 2), onEach: () => sfx('coin', .25) }), sleep(1500)]); }
+  else { flyCoins({ x: pf.x, y: pf.y }, { x: pt.x, y: pt.y }, n); await sleep(650); }
+  adjust(from, -amt); adjust(to, amt);
+  plusText(pf.x - 60, pf.y - 140, -amt); plusText(pt.x - 60, pt.y - 140, amt);
+  if (to === 0) sfx('gold'); else if (from === 0) sfx('lose', .35);
+  await sleep(500);
+}
+function adjust(p, amt) { if (p === 0) setCoins(coins + amt); else { players[p].coins = Math.max(0, players[p].coins + amt); botCoins(p); } }
+async function revealHand(p, center = false) {
+  const h = G.hands[p]; if (!h.length) return;
+  if (p === 0) return;
+  setCount(p, 0);
+  const s = SEAT[p];
+  const r = el('div', { class: 'reveal', style: center ? `left:${PILE.x - h.length * 17}px;top:${PILE.y - 60}px;transform:scale(1.4)` : p === 2 ? `left:${s.x - h.length * 16}px;top:${s.y + 100}px` : p === 1 ? `left:${s.x - 120 - h.length * 32}px;top:${s.y - 50}px` : `left:${s.x + 105}px;top:${s.y - 50}px` }, $('#table'));
+  h.forEach((id, i) => { const im = img(face(id), '', r); im.animate([{ transform: 'rotateY(90deg)', opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: 260, delay: i * 40 }); });
+  sfx('fan', .4);
+  await sleep(250);
+}
+async function gameOver(e) {
+  inGame = false; myTurn = false; stopTimer(); controls(false); activeSeat(-1); setStatus('');
+  if (!e.instant) for (let p = 1; p < 4; p++) await revealHand(p);
+  await sleep(600);
+  const deltas = [0, 0, 0, 0];
+  for (const r of e.results) { deltas[r.p] = r.units * room.bet; }
+  // apply with coin flights to the winner
+  for (const r of e.results) if (r.units < 0) { if (T3 && SPEED <= 4) HC3D.coinBurst(T3.st, SEAT[r.p], SEAT[e.winner], 8, { size: 42 }); else flyCoins(SEAT[r.p], SEAT[e.winner], 6); }
+  await sleep(600);
+  for (const r of e.results) { adjust(r.p, deltas[r.p]); plusText(SEAT[r.p].x - 60, SEAT[r.p].y - 140, deltas[r.p]); }
+  const meR = e.results.find(r => r.p === 0);
+  if (meR && meR.rank === 1) { sfx('win'); confetti(); if (T3 && !SHOT && SPEED <= 4) HC3D.coinRain(T3.st, 46); } else if (meR && meR.units < 0) sfx('lose', .5);
+  starter = e.winner; firstGame = false;
+  await sleep(900);
+  // replace broke bots
+  showResults(e);
+}
+function showResults(e) {
+  const meRes = e.results.find(r => r.p === 0);
+  setTimeout(() => resultMascot(meRes), 60);
+  const order = [...e.results].sort((a, b) => (a.rank || 9) - (b.rank || 9));
+  const p = openModal('result', { title: `Kết quả ván ${gameNo}` });
+  const inner = p.querySelector('.inner');
+  order.forEach(r => {
+    const pl = players[r.p];
+    const row = el('div', { class: 'res' + (r.p === 0 ? ' me' : '') }, inner);
+    const rk = el('div', { class: 'rk' }, row);
+    const slug = e.instant ? (r.p === e.winner ? 'toi_trang' : 'thua') : r.notes.some(n => n.startsWith('Cóng')) ? 'cong' : ['nhat', 'nhi', 'ba', 'bet'][r.rank - 1];
+    img(`ui-premium-generated/callouts/${slug}.png`, '', rk);
+    const ra = el('div', { class: 'ra' }, row); img(pl.av, '', ra, 'pic'); img(`ui-premium-generated/avatar-frames/frame_${pl.fr}.png`, '', ra, 'fr');
+    const who = el('div', { class: 'who' }, row); el('b', { text: pl.name }, who);
+    el('small', { text: r.notes.join(' · ') || (r.rank === 1 ? 'Về nhất!' : r.left && r.left.length ? `Còn ${r.left.length} lá` : 'Hết bài') }, who);
+    const left = el('div', { class: 'left' }, row); (r.left || []).forEach(id => img(face(id), '', left));
+    const amt = r.units * room.bet;
+    el('div', { class: 'dl' + (amt < 0 ? ' neg' : ''), text: (amt > 0 ? '+' : amt < 0 ? '−' : '') + fmt(Math.abs(amt)) }, row);
+  });
+  const chat = G.transfers.filter(t => t.why === 'chat' || t.why === 'chat_chong');
+  if (chat.length) el('div', { style: 'font:700 22px Nunito;color:#a07090;margin:8px 10px 0', text: 'Chặt trong ván (đã cộng/trừ ngay): ' + chat.map(t => `${players[t.to].name} chặt ${players[t.from].name} ${short(t.units * room.bet)}`).join(' · ') }, inner);
+  const bs = el('div', { class: 'mbtns' }, p);
+  const back = el('div', { class: 'mbtn', style: '--sc:#8a8496' }, bs); img('ui-premium-generated/buttons/pill_grey.png', '', back); el('span', { text: 'Rời bàn' }, back);
+  const nx = el('div', { class: 'mbtn', style: '--sc:#c2407a' }, bs); img('ui-premium-generated/buttons/pill_pink.png', '', nx); const nxt = el('span', { text: 'Ván tiếp' }, nx);
+  back.onclick = () => { sfx('click'); leaveTable(); };
+  nx.onclick = () => { sfx('accept'); nextGame(); };
+  let n = AUTO ? 1 : 12; nxt.textContent = `Ván tiếp (${n})`;
+  clearInterval(autoNext);
+  if (window.__hold) return;
+  autoNext = setInterval(() => { n--; nxt.textContent = `Ván tiếp (${n})`; if (n <= 0) { clearInterval(autoNext); nextGame(); } }, 1000 / (AUTO ? SPEED : 1));
+}
+function nextGame() {
+  clearInterval(autoNext);
+  if (coins < room.bet * 6) { closeModal(true); toast('Không đủ xu cho bàn này, về chọn bàn khác nhé'); leaveTable(); return; }
+  for (let p = 1; p < 4; p++) if (players[p].coins < room.bet * 6) {
+    const old = players[p].name; players[p] = bot(p); toast(`${old} rời bàn · ${players[p].name} vào bàn`, 1600);
+  }
+  buildSeats();
+  startGame();
+}
+function leaveTable() {
+  clearTimers(); stopTimer(); clearInterval(autoNext); closeModal(true);
+  if (inGame && G && !G.over) { const pen = room.bet * 3; setCoins(coins - pen); toast(`Rời bàn giữa ván: −${fmt(pen)} xu`); }
+  inGame = false; G = null; hourglassAt(-1);
+  $$('.screen').forEach(s => s.classList.remove('on')); $('#rooms').classList.add('on'); renderRooms();
+}
+$('#leave').onclick = () => {
+  sfx('click');
+  if (inGame && G && !G.over) openModal('confirm'); else leaveTable();
+};
+
+// ================================================================== 3D layers (three.js + KayKit models)
+const MASCOT_KEYS = ['adv_mage', 'adv_knight', 'adv_rogue_hooded', 'adv_ranger', 'adv_barbarian', 'adv_rogue', 'mini_bear', 'mini_dog', 'mini_duck'];
+const mascotKey = () => MASCOT_KEYS[(store.get('mascot', 0) || 0) % MASCOT_KEYS.length];
+const can3D = () => !!(window.HC3D && HC3D.ok);
+let T3 = null, RM = null, ROOM3 = null;
+async function initTable3D() {
+  if (!can3D() || T3) return;
+  try {
+    const st = new HC3D.Stage($('#cv3d'), { width: 1920, height: 1080, ortho: true, pixelRatio: Math.min(1.5, window.devicePixelRatio || 1) });
+    const inner = await HC3D.prop(st, 'bgb_hourglass', { scale: 50 });
+    st.remove(inner);
+    inner.traverse(o => { if (!o.isMesh) return; o.material = o.material.clone();
+      if (o.material.name === 'glass') { o.material.color = new THREE.Color(0xffc6e2).convertSRGBToLinear(); o.material.opacity = .38; }
+      else { o.material.color = new THREE.Color(0xffc23d).convertSRGBToLinear(); o.material.emissive = new THREE.Color(0x3a1800); } });
+    const hg = new THREE.Group(); hg.add(inner); hg.rotation.x = .42; st.add(hg);
+    hg.visible = false;
+    st.onUpdate((dt, t) => { if (hg.visible) { inner.rotation.y += dt * 1.6; hg.rotation.z = Math.sin(t * 1.4) * .2; hg.position.y = hg.userData.y + Math.sin(t * 3) * 4; } });
+    st.start();
+    T3 = { st, hg };
+  } catch (e) { console.warn('3D table off', e); }
+}
+function hourglassAt(p) {
+  if (!T3) return;
+  if (p == null || p < 0) { T3.hg.visible = false; return; }
+  const s = SEAT[p];
+  T3.hg.visible = true;
+  T3.hg.userData.y = -(s.y - (p === 2 ? 20 : 78));
+  T3.hg.position.set(s.x + (p === 1 ? -108 : p === 2 ? -120 : 104), T3.hg.userData.y, 50);
+}
+async function initRooms3D() {
+  if (!can3D() || ROOM3) return;
+  try {
+    const st = new HC3D.Stage($('#cvRooms'), { width: 1920, height: 1080, ortho: true, pixelRatio: 1.25 });
+    const keys = ['bgb_coin_copper', 'bgb_coin_silver', 'bgb_coin_gold', 'bgb_coin_10_gold'];
+    keys.forEach((k, i) => { const cx = 90 + i * (409.5 + 34) + 204.75; HC3D.prop(st, k, { faceCamera: true, scale: 64 + i * 8, spin: 1.5 + i * .2, bob: 8, pos: st.px(cx, 322, 100) }); });
+    [['bgb_d6_red', 1320, 900, 78], ['bgb_d6_blue', 1420, 968, 64], ['mini_star', 1300, 1010, 62], ['bgb_coin_gold', 1470, 880, 70], ['mini_heart_red', 1540, 960, 56]].forEach(([k, x, y, sc]) => HC3D.prop(st, k, { faceCamera: k.includes('coin'), scale: sc, spin: 1.2, bob: 6, pos: st.px(x, y, 100) }));
+    st.start();
+    const ms = new HC3D.Stage($('#roomMascot'), { width: 300, height: 300, fov: 30, pixelRatio: 1.5, shadows: true });
+    ms.camera.position.set(0, 2.4, 8.4); ms.camera.lookAt(0, 1.45, 0);
+    HC3D.podium(ms, 0xff86b8, 0xe0457f);
+    const key = mascotKey();
+    const ch = await HC3D.character(ms, key, { anim: 'Idle_A', scale: key.startsWith('mini') ? 1.5 : 1.32 });
+    ch.root.position.y = .04; ch.root.rotation.y = .45;
+    ms.start();
+    const cheer = () => { ch.play(key.startsWith('adv') ? pick(['Jump_Full_Short', 'Spawn_Ground', 'Interact']) : 'cheer', { once: true, then: 'Idle_A' }); sfx('pop'); };
+    $('#roomMascot').onclick = cheer;
+    setTimeout(cheer, 500);
+    ROOM3 = { st, ms, ch };
+  } catch (e) { console.warn('3D rooms off', e); $('#roomMascot').style.display = 'none'; }
+}
+async function resultMascot(r) {
+  if (!can3D() || !r) return;
+  try {
+    if (!RM) {
+      const cv = el('canvas', { id: 'resMascot', width: 360, height: 440 });
+      const st = new HC3D.Stage(cv, { width: 360, height: 440, fov: 30, pixelRatio: 1.5, shadows: true });
+      st.camera.position.set(0, 2.5, 9.0); st.camera.lookAt(0, 1.45, 0);
+      HC3D.podium(st, 0xffd15a, 0xe89a00);
+      st.start();
+      RM = { cv, st, ch: null, key: null };
+    }
+    const key = mascotKey(), adv = key.startsWith('adv');
+    if (RM.key !== key) { if (RM.ch) RM.ch.dispose(); RM.ch = await HC3D.character(RM.st, key, { anim: 'Idle_A', scale: key.startsWith('mini') ? 1.5 : 1.32 }); RM.ch.root.position.y = .04; RM.ch.root.rotation.y = .4; RM.key = key; }
+    const m = $('#modal'); if (!m.classList.contains('on')) return;
+    m.appendChild(RM.cv);
+    const good = r.units > 0, last = r.rank === 4 || r.notes.some(n => n.startsWith('Cóng'));
+    if (adv) RM.ch.play(good ? 'Jump_Full_Short' : last ? 'Death_A' : 'Hit_A', { once: !good });
+    else RM.ch.play(good ? 'cheer' : 'sad');
+    el('div', { id: 'resBubble', text: good ? (r.rank === 1 ? 'Về nhất rồi! 🎉' : 'Có lời nha! 😊') : last ? 'Huhu bét rồi 😭' : 'Ván sau gỡ nha! 💪' }, m);
+  } catch (e) { console.warn('3D result off', e); }
+}
+
+// ================================================================== emotes
+const EMOS = ['joy_1f602', 'rofl_1f923', 'heart-eyes_1f60d', 'star-struck_1f929', 'partying-face_1f973', 'loudly-crying_1f62d', 'rage_1f621', 'mind-blown_1f92f', 'sunglasses-face_1f60e', 'money-face_1f911', 'clown_1f921', 'skull_1f480', 'fire_1f525', 'thumbs-up_1f44d', 'clap_1f44f', 'pig_1f416', 'pray_1f64f', 'red-heart_2764_fe0f'];
+EMOS.forEach(k => { const i = img(`emoji-noto-animated/${k}/512.webp`, '', $('#emopick')); i.onclick = () => { $('#emopick').classList.remove('on'); emote(0, k); sfx('pop'); if (Math.random() < .5) later(() => emote(ri(1, 3), pick(EMOS)), 900); }; });
+$('#emobtn').onclick = () => { sfx('click'); $('#emopick').classList.toggle('on'); };
+
+// ================================================================== modals
+document.addEventListener('click', e => { const t = e.target.closest('[data-open]'); if (t) { sfx('click'); openModal(t.dataset.open); } });
+function openModal(kind, o = {}) {
+  const m = $('#modal'); m.innerHTML = ''; m.classList.add('on');
+  const cls = { settings: 'sky', rules: 'mint', relief: 'mint' }[kind] || '';
+  const ribbon = { sky: 'sky', mint: 'mint' }[cls] || 'pink';
+  const titles = { settings: 'Cài đặt', rules: 'Luật Tiến Lên', relief: 'Xu cứu trợ', confirm: 'Rời bàn?', result: o.title };
+  const p = el('div', { class: 'panel ' + cls + (kind === 'result' ? ' result' : '') }, m);
+  const t = el('div', { class: 'ttl' }, p); img(`ui-premium-generated/ribbons/ribbon_${ribbon}.png`, '', t); el('span', { text: titles[kind] }, t);
+  if (kind !== 'result') { const x = img('ui-jelly-pzuh/buttons/icon_close_red.png', '', p, 'x'); x.onclick = () => closeModal(); }
+  const inner = el('div', { class: 'inner' }, p);
+  if (kind === 'settings') modalSettings(inner);
+  if (kind === 'rules') modalRules(inner);
+  if (kind === 'relief') modalRelief(inner);
+  if (kind === 'confirm') modalConfirm(inner, p);
+  if (kind !== 'result') sfx('pop');
+  return p;
+}
+function closeModal(silent) { if (!silent) sfx('cancel'); $('#modal').classList.remove('on'); $('#modal').innerHTML = ''; }
+$('#modal').addEventListener('click', e => { if (e.target.id === 'modal' && !$('#modal .res')) closeModal(); });
+function toggleRow(inner, label, key, after) {
+  const r = el('div', { class: 'row' }, inner); el('span', { text: label }, r);
+  const tg = img(S[key] ? 'ui-premium-generated/controls/toggle_on_pink.png' : 'ui-premium-generated/controls/toggle_off.png', '', r, 'tg');
+  tg.onclick = () => { S[key] = !S[key]; store.set('tl_settings', S); tg.src = A(S[key] ? 'ui-premium-generated/controls/toggle_on_pink.png' : 'ui-premium-generated/controls/toggle_off.png'); sfx('click'); after && after(); };
+}
+function modalSettings(inner) {
+  toggleRow(inner, '🎵 Nhạc nền', 'music', () => music(S.music));
+  toggleRow(inner, '🔔 Âm thanh', 'sfx');
+  toggleRow(inner, '💥 Rung màn hình khi chặt', 'vibe');
+  toggleRow(inner, '♠ Ván đầu bắt buộc đánh 3♠', 'must3s');
+  const r = el('div', { class: 'row' }, inner); el('span', { text: '⚡ Tốc độ máy đánh' }, r);
+  const seg = el('div', { class: 'seg' }, r);
+  [[1, 'Thường'], [1.6, 'Nhanh'], [2.5, 'Siêu nhanh']].forEach(([v, l]) => { const s = el('span', { text: l, class: S.speed === v ? 'on' : '' }, seg); s.onclick = () => { S.speed = v; SPEED = v; store.set('tl_settings', S); $$('span', seg).forEach(x => x.classList.remove('on')); s.classList.add('on'); sfx('click'); }; });
+  el('div', { style: 'text-align:center;margin-top:18px;font:700 22px Nunito;color:#a07090', text: 'Phím tắt: Space/Enter đánh · P bỏ lượt · H gợi ý · S xếp bài · Esc bỏ chọn · Kéo ngang qua bài để chọn nhiều lá' }, inner);
+}
+function modalRules(inner) {
+  inner.classList.add('rules');
+  inner.innerHTML = `
+  <h3>Cơ bản</h3><ul><li>4 người, mỗi người 13 lá. Ai đánh hết bài trước thắng.</li>
+  <li>Thứ tự: <b>3 &lt; 4 &lt; … &lt; K &lt; A &lt; 2 (heo)</b>. Cùng số thì so chất: <b>♠ bích &lt; ♣ chuồn &lt; ♦ rô &lt; ♥ cơ</b>.</li>
+  <li>Ván đầu: người có <b>3♠</b> đi trước và phải đánh kèm 3♠. Ván sau: người về nhất đi trước.</li></ul>
+  <h3>Các bộ bài</h3><ul><li><b>Rác</b> (1 lá), <b>Đôi</b>, <b>Sám cô</b> (3 lá cùng số), <b>Tứ quý</b> (4 lá).</li>
+  <li><b>Sảnh</b>: từ 3 lá liên tiếp, không có heo (Q-K-A được, K-A-2 không).</li>
+  <li><b>Đôi thông</b>: từ 3 đôi liên tiếp, không có heo.</li>
+  <li>Chặn bài phải <b>cùng loại, cùng số lá và lớn hơn</b> (so lá lớn nhất). Đã bỏ lượt thì mất quyền đánh tới hết vòng.</li></ul>
+  <h3>Chặt</h3><ul><li><b>3 đôi thông</b> chặt 1 heo hoặc 3 đôi thông nhỏ hơn.</li>
+  <li><b>Tứ quý</b> chặt 1 heo, đôi heo, 3 đôi thông, tứ quý nhỏ hơn.</li>
+  <li><b>4 đôi thông</b> chặt 1 heo, đôi heo, 3 đôi thông, tứ quý, 4 đôi thông nhỏ hơn.</li>
+  <li>Tiền chặt (× mức cược): heo đen 1, heo đỏ 2, 3 đôi thông 3, tứ quý 4, 4 đôi thông 5. <b>Chặt chồng</b>: người bị chặt sau cùng trả hết. Trả khi hết vòng.</li></ul>
+  <h3>Kết thúc ván</h3><ul><li>Nhất +3, Nhì +1, Ba −1, Bét −3 (× mức cược).</li>
+  <li><b>Cóng</b>: chưa đánh được lá nào khi có người về nhất → xếp cuối, phạt thêm 2.</li>
+  <li><b>Thối</b>: người về bét còn heo / tứ quý / đôi thông thì trả thêm cho người nhất (heo đen 1, heo đỏ 2, 3 đôi thông 3, tứ quý 4).</li>
+  <li><b>Tới trắng</b> (thắng ngay khi chia): tứ quý heo, sảnh rồng (3→A), 5 đôi thông, 6 đôi, đồng màu, tứ quý 3 (ván đầu). Mỗi người trả 4.</li>
+  <li>Hết vòng mà người thắng vòng đã hết bài thì người kế tiếp được đi (<b>hưởng sái</b>).</li></ul>`;
+}
+function modalRelief(inner) {
+  const ok = coins < 50000;
+  inner.innerHTML = `<div style="text-align:center;padding:20px"><img src="${A('emoji-noto-animated/money-with-wings_1f4b8/512.webp')}" style="width:180px"><div style="font:800 34px 'Baloo 2';color:#7a3a5c;margin-top:10px">${ok ? 'Nhận 100.000 xu cứu trợ để chơi tiếp!' : 'Còn từ 50.000 xu trở lên thì chưa nhận cứu trợ được nha 😉'}</div></div>`;
+  if (ok) { const bs = el('div', { class: 'mbtns' }, inner); const b = el('div', { class: 'mbtn', style: '--sc:#1f9a70' }, bs); img('ui-premium-generated/buttons/pill_mint.png', '', b); el('span', { text: 'Nhận xu' }, b);
+    b.onclick = () => { sfx('gold'); setCoins(coins + 100000); confetti(50); closeModal(true); renderRooms(); }; }
+}
+function modalConfirm(inner, p) {
+  inner.innerHTML = `<div style="text-align:center;font:800 34px 'Baloo 2';color:#7a3a5c;padding:20px">Rời bàn giữa ván sẽ bị xử thua <b style="color:#c2407a">−${fmt(room.bet * 3)}</b> xu.<br>Bạn chắc chứ?</div>`;
+  const bs = el('div', { class: 'mbtns' }, inner);
+  const a = el('div', { class: 'mbtn', style: '--sc:#8a8496' }, bs); img('ui-premium-generated/buttons/pill_grey.png', '', a); el('span', { text: 'Rời bàn' }, a);
+  const b = el('div', { class: 'mbtn', style: '--sc:#1f9a70' }, bs); img('ui-premium-generated/buttons/pill_mint.png', '', b); el('span', { text: 'Chơi tiếp' }, b);
+  a.onclick = () => { closeModal(true); leaveTable(); }; b.onclick = () => closeModal();
+}
+
+// ================================================================== boot
+if (window.HC) HC.arrive();
+renderRooms();
+initRooms3D();
+if (Q.get('room') != null) joinRoom(Math.max(0, Math.min(3, +Q.get('room'))));
+if (Q.get('uitest') || Q.get('pose')) { const s = document.createElement('script'); s.src = 'js/tienlen-uitest.js'; document.body.appendChild(s); }
+window.__TL_UI = { get G() { return G; }, get players() { return players; }, get gameNo() { return gameNo; }, coins: () => coins };
+</script>
+</body>
+</html>

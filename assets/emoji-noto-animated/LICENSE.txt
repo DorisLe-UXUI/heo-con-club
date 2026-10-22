@@ -1,0 +1,3 @@
+Noto Animated Emoji by Google — CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/).
+Source: https://googlefonts.github.io/noto-emoji-animation/
+sheet_96.png (+ .json timings) / still_128.png are resized frame strips made from 512.webp (changes made).

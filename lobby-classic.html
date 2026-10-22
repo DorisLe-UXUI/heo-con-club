@@ -1,0 +1,1110 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Heo Con Club</title>
+<style>
+@font-face{font-family:"Grandstander Black";src:url("assets/fonts/GrandstanderBlack-Regular.ttf") format("truetype");font-display:swap}
+@font-face{font-family:"Baloo 2";src:url("assets/fonts/Baloo2%5Bwght%5D.ttf") format("truetype");font-weight:400 800;font-display:swap}
+@font-face{font-family:"Nunito";src:url("assets/fonts/Nunito%5Bwght%5D.ttf") format("truetype");font-weight:200 1000;font-display:swap}
+:root{--pink:#ff6fa8;--pinkd:#c2407a;--ink:#5a2342;--cream:#fffaf5}
+*{box-sizing:border-box;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:radial-gradient(circle at 15% 15%,rgba(255,255,255,.55),transparent 35%),radial-gradient(circle at 85% 85%,rgba(255,255,255,.45),transparent 40%),linear-gradient(135deg,#ffc9e0,#e3d4ff 50%,#c4e3ff);overflow:hidden;font-family:Nunito,system-ui,sans-serif;color:var(--ink)}
+#wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+#stage{position:relative;flex:none;width:1920px;height:1080px;transform-origin:center center;overflow:hidden;border-radius:28px;background:#ffd6e8;box-shadow:0 30px 80px rgba(120,50,110,.35),0 0 0 6px rgba(255,255,255,.6)}
+.screen{position:absolute;inset:0;display:none}
+.screen.on{display:block}
+img{-webkit-user-drag:none;user-drag:none}
+.abs{position:absolute}
+.bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.cb{font-family:"Grandstander Black","Baloo 2",sans-serif;font-weight:400}
+.btn{cursor:pointer;transition:transform .12s ease, filter .12s}
+.btn:hover{transform:translateY(-4px) scale(1.04);filter:brightness(1.05)}
+.btn:active{transform:translateY(2px) scale(.97)}
+.pill{position:absolute;height:84px;padding:0 70px 0 92px;border-radius:42px;background:linear-gradient(#fff,#fff3f8);box-shadow:0 6px 0 #f3b8cf,0 10px 18px rgba(120,30,70,.18);display:flex;align-items:center;font:800 40px "Baloo 2";color:#c08f00;white-space:nowrap}
+.pill img.ic{position:absolute;left:8px;top:2px;width:80px;height:80px}
+.pill img.plus{position:absolute;right:10px;top:12px;width:60px;cursor:pointer}
+.pill.gem{color:#2a7fd0}
+.avatarbox{position:absolute;width:180px;height:180px}
+.avatarbox .av{position:absolute;left:28px;top:28px;width:124px;height:124px;border-radius:50%;object-fit:cover;background:#fff}
+.avatarbox .fr{position:absolute;inset:0;width:180px;height:180px;pointer-events:none}
+.namecard{position:absolute;background:rgba(255,255,255,.92);border-radius:28px;padding:8px 22px 10px 22px;box-shadow:0 6px 0 #f3b8cf;min-width:220px;text-align:center}
+.namecard .nm{font:400 30px "Grandstander Black";color:#9b2c5e;line-height:1.1}
+.namecard .mn{font:800 26px "Baloo 2";color:#c08f00;display:flex;align-items:center;justify-content:center;gap:6px;line-height:1}
+.namecard .mn img{width:32px}
+/* lobby */
+#toTown{position:absolute;right:24px;top:122px;height:76px;padding:0 30px 0 92px;border-radius:38px;display:flex;align-items:center;background:linear-gradient(#8ff2c8,#2fc58e);box-shadow:0 8px 0 #1f9a70,0 14px 22px rgba(31,154,112,.3);font:400 32px "Grandstander Black";color:#fff;-webkit-text-stroke:6px #1f9a70;paint-order:stroke fill;z-index:5}
+#toTown img{position:absolute;left:10px;top:-8px;width:84px;filter:drop-shadow(0 4px 4px rgba(0,0,0,.2))}
+#marquee{position:absolute;left:600px;top:30px;width:430px;height:60px;border-radius:30px;background:rgba(255,255,255,.75);overflow:hidden;box-shadow:inset 0 2px 6px rgba(160,60,110,.15)}
+#marquee span{position:absolute;white-space:nowrap;top:10px;font:800 28px "Baloo 2";color:#b03c74;animation:marq 16s linear infinite}
+@keyframes marq{from{left:100%}to{left:-180%}}
+.side{position:absolute;left:28px;width:200px;height:190px;cursor:pointer}
+.side .sq{position:absolute;left:20px;top:0;width:160px;height:160px}
+.side .ico{position:absolute;left:40px;top:12px;width:120px;height:120px;object-fit:contain;filter:drop-shadow(0 6px 6px rgba(80,20,60,.25))}
+.side .lb{position:absolute;left:0;right:0;top:150px;text-align:center;font:400 30px "Grandstander Black";color:#fff;-webkit-text-stroke:7px #c2407a;paint-order:stroke fill}
+.side .dot{position:absolute;right:16px;top:-6px;width:52px}
+#tabs{position:absolute;left:622px;top:128px;display:flex;gap:14px}
+.tab{height:76px;padding:0 34px;border-radius:38px;display:flex;align-items:center;font:400 32px "Grandstander Black";color:#c2407a;background:#fff;box-shadow:0 6px 0 #f0bcd2;cursor:pointer;transition:all .15s}
+.tab.on{background:linear-gradient(#ff9cc4,#ff6fa8);color:#fff;box-shadow:0 6px 0 #c2407a;text-shadow:0 2px 0 #c2407a}
+#grid{position:absolute;left:600px;top:214px;width:1310px;height:866px;display:grid;grid-template-columns:repeat(5,1fr);gap:12px 6px;align-content:start;overflow:auto;padding:8px 10px 30px}
+#grid::-webkit-scrollbar{width:0}
+.gi{position:relative;width:204px;height:204px;cursor:pointer;justify-self:center;animation:popin .45s cubic-bezier(.2,1.6,.4,1) both}
+.gi img{width:100%;height:100%;transition:transform .18s cubic-bezier(.2,1.6,.4,1);filter:drop-shadow(0 10px 10px rgba(120,30,80,.25))}
+.gi:hover img{transform:translateY(-10px) rotate(-2deg) scale(1.06)}
+.gi:active img{transform:scale(.95)}
+.gi .online{position:absolute;left:14px;top:10px;font:800 18px "Baloo 2";color:#fff;background:rgba(60,207,155,.95);border-radius:14px;padding:0 10px;box-shadow:0 3px 0 #1f9a70}
+#lobby .rainbow{position:absolute;inset:0;background:linear-gradient(120deg,#ffc6e0,#d9c9ff,#bfe8ff,#c8ffe6,#fff0b8,#ffd0b8,#ffc6e0);background-size:400% 400%;animation:huebg 22s ease infinite}
+@keyframes huebg{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+#lobby .bg.soft{opacity:.45;mix-blend-mode:soft-light}
+#deco3d{position:absolute;inset:0;width:1920px;height:1080px;pointer-events:none;z-index:1}
+#lobby>*:not(.bg):not(.rainbow):not(#deco3d){z-index:2}
+#hero{position:absolute;left:22px;top:178px;width:560px;height:888px;border-radius:52px;background:linear-gradient(165deg,rgba(255,255,255,.62),rgba(255,255,255,.18));box-shadow:0 10px 0 rgba(194,64,122,.25),0 24px 48px rgba(110,40,120,.18),inset 0 2px 0 rgba(255,255,255,.9);overflow:visible}
+#hero canvas{position:absolute;left:0;top:0;width:560px;height:560px;border-radius:52px 52px 0 0;cursor:pointer}
+#hero .heroimg{position:absolute;left:60px;top:10px;width:440px;display:none}
+#hero .arrow{position:absolute;top:232px;width:78px;cursor:pointer;transition:transform .12s;z-index:3}
+#hero .arrow:hover{transform:scale(1.1)}#hero .arrow:active{transform:scale(.92)}
+#mascotName{position:absolute;left:50%;top:500px;transform:translateX(-50%);padding:6px 30px;border-radius:30px;background:linear-gradient(#fff,#ffeef6);box-shadow:0 5px 0 #f0bcd2;font:400 32px "Grandstander Black";color:#c2407a;white-space:nowrap;z-index:3}
+#heroBubble{position:absolute;left:260px;top:30px;max-width:290px;padding:12px 20px;border-radius:26px;background:#fff;box-shadow:0 8px 18px rgba(110,40,90,.2);font:800 24px "Baloo 2";color:#9b2c5e;display:none;z-index:4}
+#heroBubble:after{content:"";position:absolute;left:30px;bottom:-16px;border:10px solid transparent;border-top:16px solid #fff}
+#cta{position:absolute;left:30px;top:572px;width:500px;height:124px;border-radius:64px;cursor:pointer;overflow:hidden;background:linear-gradient(90deg,#ff5c9a,#ffb347,#ffe14a,#5fe0a0,#4fb3ff,#a07bff,#ff5c9a);background-size:300% 100%;animation:ctaGrad 6s linear infinite;box-shadow:0 10px 0 #b8336f,0 16px 30px rgba(184,51,111,.35),inset 0 4px 0 rgba(255,255,255,.55);transition:transform .14s;z-index:3}
+#cta:hover{transform:translateY(-4px) scale(1.02)}#cta:active{transform:translateY(4px) scale(.98)}
+@keyframes ctaGrad{to{background-position:300% 0}}
+#cta:before{content:"";position:absolute;top:0;left:-40%;width:30%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.75),transparent);transform:skewX(-20deg);animation:shine 2.6s ease-in-out infinite}
+@keyframes shine{0%{left:-40%}60%,100%{left:130%}}
+#cta span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:10px;padding-bottom:6px;font:400 44px "Grandstander Black";color:#fff;-webkit-text-stroke:9px #b8336f;paint-order:stroke fill}
+#cta img{width:70px;filter:drop-shadow(0 4px 4px rgba(0,0,0,.2))}
+#quick4{position:absolute;left:18px;top:724px;width:524px;display:flex;justify-content:space-between;z-index:3}
+.q4{position:relative;width:122px;cursor:pointer;text-align:center;transition:transform .14s}
+.q4:hover{transform:translateY(-5px)}.q4:active{transform:scale(.94)}
+.q4 .disc{width:112px;height:112px;margin:0 auto;border-radius:36px;display:flex;align-items:center;justify-content:center;box-shadow:0 7px 0 var(--d),0 12px 20px rgba(80,20,60,.2),inset 0 3px 0 rgba(255,255,255,.6)}
+.q4 .disc img{width:88px;height:88px;object-fit:contain;filter:drop-shadow(0 5px 5px rgba(60,20,50,.25))}
+.q4 .t{margin-top:10px;font:400 25px "Grandstander Black";color:#fff;-webkit-text-stroke:6px var(--d);paint-order:stroke fill;white-space:nowrap}
+.q4 .dot{position:absolute;right:2px;top:-8px;width:40px}
+#lobby .side{display:none}
+#bottomnav{display:none!important;position:absolute;left:560px;bottom:12px;width:800px;height:96px;border-radius:48px;background:rgba(255,255,255,.9);box-shadow:0 8px 0 #f0bcd2,0 12px 24px rgba(120,30,70,.2);display:flex;justify-content:space-around;align-items:center}
+.nv{display:flex;flex-direction:column;align-items:center;cursor:pointer;font:800 20px "Baloo 2";color:#b0789a;transition:transform .15s}
+.nv img{width:54px;height:54px;transition:transform .2s}
+.nv.on{color:#ff4f95}.nv.on img{transform:scale(1.18) translateY(-4px)}
+.nv:hover{transform:translateY(-3px)}
+.float{animation:float 3.2s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes popin{0%{transform:scale(.3);opacity:0}100%{transform:scale(1);opacity:1}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+.pulse{animation:pulse 1.4s ease-in-out infinite}
+/* modal */
+#modal{position:absolute;inset:0;background:rgba(60,20,50,.45);display:none;align-items:center;justify-content:center;z-index:50;backdrop-filter:blur(3px)}
+#modal.on{display:flex}
+.panel{position:relative;width:1100px;min-height:640px;border-radius:56px;background:linear-gradient(#ffd1e3,#ff8fbf);box-shadow:0 14px 0 #c2407a,0 30px 60px rgba(60,10,40,.4);padding:110px 40px 44px;animation:popin .38s cubic-bezier(.2,1.6,.4,1) both}
+.panel.mint{background:linear-gradient(#c9f6e6,#5fd9ac);box-shadow:0 14px 0 #1f9a70,0 30px 60px rgba(10,60,40,.35)}
+.panel.sky{background:linear-gradient(#d3ecff,#6fbfff);box-shadow:0 14px 0 #2a7fd0,0 30px 60px rgba(10,40,80,.35)}
+.panel.lav{background:linear-gradient(#e6dcff,#ad8cff);box-shadow:0 14px 0 #6c4bd1,0 30px 60px rgba(40,20,80,.35)}
+.panel .inner{background:linear-gradient(#fffdf8,#fff3ea);border-radius:40px;padding:30px;min-height:470px;box-shadow:inset 0 4px 10px rgba(160,80,110,.12)}
+.panel .ttl{position:absolute;left:50%;top:-34px;transform:translateX(-50%);width:600px;height:130px}
+.panel .ttl img{width:100%;height:100%}
+.panel .ttl span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding-bottom:22px;font:400 52px "Grandstander Black";color:#fff;-webkit-text-stroke:8px #c2407a;paint-order:stroke fill}
+.panel .x{position:absolute;right:-26px;top:-26px;width:100px;cursor:pointer}
+.days{display:grid;grid-template-columns:repeat(7,1fr);gap:12px}
+.day{position:relative;cursor:pointer;transition:transform .15s}
+.day img{width:100%}
+.day.done img{filter:grayscale(.7) brightness(1.05);opacity:.7}
+.day.done:after{content:"✔";position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);font:900 80px "Baloo 2";color:#3ccf9b;-webkit-text-stroke:5px #fff;paint-order:stroke fill}
+.day.today{animation:pulse 1.2s infinite}
+.row2{display:flex;align-items:center;justify-content:space-between;margin:12px 6px;font:800 34px "Baloo 2";color:#7a3a5c}
+.row2 img{height:70px;cursor:pointer}
+.avgrid{display:grid;grid-template-columns:repeat(10,1fr);gap:10px;max-height:300px;overflow:auto;padding:6px}
+.avgrid img{width:86px;height:86px;border-radius:50%;object-fit:cover;background:#ffe9f2;cursor:pointer;border:4px solid transparent;transition:transform .15s}
+.avgrid img:hover{transform:scale(1.1)}
+.avgrid img.sel{border-color:#ff6fa8}
+.frgrid{display:flex;gap:10px;margin-top:14px}
+.frgrid img{width:110px;cursor:pointer;transition:transform .15s;border-radius:50%}
+.frgrid img.sel{background:#ffe1ee;transform:scale(1.1)}
+.shop{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.pack{position:relative;border-radius:34px;background:linear-gradient(#fff,#ffeef6);box-shadow:0 8px 0 #f0bcd2;padding:16px;text-align:center;cursor:pointer;transition:transform .15s}
+.pack:hover{transform:translateY(-6px)}
+.pack img{width:150px;height:150px;object-fit:contain}
+.pack .amt{font:800 40px "Baloo 2";color:#c08f00}
+.pack .price{margin-top:6px;display:inline-block;padding:4px 26px;border-radius:24px;background:linear-gradient(#7fe3b8,#3ccf9b);color:#fff;font:400 30px "Grandstander Black";box-shadow:0 5px 0 #1f9a70}
+.lb-row{display:flex;align-items:center;gap:18px;padding:8px 18px;border-radius:24px;margin:6px 0;background:#fff;box-shadow:0 4px 0 #f0d1df;font:800 30px "Baloo 2";color:#7a3a5c}
+.lb-row img.a{width:70px;height:70px;border-radius:50%}
+.lb-row img.m{width:58px}
+.lb-row .sc{margin-left:auto;color:#c08f00}
+/* game screen */
+#gtop{position:absolute;left:0;right:0;top:0;height:120px;z-index:10;pointer-events:none}
+#gtop>*{pointer-events:auto}
+#gtitle{position:absolute;left:128px;top:14px;width:440px;height:96px}
+#gtitle img{width:100%;height:100%}
+#gtitle span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding-bottom:18px;font:400 40px "Grandstander Black";color:#fff;-webkit-text-stroke:8px #c2407a;paint-order:stroke fill}
+#garea{position:absolute;inset:0}
+.card{position:absolute;width:140px;height:202px;transition:transform .25s cubic-bezier(.2,1.4,.4,1), left .35s cubic-bezier(.2,1.2,.4,1), top .35s cubic-bezier(.2,1.2,.4,1);filter:drop-shadow(0 6px 6px rgba(80,20,50,.3));cursor:pointer}
+.card.sel{filter:drop-shadow(0 0 14px #ffd23a) drop-shadow(0 6px 6px rgba(80,20,50,.3))}
+.card.small{width:100px;height:144px}
+.gbtn{position:absolute;width:300px;height:100px;cursor:pointer;transition:transform .12s;z-index:20}
+.gbtn img{width:100%;height:100%}
+.gbtn span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding-bottom:10px;font:400 40px "Grandstander Black";color:#fff;-webkit-text-stroke:7px var(--sc,#c2407a);paint-order:stroke fill}
+.gbtn:hover{transform:translateY(-4px) scale(1.03)}.gbtn:active{transform:scale(.96)}
+.backstack{position:absolute;width:80px;height:115px}
+.backstack img{position:absolute;width:80px}
+.badge{position:absolute;right:-26px;top:-24px;width:52px;height:52px;border-radius:50%;background:linear-gradient(#ff9cc4,#ff5c9a);border:4px solid #fff;color:#fff;font:800 26px "Baloo 2";display:flex;align-items:center;justify-content:center;box-shadow:0 4px 8px rgba(0,0,0,.2)}
+.bubble{position:absolute;padding:10px 26px;border-radius:30px;background:#fff;font:400 30px "Grandstander Black";color:#9b2c5e;box-shadow:0 6px 14px rgba(80,20,50,.2);animation:popin .3s cubic-bezier(.2,1.6,.4,1) both;white-space:nowrap}
+.emote{position:absolute;width:150px;height:150px;pointer-events:none;animation:popin .35s cubic-bezier(.2,1.6,.4,1) both;filter:drop-shadow(0 8px 10px rgba(80,20,50,.25));z-index:20}
+#emopick{position:absolute;right:30px;top:230px;width:520px;padding:18px;border-radius:34px;background:rgba(255,255,255,.96);box-shadow:0 10px 0 #f0bcd2,0 20px 40px rgba(80,20,50,.25);display:none;grid-template-columns:repeat(6,1fr);gap:8px;z-index:30}
+#emopick.on{display:grid}
+#emopick img{width:72px;height:72px;cursor:pointer;transition:transform .12s}
+#emopick img:hover{transform:scale(1.2)}
+.betarea{position:absolute;cursor:pointer;transition:transform .12s, filter .2s}
+.betarea:hover{transform:translateY(-4px)}
+.betarea.win{filter:drop-shadow(0 0 22px #ffe14a) drop-shadow(0 0 10px #fff) brightness(1.08);animation:pulse .6s 3}
+.betarea .stack{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);width:90px;height:90px;pointer-events:none}
+.betarea .stack img{position:absolute;left:0;width:90px}
+.betarea .amt{position:absolute;left:50%;top:-30px;transform:translateX(-50%);padding:2px 16px;border-radius:20px;background:#fff;font:800 28px "Baloo 2";color:#c08f00;box-shadow:0 4px 0 #f0d1df;display:none}
+.chipsel{position:absolute;display:flex;gap:16px;left:50%;transform:translateX(-50%)}
+.chipsel img{width:110px;cursor:pointer;transition:transform .15s}
+.chipsel img.on{transform:translateY(-18px) scale(1.12);filter:drop-shadow(0 0 12px #fff)}
+.shake{animation:shk .5s linear}
+@keyframes shk{0%,100%{transform:translate(0,0)}20%{transform:translate(-14px,6px) rotate(-1deg)}40%{transform:translate(12px,-8px) rotate(1deg)}60%{transform:translate(-10px,4px)}80%{transform:translate(8px,-4px)}}
+.bowlshake{animation:bshk .18s linear infinite}
+@keyframes bshk{0%,100%{transform:translate(-50%,0) rotate(0)}25%{transform:translate(calc(-50% - 16px),-6px) rotate(-5deg)}75%{transform:translate(calc(-50% + 16px),-6px) rotate(5deg)}}
+.hist{position:absolute;display:flex;gap:6px}
+.hist img{width:48px}
+.cell{position:absolute;cursor:pointer}
+.piece{position:absolute;width:84px;height:84px;cursor:pointer;transition:left .3s cubic-bezier(.2,1.3,.4,1), top .3s cubic-bezier(.2,1.3,.4,1), transform .15s;z-index:2}
+.piece.sel{transform:scale(1.15) translateY(-6px);filter:drop-shadow(0 0 12px #ffd23a)}
+.fish{position:absolute;pointer-events:auto;cursor:crosshair}
+.fish.caught{transition:all .6s ease-in;transform:scale(.2) rotate(540deg)!important;opacity:0}
+.plustxt{position:absolute;font:400 40px "Grandstander Black";color:#fff27a;-webkit-text-stroke:6px #a5205a;paint-order:stroke fill;pointer-events:none;animation:rise 1s ease-out forwards}
+@keyframes rise{from{transform:translateY(0);opacity:1}to{transform:translateY(-90px);opacity:0}}
+#fx{position:absolute;inset:0;pointer-events:none;z-index:60;overflow:hidden}
+.callout{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);pointer-events:none}
+.confetti{position:absolute;top:-30px;width:16px;height:26px;border-radius:5px}
+#loading{background:linear-gradient(#ffd6e8,#c9c2ff)}
+#loading .logo{position:absolute;left:50%;top:140px;transform:translateX(-50%);text-align:center}
+#loading .bar{position:absolute;left:660px;top:760px;width:600px;height:56px}
+#loading .bar img{position:absolute;left:0;top:0;height:56px}
+#loading .tip{position:absolute;left:0;right:0;top:920px;text-align:center;font:800 32px "Baloo 2";color:#a14b78}
+#tapstart{position:absolute;left:750px;top:770px;display:none}
+#toast{position:absolute;left:50%;top:150px;transform:translateX(-50%);padding:14px 34px;border-radius:30px;background:rgba(255,255,255,.96);font:800 30px "Baloo 2";color:#9b2c5e;box-shadow:0 8px 0 #f0bcd2;z-index:70;display:none}
+</style>
+</head>
+<body>
+<div id="wrap"><div id="stage">
+
+<!-- LOADING -->
+<div id="loading" class="screen on">
+  <div class="logo">
+    <img src="assets/emoji-noto-animated/pig_1f416/512.webp" style="width:260px" class="float">
+    <div class="cb" id="logoText"></div>
+  </div>
+  <div class="bar"><img id="barbg" src="assets/ui-premium-generated/controls/progress_empty.png" style="width:600px"><img id="barfill" src="assets/ui-premium-generated/controls/progress_fill_pink.png" style="width:0px;top:3px;height:50px;object-fit:cover;object-position:left"></div>
+  <div class="tip" id="tip">Đang xào bài…</div>
+  <div id="tapstart" class="gbtn btn" style="--sc:#1f9a70;width:420px;height:130px"><img src="assets/ui-premium-generated/buttons/pill_mint.png"><span style="font-size:52px">Vào chơi</span></div>
+</div>
+
+<!-- LOBBY -->
+<div id="lobby" class="screen">
+  <div class="rainbow"></div>
+  <img class="bg soft" src="assets/ui-premium-generated/lobby-backgrounds/lobby_dream_1920x1080.png">
+  <canvas id="deco3d" width="1920" height="1080"></canvas>
+  <div class="avatarbox btn" id="meBox" style="left:16px;top:-6px" title="Hồ sơ"><img class="av" id="meAv"><img class="fr" id="meFr"></div>
+  <div class="abs" style="left:196px;top:22px">
+    <div class="cb" id="meName" style="font-size:38px;color:#fff;-webkit-text-stroke:7px #c2407a;paint-order:stroke fill"></div>
+    <div style="display:flex;align-items:center;gap:10px;margin-top:2px">
+      <img id="meVip" style="width:58px">
+      <div style="position:relative;width:230px;height:40px"><img src="assets/ui-premium-generated/controls/progress_pink_68.png" style="width:230px;height:30px;margin-top:6px"></div>
+      <span style="font:800 24px 'Baloo 2';color:#a14b78">Lv 27</span>
+    </div>
+  </div>
+  <div id="marquee"><span id="marqText"></span></div>
+  <div class="btn" id="toTown" title="Về thị trấn 3D"><img src="assets/emoji-fluent-3d/game/house.png"><span>Thị trấn 3D</span></div>
+  <div class="pill" id="coinPill" style="left:1050px;top:22px;padding-right:84px"><img class="ic" src="assets/emoji-fluent-3d/game/coin.png"><span class="coinTxt">0</span><img class="plus" src="assets/ui-jelly-pzuh/buttons-pastel/mint/icon_plus_mint.png" data-open="shop"></div>
+  <div class="pill gem" style="left:1510px;top:22px;padding-right:84px"><img class="ic" src="assets/emoji-fluent-3d/game/gem_stone.png"><span id="gemTxt">2.480</span><img class="plus" src="assets/ui-jelly-pzuh/buttons-pastel/mint/icon_plus_mint.png" data-open="shop"></div>
+  <img class="abs btn" src="assets/ui-jelly-pzuh/buttons-pastel/pink/icon_settings_pink.png" style="right:24px;top:20px;width:92px" data-open="settings" title="Cài đặt">
+  <div class="side btn" style="top:200px" data-open="daily"><img class="sq" src="assets/ui-premium-generated/buttons/square_mint.png"><img class="ico" src="assets/emoji-noto-animated/wrapped-gift_1f381/512.webp"><div class="lb">Quà ngày</div><img class="dot pulse" src="assets/ui-premium-generated/badges/notify_dot.png"></div>
+  <div class="side btn" style="top:410px" data-open="event"><img class="sq" src="assets/ui-premium-generated/buttons/square_peach.png"><img class="ico float" src="assets/emoji-fluent-3d/tet/red_envelope.png"><div class="lb">Lì xì Tết</div></div>
+  <div class="side btn" style="top:620px" data-open="rank"><img class="sq" src="assets/ui-premium-generated/buttons/square_lemon.png"><img class="ico" src="assets/emoji-noto-animated/trophy_1f3c6/512.webp"><div class="lb">Xếp hạng</div></div>
+  <div class="side btn" style="top:830px" data-open="shop"><img class="sq" src="assets/ui-premium-generated/buttons/square_lavender.png"><img class="ico" src="assets/emoji-fluent-3d/game/shopping_bags.png"><div class="lb">Cửa hàng</div></div>
+  <div id="hero">
+    <canvas id="mascotCv" width="560" height="560" title="Bấm vào linh vật!"></canvas>
+    <img class="heroimg" id="mascotImg">
+    <img class="arrow" id="mPrev" src="assets/ui-jelly-pzuh/buttons-pastel/pink/icon_arrow_left_pink.png" style="left:14px">
+    <img class="arrow" id="mNext" src="assets/ui-jelly-pzuh/buttons-pastel/pink/icon_arrow_right_pink.png" style="right:14px">
+    <div id="mascotName"></div>
+    <div id="heroBubble"></div>
+    <div id="cta"><span><img src="assets/3d/renders/icons/bgb_d6_red.png">CHƠI TIẾN LÊN</span></div>
+    <div id="quick4">
+      <div class="q4" data-open="daily" style="--d:#1f9a70"><div class="disc" style="background:linear-gradient(#bff3dd,#3ccf9b)"><img src="assets/3d/renders/icons/mini_star.png"></div><div class="t">Quà ngày</div><img class="dot pulse" src="assets/ui-premium-generated/badges/notify_dot.png"></div>
+      <div class="q4" data-open="event" style="--d:#c22f3a"><div class="disc" style="background:linear-gradient(#ffd0c8,#ff5a5a)"><img src="assets/emoji-fluent-3d/tet/red_envelope.png"></div><div class="t">Lì xì</div></div>
+      <div class="q4" data-open="rank" style="--d:#c08f00"><div class="disc" style="background:linear-gradient(#fff3c4,#ffc93c)"><img src="assets/emoji-noto-animated/trophy_1f3c6/512.webp"></div><div class="t">Xếp hạng</div></div>
+      <div class="q4" data-open="shop" style="--d:#6c4bd1"><div class="disc" style="background:linear-gradient(#e6dcff,#a07bff)"><img src="assets/3d/renders/icons/mini_diamond_blue.png"></div><div class="t">Cửa hàng</div></div>
+    </div>
+  </div>
+  <div id="tabs"></div>
+  <div id="grid"></div>
+  <div id="bottomnav"></div>
+</div>
+
+<!-- GAME -->
+<div id="game" class="screen">
+  <img class="bg" id="gbg">
+  <div id="garea"></div>
+  <div id="gtop">
+    <img class="abs btn" id="gback" src="assets/ui-jelly-pzuh/buttons-pastel/pink/icon_back_pink.png" style="left:22px;top:18px;width:96px" title="Về sảnh">
+    <div id="gtitle"><img src="assets/ui-premium-generated/ribbons/ribbon_pink.png"><span id="gname"></span></div>
+    <div class="pill" style="left:1500px;top:20px;transform:scale(.92);transform-origin:left top"><img class="ic" src="assets/emoji-fluent-3d/game/coin.png"><span class="coinTxt">0</span><img class="plus" src="assets/ui-jelly-pzuh/buttons-pastel/mint/icon_plus_mint.png" data-open="shop"></div>
+    <img class="abs btn" src="assets/ui-jelly-pzuh/buttons-pastel/pink/icon_settings_pink.png" style="right:24px;top:18px;width:90px" data-open="settings">
+  </div>
+  <div id="emopick"></div>
+</div>
+
+<div id="modal"></div>
+<div id="toast"></div>
+<div id="fx"></div>
+</div></div>
+
+<script src="js/vendor/three.min.js"></script>
+<script src="js/vendor/GLTFLoader.js"></script>
+<script src="js/vendor/SkeletonUtils.js"></script>
+<script src="js/hc3d.js"></script>
+<script src="js/hc-core.js"></script>
+<script>
+'use strict';
+// ?shot=1 : finish Web Animations instantly (used for headless screenshots)
+if (new URLSearchParams(location.search).get('shot')) {
+  Element.prototype.animate = function (kf, opts) {
+    const o = typeof opts === 'number' ? { duration: opts } : (opts || {}); let cb = null;
+    const t = setTimeout(() => cb && cb(), (o.duration || 0) + (o.delay || 0));
+    return { set onfinish(f) { cb = f; }, get onfinish() { return cb; }, pause() { clearTimeout(t); }, cancel() { clearTimeout(t); }, finished: Promise.resolve() };
+  };
+}
+// ------------------------------------------------------------------ helpers
+const $ = (s, el = document) => el.querySelector(s);
+const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+const A = p => 'assets/' + p.split('/').map(encodeURIComponent).join('/');
+const rnd = (a, b) => a + Math.random() * (b - a);
+const ri = (a, b) => Math.floor(rnd(a, b + 1));
+const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const fmt = n => n.toLocaleString('vi-VN');
+function el(tag, attrs = {}, parent) {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === 'style') e.style.cssText = v; else if (k === 'html') e.innerHTML = v; else if (k === 'text') e.textContent = v;
+    else if (k.startsWith('on')) e.addEventListener(k.slice(2), v); else e.setAttribute(k, v);
+  }
+  if (parent) parent.appendChild(e);
+  return e;
+}
+function img(src, style = '', parent, cls = '') { return el('img', { src: A(src), style, class: cls }, parent); }
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(window.HC ? HC.key(k) : 'heocon_' + k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(window.HC ? HC.key(k) : 'heocon_' + k, JSON.stringify(v)); } catch (e) {} }
+};
+
+// ------------------------------------------------------------------ stage scaling
+function fit() {
+  const s = Math.min(innerWidth / 1920, innerHeight / 1080);
+  $('#stage').style.transform = `scale(${s})`;
+}
+addEventListener('resize', fit); fit();
+function stagePt(ev) {
+  const r = $('#stage').getBoundingClientRect(), s = r.width / 1920;
+  return { x: (ev.clientX - r.left) / s, y: (ev.clientY - r.top) / s };
+}
+function rectOf(e) {
+  const r = e.getBoundingClientRect(), sr = $('#stage').getBoundingClientRect(), s = sr.width / 1920;
+  return { x: (r.left - sr.left) / s, y: (r.top - sr.top) / s, w: r.width / s, h: r.height / s, cx: (r.left - sr.left + r.width / 2) / s, cy: (r.top - sr.top + r.height / 2) / s };
+}
+
+// ------------------------------------------------------------------ audio
+const SFX = {
+  click: 'audio-ui-kenney/Audio/click1.ogg', pop: 'audio-sfx-ninja/Elemental/Bubble.wav', pop2: 'audio-sfx-ninja/Elemental/Bubble2.wav',
+  card: 'audio-casino-kenney/Audio/card-place-1.ogg', card2: 'audio-casino-kenney/Audio/card-place-2.ogg', slide: 'audio-casino-kenney/Audio/card-slide-1.ogg',
+  shuffle: 'audio-casino-kenney/Audio/card-shuffle.ogg', fan: 'audio-casino-kenney/Audio/card-fan-1.ogg', chip: 'audio-casino-kenney/Audio/chip-lay-1.ogg',
+  chips: 'audio-casino-kenney/Audio/chips-stack-1.ogg', coin: 'audio-sfx-ninja/Bonus/Coin.wav', gold: 'audio-sfx-ninja/Bonus/Gold1.wav',
+  diceShake: 'audio-casino-kenney/Audio/dice-shake-1.ogg', diceThrow: 'audio-casino-kenney/Audio/dice-throw-1.ogg', slash: 'audio-sfx-ninja/Whoosh & Slash/Slash.wav',
+  boom: 'audio-sfx-ninja/Elemental/Explosion.wav', win: 'audio-sfx-ninja/Jingles/Success1.wav', lose: 'audio-sfx-ninja/Jingles/GameOver.wav',
+  turn: 'audio-sfx-ninja/Alert/Alert.wav', accept: 'audio-sfx-ninja/Menu/Accept.wav', cancel: 'audio-sfx-ninja/Menu/Cancel.wav', jump: 'audio-sfx-ninja/Jump & Bounce/Jump.wav',
+  bounce: 'audio-sfx-ninja/Jump & Bounce/Bounce.wav', power: 'audio-digital-kenney/Audio/powerUp2.ogg', laser: 'audio-digital-kenney/Audio/pepSound1.ogg',
+  jingle: 'audio-jingles-kenney/Audio/Pizzicato jingles/jingles_PIZZI00.ogg', tick: 'audio-interface-kenney/Audio/tick_001.ogg',
+};
+const BGM = { lobby: 'music-bgm/opengameart/menu-loop-tiggo__qubodup.ogg', cards: 'music-bgm/opengameart/happy-clappy-loop__OwlishMedia.wav',
+  dice: 'music-bgm/opengameart/level-loop-tigrun__qubodup.ogg', board: 'music-bgm/opengameart/menu-chill__etrock.wav', sea: 'music-bgm/ninja-adventure/39 - Boat.ogg',
+  loto: 'music-bgm/opengameart/happy-vibes__Ruskerdax.mp3' };
+const settings = store.get('settings', { music: true, sfx: true, vibe: true });
+const pool = {};
+function sfx(name, vol = .7) {
+  if (!settings.sfx || !SFX[name]) return;
+  try { const a = new Audio(A(SFX[name])); a.volume = vol; a.play().catch(() => {}); } catch (e) {}
+}
+let bgm = null, bgmKey = null;
+function music(key) {
+  bgmKey = key;
+  if (!settings.music) { if (bgm) bgm.pause(); return; }
+  if (bgm && bgm.dataset.key === key) { bgm.play().catch(() => {}); return; }
+  if (bgm) bgm.pause();
+  bgm = new Audio(A(BGM[key])); bgm.loop = true; bgm.volume = .35; bgm.dataset.key = key;
+  bgm.play().catch(() => {});
+}
+
+// ------------------------------------------------------------------ state & data
+const NAMES = ['Heo Hồng', 'Mèo Mập', 'Gấu Bông', 'Thỏ Ngọc', 'Cún Con', 'Bé Na', 'Bin Bon', 'Sữa Chua', 'Bánh Bao', 'Kem Dâu', 'Mít Ướt', 'Bơ Sáp'];
+const SEEDS = ['heo', 'meo', 'ti', 'teo', 'bong', 'mit', 'na', 'bo', 'sua', 'kem', 'banh', 'mochi', 'com', 'xoai', 'dau', 'bin', 'bon', 'su', 'gau', 'tho', 'cun', 'miu', 'bi', 'na-na'];
+const FLUENT_CHARS = ['ninja', 'princess', 'prince', 'person_with_crown', 'woman_fairy', 'person_mage', 'woman_astronaut', 'person_superhero', 'woman_vampire', 'woman_cook', 'man_dancing', 'woman_with_bunny_ears', 'baby_angel', 'santa_claus', 'robot', 'unicorn', 'teddy_bear', 'panda', 'tiger', 'alien_monster', 'person_genie', 'woman_merpeople', 'woman_elf', 'detective'];
+const ANIMALS = ['pig', 'rabbit', 'chick', 'panda', 'penguin', 'bear', 'frog', 'owl', 'dog', 'monkey', 'cow', 'duck', 'giraffe', 'elephant', 'parrot', 'sloth', 'narwhal', 'whale', 'hippo', 'zebra'];
+const AV3D = ['adv_mage', 'adv_knight', 'adv_rogue_hooded', 'adv_ranger', 'adv_barbarian', 'adv_rogue', 'mini_bear', 'mini_dog', 'mini_duck'].map(k => `3d/renders/avatars/${k}.png`);
+const AVATARS = [
+  ...AV3D,
+  ...SEEDS.map(s => `avatars-dicebear/fun-emoji/png/${s}.png`),
+  ...SEEDS.slice(0, 12).map(s => `avatars-dicebear/big-smile/png/${s}.png`),
+  ...SEEDS.slice(0, 12).map(s => `avatars-dicebear/adventurer/png/${s}.png`),
+  ...SEEDS.slice(0, 12).map(s => `avatars-dicebear/avataaars/png/${s}.png`),
+  ...SEEDS.slice(0, 12).map(s => `avatars-dicebear/micah/png/${s}.png`),
+  ...ANIMALS.map(a => `avatars-animals-remastered-kenney/PNG/Round/${a}.png`),
+  ...FLUENT_CHARS.map(c => `emoji-fluent-3d/characters/${c}.png`),
+];
+const FRAMES = ['pink', 'gold', 'rainbow', 'mint', 'sky', 'lavender', 'silver', 'tet'];
+const me = { name: store.get('name', 'Bạn Heo Con'), av: store.get('av', 'avatars-dicebear/fun-emoji/png/bong.png'), fr: store.get('fr', 'gold'), coins: store.get('coins', 1250000), vip: 5 };
+function setCoins(v, animate = true) {
+  const from = me.coins; me.coins = Math.max(0, Math.round(v)); store.set('coins', me.coins);
+  const els = $$('.coinTxt');
+  if (!animate) { els.forEach(e => e.textContent = fmt(me.coins)); return; }
+  const t0 = performance.now(), dur = 700;
+  const step = t => { const k = Math.min(1, (t - t0) / dur), val = Math.round(from + (me.coins - from) * (1 - Math.pow(1 - k, 3)));
+    els.forEach(e => e.textContent = fmt(val)); if (k < 1) requestAnimationFrame(step); };
+  requestAnimationFrame(step);
+  els.forEach(e => { const p = e.parentElement; p.animate([{ transform: p.style.transform + ' scale(1)' }, { transform: p.style.transform + ' scale(1.08)' }, { transform: p.style.transform + ' scale(1)' }], { duration: 400 }); });
+}
+function refreshMe() {
+  $('#meAv').src = A(me.av); $('#meFr').src = A(`ui-premium-generated/avatar-frames/frame_${me.fr}.png`);
+  $('#meName').textContent = me.name; $('#meVip').src = A(`ui-premium-generated/badges/vip_${me.vip}.png`);
+  setCoins(me.coins, false);
+}
+
+const GAMES = [
+  { key: 'tien-len', name: 'Tiến Lên', cat: 'bai', mode: 'cards', theme: 'sakura', n: 13 },
+  { key: 'phom', name: 'Phỏm', cat: 'bai', mode: 'cards', theme: 'mint', n: 9 },
+  { key: 'mau-binh', name: 'Mậu Binh', cat: 'bai', mode: 'cards', theme: 'lavender', n: 13 },
+  { key: 'xi-dach', name: 'Xì Dách', cat: 'bai', mode: 'cards', theme: 'sky', n: 2 },
+  { key: 'poker', name: 'Poker', cat: 'bai', mode: 'cards', theme: 'classic', n: 2 },
+  { key: 'bai-cao', name: 'Bài Cào', cat: 'bai', mode: 'cards', theme: 'peach', n: 3 },
+  { key: 'sam-loc', name: 'Sâm Lốc', cat: 'bai', mode: 'cards', theme: 'tet', n: 10 },
+  { key: 'lieng', name: 'Liêng', cat: 'bai', mode: 'cards', theme: 'classic', n: 3 },
+  { key: 'bau-cua', name: 'Bầu Cua', cat: 'xx', mode: 'baucua' },
+  { key: 'xoc-dia', name: 'Xóc Đĩa', cat: 'xx', mode: 'xocdia' },
+  { key: 'tai-xiu', name: 'Tài Xỉu', cat: 'xx', mode: 'taixiu' },
+  { key: 'co-tuong', name: 'Cờ Tướng', cat: 'co', mode: 'xiangqi' },
+  { key: 'co-ca-ngua', name: 'Cá Ngựa', cat: 'co', mode: 'ludo' },
+  { key: 'co-caro', name: 'Cờ Caro', cat: 'co', mode: 'caro' },
+  { key: 'bai-mau', name: 'Bài Màu', cat: 'khac', mode: 'baimau' },
+  { key: 'lo-to', name: 'Lô Tô', cat: 'khac', mode: 'loto' },
+  { key: 'ban-ca', name: 'Bắn Cá', cat: 'khac', mode: 'banca' },
+  { key: 'day-xu', name: 'Đẩy Xu', cat: 'khac', mode: 'pusher' },
+];
+const TABS = [['all', 'Tất cả'], ['bai', 'Game bài'], ['xx', 'Xúc xắc'], ['co', 'Cờ'], ['khac', 'Vui khác']];
+
+// ------------------------------------------------------------------ FX
+const FX = $('#fx');
+function callout(slug, ms = 1300, scale = 1) {
+  const c = img(`ui-premium-generated/callouts/${slug}.png`, `width:auto;max-width:${900 * scale}px`, FX, 'callout');
+  c.animate([{ transform: 'translate(-50%,-50%) scale(.2) rotate(-12deg)', opacity: 0 }, { transform: 'translate(-50%,-50%) scale(1.15) rotate(3deg)', opacity: 1, offset: .35 },
+    { transform: 'translate(-50%,-50%) scale(1) rotate(0)', opacity: 1, offset: .55 }, { transform: 'translate(-50%,-50%) scale(1)', opacity: 1, offset: .85 },
+    { transform: 'translate(-50%,-70%) scale(1.1)', opacity: 0 }], { duration: ms, easing: 'ease-out' }).onfinish = () => c.remove();
+}
+function confetti(n = 90) {
+  const cols = ['#ff6fa8', '#ffc93c', '#3ccf9b', '#4fb3ff', '#a07bff', '#ff9e6b', '#fff'];
+  for (let i = 0; i < n; i++) {
+    const c = el('div', { class: 'confetti', style: `left:${rnd(0, 1920)}px;background:${pick(cols)};${Math.random() < .4 ? 'border-radius:50%;width:18px;height:18px' : ''}` }, FX);
+    c.animate([{ transform: `translate(0,0) rotate(0)` }, { transform: `translate(${rnd(-200, 200)}px,${rnd(1100, 1300)}px) rotate(${rnd(-900, 900)}deg)` }],
+      { duration: rnd(1600, 2800), delay: rnd(0, 400), easing: 'cubic-bezier(.3,.6,.6,1)' }).onfinish = () => c.remove();
+  }
+}
+function flyCoins(from, to, n = 10, onEach) {
+  if (new URLSearchParams(location.search).get('shot')) return;
+  if (from.cx !== undefined) from = { x: from.cx, y: from.cy };
+  if (to.cx !== undefined) to = { x: to.cx, y: to.cy };
+  for (let i = 0; i < n; i++) {
+    const c = img('emoji-fluent-3d/game/coin.png', `position:absolute;width:56px;left:${from.x - 28}px;top:${from.y - 28}px`, FX);
+    const mx = (from.x + to.x) / 2 + rnd(-160, 160), my = Math.min(from.y, to.y) - rnd(80, 220);
+    c.animate([{ transform: 'translate(0,0) scale(.6)' }, { transform: `translate(${mx - from.x}px,${my - from.y}px) scale(1.1)`, offset: .45 },
+      { transform: `translate(${to.x - from.x}px,${to.y - from.y}px) scale(.7)` }], { duration: rnd(650, 950), delay: i * 55, easing: 'ease-in-out' })
+      .onfinish = () => { c.remove(); if (i % 3 === 0) sfx('coin', .35); onEach && onEach(i); };
+  }
+}
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.style.display = 'block'; t.animate([{ opacity: 0, transform: 'translate(-50%,-20px)' }, { opacity: 1, transform: 'translate(-50%,0)' }], { duration: 250 }); clearTimeout(t._h); t._h = setTimeout(() => t.style.display = 'none', 1800); }
+function shakeStage() { if (!settings.vibe) return; const s = $('#game'); s.classList.remove('shake'); void s.offsetWidth; s.classList.add('shake'); }
+function plusText(x, y, txt) { const p = el('div', { class: 'plustxt', text: txt, style: `left:${x}px;top:${y}px` }, FX); setTimeout(() => p.remove(), 1000); }
+const coinTarget = () => { const r = rectOf($('#game.on .coinTxt') || $('#lobby .coinTxt')); return { x: r.cx, y: r.cy }; };
+
+// ------------------------------------------------------------------ loading
+const Q = new URLSearchParams(location.search);
+const DEMO = !!Q.get('demo'), SHOT = !!Q.get('shot');
+function runDemo() {
+  const area = $('#garea');
+  const twos = G && G.def.mode === 'cards' ? $$('.card', area) : [];
+  if (G && G.def.mode === 'cards') {
+    if (G.def.key === 'mau-binh') { $$('.gbtn', area)[0].click(); return; }
+    if (['tien-len', 'sam-loc', 'phom'].includes(G.def.key)) { const c = G.forceHeo && G.forceHeo(); $$('.gbtn', area)[0].click(); return; }
+    $$('.gbtn', area)[0].click(); return;
+  }
+  const bets = $$('.betarea', area);
+  if (bets.length) { [0, 0, 1, 1, 3].forEach((i, k) => setTimeout(() => bets[Math.min(i, bets.length - 1)].click(), k * 80)); setTimeout(() => $$('.gbtn', area)[0].click(), 600); return; }
+  if (G && G.def.mode === 'loto') { for (let i = 0; i < 14; i++) setTimeout(() => $$('.gbtn', area)[0].click(), i * 60); return; }
+  if (G && G.def.mode === 'caro') { [[7, 7], [7, 8], [6, 8]].forEach(([r, c], i) => setTimeout(() => $$('.cell', area)[r * 15 + c].click(), i * 600)); return; }
+}
+async function boot() {
+  if (window.HC) HC.arrive();
+  if (Q.get('screen') || Q.get('game') || Q.get('modal')) {
+    go('lobby');
+    const g = GAMES.find(x => x.key === Q.get('game')); if (g) openGame(g);
+    if (Q.get('modal')) openModal(Q.get('modal'));
+    if (Q.get('demo')) setTimeout(runDemo, 700);
+    return;
+  }
+  const lt = $('#logoText');
+  lt.innerHTML = `<img src="${A('ui-premium-generated/callouts/san_sang.png')}" style="display:none">`;
+  lt.innerHTML = '<div style="font-size:120px;color:#fff;-webkit-text-stroke:14px #c2407a;paint-order:stroke fill;line-height:1">Heo Con</div><div style="font-size:70px;color:#fff27a;-webkit-text-stroke:11px #a5205a;paint-order:stroke fill;margin-top:-6px">CLUB</div>';
+  const tips = ['Đang xào bài…', 'Đang lau bàn cho bóng…', 'Đang gọi heo về chuồng…', 'Đang đếm xu…', 'Mẹo: 4 đôi thông chặt được heo!'];
+  const pre = [...GAMES.map(g => `games/lobby-icons/${g.key}.png`), 'ui-premium-generated/lobby-backgrounds/lobby_dream_1920x1080.png'];
+  let done = 0;
+  await Promise.all(pre.map(p => new Promise(r => { const i = new Image(); i.onload = i.onerror = () => { done++; $('#barfill').style.width = (600 * done / pre.length) + 'px'; if (done % 4 === 0) $('#tip').textContent = pick(tips); r(); }; i.src = A(p); })));
+  $('#tip').textContent = 'Sẵn sàng rồi nè!';
+  $('#loading .bar').style.display = 'none';
+  const ts = $('#tapstart'); ts.style.display = 'block'; ts.classList.add('pulse');
+  ts.onclick = () => { sfx('accept'); go('lobby'); };
+}
+function go(id) {
+  $$('.screen').forEach(s => s.classList.remove('on'));
+  $('#' + id).classList.add('on');
+  if (id === 'lobby') { music('lobby'); renderGrid(); }
+}
+
+// ------------------------------------------------------------------ lobby
+let curTab = 'all';
+function renderLobby() {
+  const tabs = $('#tabs'); tabs.innerHTML = '';
+  TABS.forEach(([k, l]) => el('div', { class: 'tab' + (k === curTab ? ' on' : ''), text: l, onclick: () => { sfx('click'); curTab = k; renderLobby(); renderGrid(); } }, tabs));
+  const nav = $('#bottomnav'); nav.innerHTML = '';
+  [['Sảnh', 'emoji-fluent-3d/game/joystick.png', null], ['Shop', 'emoji-fluent-3d/game/shopping_bags.png', 'shop'], ['Sự kiện', 'emoji-fluent-3d/tet/red_envelope.png', 'event'],
+   ['Xếp hạng', 'emoji-fluent-3d/game/trophy.png', 'rank'], ['Hồ sơ', 'emoji-fluent-3d/characters/person_with_crown.png', 'profile']].forEach(([l, ic, op], i) => {
+    const n = el('div', { class: 'nv' + (i === 0 ? ' on' : ''), onclick: () => { sfx('click'); if (op) openModal(op); } }, nav);
+    img(ic, '', n); el('span', { text: l }, n);
+  });
+  const msgs = ['🎉 Heo Hồng vừa CHẶT HEO ăn 2.000.000 xu!', '🧧 Sự kiện Lì xì Tết: nạp lần đầu x2 xu!', '🏆 Mèo Mập lên top 1 Bầu Cua tuần này', '🐟 Bắn Cá: cá mập vàng đang xuất hiện!'];
+  $('#marqText').textContent = msgs.join('     •     ');
+}
+function renderGrid() {
+  const g = $('#grid'); g.innerHTML = '';
+  GAMES.filter(x => curTab === 'all' || x.cat === curTab).forEach((x, i) => {
+    const it = el('div', { class: 'gi', style: `animation-delay:${i * 35}ms`, title: x.name, onclick: () => { sfx('accept'); openGame(x); } }, g);
+    img(`games/lobby-icons/${x.key}.png`, '', it);
+    el('div', { class: 'online', text: `● ${fmt(ri(120, 9800))}` }, it);
+  });
+}
+document.addEventListener('click', e => { const t = e.target.closest('[data-open]'); if (t) { sfx('click'); openModal(t.dataset.open); } });
+$('#meBox').onclick = () => { sfx('click'); openModal('profile'); };
+
+// ------------------------------------------------------------------ modals
+function openModal(kind) {
+  const m = $('#modal'); m.innerHTML = ''; m.classList.add('on');
+  const colors = { daily: 'mint', settings: 'sky', profile: '', shop: 'lav', rank: 'sky', event: '' };
+  const titles = { daily: 'Quà mỗi ngày', settings: 'Cài đặt', profile: 'Hồ sơ', shop: 'Cửa hàng', rank: 'Xếp hạng', event: 'Lì xì Tết' };
+  const ribbons = { mint: 'mint', sky: 'sky', lav: 'lavender', '': 'pink' };
+  const p = el('div', { class: 'panel ' + (colors[kind] || '') }, m);
+  const t = el('div', { class: 'ttl' }, p); img(`ui-premium-generated/ribbons/ribbon_${ribbons[colors[kind] || '']}.png`, '', t); el('span', { text: titles[kind] }, t);
+  const x = img('ui-jelly-pzuh/buttons/icon_close_red.png', '', p, 'x btn'); x.onclick = closeModal;
+  const inner = el('div', { class: 'inner' }, p);
+  ({ daily: modalDaily, settings: modalSettings, profile: modalProfile, shop: modalShop, rank: modalRank, event: modalEvent })[kind](inner);
+  sfx('pop');
+}
+function closeModal() { sfx('cancel'); $('#modal').classList.remove('on'); }
+$('#modal').addEventListener('click', e => { if (e.target.id === 'modal') closeModal(); });
+function modalDaily(inner) {
+  const claimed = store.get('daily', 2);
+  const wrap = el('div', { class: 'days' }, inner);
+  const rewards = [1000, 2000, 5000, 10000, 20000, 50000, 100000];
+  for (let d = 1; d <= 7; d++) {
+    const c = el('div', { class: 'day' + (d <= claimed ? ' done' : '') + (d === claimed + 1 ? ' today' : '') }, wrap);
+    img(`ui-premium-generated/daily-reward/day_${d}.png`, '', c);
+    if (d === claimed + 1) c.onclick = () => {
+      store.set('daily', d); c.classList.remove('today'); c.classList.add('done'); sfx('win'); confetti();
+      flyCoins(rectOf(c), coinTarget(), 14); setTimeout(() => setCoins(me.coins + rewards[d - 1]), 700); callout('thang');
+    };
+  }
+  el('div', { style: 'text-align:center;margin-top:26px;font:800 32px "Baloo 2";color:#7a3a5c', text: 'Đăng nhập liên tục 7 ngày để nhận khung VIP vương miện 👑' }, inner);
+}
+function toggleRow(inner, label, key) {
+  const r = el('div', { class: 'row2' }, inner); el('span', { text: label }, r);
+  const t = img(settings[key] ? 'ui-premium-generated/controls/toggle_on_pink.png' : 'ui-premium-generated/controls/toggle_off.png', '', r);
+  t.onclick = () => { settings[key] = !settings[key]; store.set('settings', settings); t.src = A(settings[key] ? 'ui-premium-generated/controls/toggle_on_pink.png' : 'ui-premium-generated/controls/toggle_off.png'); sfx('click'); if (key === 'music') music(bgmKey || 'lobby'); };
+}
+function modalSettings(inner) {
+  toggleRow(inner, '🎵 Nhạc nền', 'music'); toggleRow(inner, '🔔 Âm thanh hiệu ứng', 'sfx'); toggleRow(inner, '💥 Rung màn hình', 'vibe');
+  const r = el('div', { class: 'row2' }, inner); el('span', { text: '🗣️ Ngôn ngữ' }, r); el('span', { text: 'Tiếng Việt', style: 'color:#ff4f95' }, r);
+  el('div', { style: 'text-align:center;margin-top:30px;font:700 24px Nunito;color:#a07090', text: 'Heo Con Club · bản demo UI ghép từ asset trong thư mục assets/' }, inner);
+}
+function modalProfile(inner) {
+  const top = el('div', { style: 'display:flex;gap:28px;align-items:center' }, inner);
+  const box = el('div', { class: 'avatarbox', style: 'position:relative;flex:none' }, top);
+  const av = img(me.av, '', box, 'av'); const fr = img(`ui-premium-generated/avatar-frames/frame_${me.fr}.png`, '', box, 'fr');
+  const info = el('div', {}, top);
+  const nm = el('input', { value: me.name, style: 'font:400 40px "Grandstander Black";color:#9b2c5e;border:0;background:#ffe9f2;border-radius:20px;padding:6px 18px;width:460px;outline:none', maxlength: 18 }, info);
+  nm.oninput = () => { me.name = nm.value || 'Bạn Heo Con'; store.set('name', me.name); refreshMe(); };
+  el('div', { style: 'font:800 26px "Baloo 2";color:#a07090;margin-top:8px', text: `VIP ${me.vip} · Thắng 1.284 ván · Chặt heo 96 lần` }, info);
+  el('div', { style: 'font:400 28px "Grandstander Black";color:#c2407a;margin:18px 0 6px', text: 'Linh vật 3D' }, inner);
+  const mg = el('div', { style: 'display:flex;gap:10px;flex-wrap:wrap' }, inner);
+  MASCOTS.forEach((m, i) => { const im = img(`3d/renders/avatars/${m.key}.png`, `width:92px;height:92px;border-radius:24px;background:${i === mascotIdx ? '#ffd1e3' : '#fff3f8'};border:4px solid ${i === mascotIdx ? '#ff6fa8' : 'transparent'};cursor:pointer`, mg); im.title = m.name; im.onclick = () => { sfx('pop'); setMascot(i); closeModal(); }; });
+  el('div', { style: 'font:400 28px "Grandstander Black";color:#c2407a;margin:18px 0 6px', text: 'Chọn avatar' }, inner);
+  const g = el('div', { class: 'avgrid' }, inner);
+  AVATARS.forEach(a => { const i = img(a, '', g); if (a === me.av) i.classList.add('sel'); i.onclick = () => { $$('.avgrid img').forEach(x => x.classList.remove('sel')); i.classList.add('sel'); me.av = a; store.set('av', a); av.src = A(a); refreshMe(); sfx('pop2'); }; });
+  el('div', { style: 'font:400 28px "Grandstander Black";color:#c2407a;margin:14px 0 0', text: 'Chọn khung' }, inner);
+  const fg = el('div', { class: 'frgrid' }, inner);
+  FRAMES.forEach(f => { const i = img(`ui-premium-generated/avatar-frames/frame_${f}.png`, '', fg); if (f === me.fr) i.classList.add('sel'); i.onclick = () => { $$('.frgrid img').forEach(x => x.classList.remove('sel')); i.classList.add('sel'); me.fr = f; store.set('fr', f); fr.src = A(`ui-premium-generated/avatar-frames/frame_${f}.png`); refreshMe(); sfx('pop'); }; });
+}
+function modalShop(inner) {
+  const g = el('div', { class: 'shop' }, inner);
+  [['emoji-fluent-3d/game/coin.png', 50000, '10K'], ['emoji-fluent-3d/game/money_bag.png', 300000, '50K'], ['emoji-fluent-3d/game-items/gem_stone.png', 1000000, '100K'], ['emoji-fluent-3d/game/crown.png', 5000000, '500K'],
+   ['emoji-fluent-3d/tet/red_envelope.png', 88888, 'Free'], ['emoji-fluent-3d/game/wrapped_gift.png', 200000, '20K'], ['emoji-fluent-3d/game-items/slot_machine.png', 2000000, '200K'], ['emoji-fluent-3d/game/trophy.png', 9999999, '999K']].forEach(([ic, amt, price]) => {
+    const p = el('div', { class: 'pack' }, g); img(ic, '', p); el('div', { class: 'amt', text: fmt(amt) }, p); el('div', { class: 'price', text: price === 'Free' ? 'Nhận' : price + 'đ' }, p);
+    p.onclick = () => { sfx('gold'); flyCoins(rectOf(p), coinTarget(), 12); setTimeout(() => setCoins(me.coins + amt), 700); toast('Demo thôi nha, không trừ tiền thật 😉'); };
+  });
+}
+function modalRank(inner) {
+  const ppl = NAMES.slice(0, 7).map((n, i) => [n, AVATARS[(i * 7) % AVATARS.length], 9800000 - i * 1234567]);
+  ppl.forEach(([n, a, s], i) => {
+    const r = el('div', { class: 'lb-row' }, inner);
+    if (i < 3) img(`emoji-fluent-3d/game/${['1st', '2nd', '3rd'][i]}_place_medal.png`, '', r, 'm'); else el('span', { text: `#${i + 1}`, style: 'width:58px;text-align:center' }, r);
+    img(a, '', r, 'a'); el('span', { text: n }, r); el('span', { class: 'sc', text: fmt(s) + ' xu' }, r);
+  });
+}
+function modalEvent(inner) {
+  const wrap = el('div', { style: 'display:flex;gap:30px;justify-content:center;align-items:flex-end;margin-top:20px' }, inner);
+  for (let i = 0; i < 3; i++) {
+    const c = el('div', { class: 'btn', style: 'text-align:center' }, wrap);
+    img('emoji-fluent-3d/tet/red_envelope.png', 'width:220px;filter:drop-shadow(0 10px 10px rgba(150,20,30,.3))', c, 'float');
+    el('div', { class: 'cb', text: 'Mở!', style: 'font-size:40px;color:#fff;-webkit-text-stroke:7px #c22f3a;paint-order:stroke fill' }, c);
+    c.onclick = () => { const amt = pick([8888, 18888, 68888, 88888, 168888]); sfx('win'); confetti(70); c.innerHTML = ''; img('emoji-fluent-3d/game/money_bag.png', 'width:200px', c, 'float');
+      el('div', { class: 'cb', text: '+' + fmt(amt), style: 'font-size:46px;color:#fff27a;-webkit-text-stroke:8px #a5205a;paint-order:stroke fill' }, c);
+      flyCoins(rectOf(c), coinTarget(), 10); setTimeout(() => setCoins(me.coins + amt), 700); c.onclick = null; };
+  }
+  el('div', { style: 'text-align:center;margin-top:20px;font:800 30px "Baloo 2";color:#7a3a5c', text: 'Chọn 1 bao lì xì may mắn 🧧' }, inner);
+}
+
+// ------------------------------------------------------------------ game shell
+let G = null, timers = [];
+const later = (fn, ms) => { const h = setTimeout(fn, ms); timers.push(h); return h; };
+$('#gback').onclick = () => { sfx('cancel'); if (window.HC && HC.from() === 'town') { HC.goto('index.html', 'Đang về thị trấn…'); return; } timers.forEach(clearTimeout); timers = []; if (G && G.cleanup) G.cleanup(); G = null; const a = $('#garea'); a.onclick = null; a.onmousemove = null; a.innerHTML = ''; go('lobby'); };
+function openGame(g) {
+  if (g.key === 'day-xu') { HC.goto('pusher.html' + (HC.from() === 'town' ? '?from=town' : ''), 'Đang bật máy đẩy xu…'); return; }
+  if (g.key === 'tien-len' && !DEMO) { const f = el('div', { style: 'position:absolute;inset:0;background:#ffd6e8;opacity:0;transition:opacity .35s;z-index:99' }, $('#stage')); requestAnimationFrame(() => f.style.opacity = '1'); setTimeout(() => location.href = 'tien-len.html' + (window.HC && HC.from() === 'town' ? '?from=town' : ''), 360); return; }
+  timers.forEach(clearTimeout); timers = [];
+  go('game'); $('#gname').textContent = g.name; const area = $('#garea'); area.innerHTML = ''; area.onclick = null; area.onmousemove = null; $('#emopick').classList.remove('on');
+  setCoins(me.coins, false);
+  G = { def: g, area };
+  ({ cards: gameCards, baucua: gameBauCua, taixiu: gameTaiXiu, xocdia: gameXocDia, xiangqi: gameXiangqi, ludo: gameLudo, caro: gameCaro, baimau: gameBaiMau, loto: gameLoto, banca: gameBanCa })[g.mode](g, area);
+}
+function gbutton(parent, label, color, x, y, onclick, w = 300, h = 100) {
+  const dark = { pink: '#c2407a', mint: '#1f9a70', sky: '#2a7fd0', lemon: '#c08f00', lavender: '#6c4bd1', peach: '#d06a35', grey: '#8a8496' }[color];
+  const b = el('div', { class: 'gbtn', style: `left:${x}px;top:${y}px;width:${w}px;height:${h}px;--sc:${dark}` }, parent);
+  img(`ui-premium-generated/buttons/pill_${color}.png`, '', b); el('span', { text: label, style: h < 90 ? 'font-size:32px' : '' }, b);
+  b.onclick = e => { sfx('click'); onclick(e, b); };
+  return b;
+}
+function seat(parent, x, y, opts = {}) {
+  const box = el('div', { class: 'avatarbox', style: `left:${x - 90}px;top:${y - 90}px` }, parent);
+  img(opts.av || pick(AVATARS), '', box, 'av'); img(`ui-premium-generated/avatar-frames/frame_${opts.fr || pick(FRAMES)}.png`, '', box, 'fr');
+  const nc = el('div', { class: 'namecard', style: `left:${x - 120}px;top:${y + 78}px` }, parent);
+  el('div', { class: 'nm', text: opts.name || pick(NAMES) }, nc);
+  const mn = el('div', { class: 'mn' }, nc); img('emoji-fluent-3d/game/coin.png', '', mn); const ms = el('span', { text: fmt(opts.money || ri(2, 90) * 1000 * 10) }, mn);
+  return { box, nc, x, y, ms };
+}
+function emotePicker(anchor) {
+  const pk = $('#emopick'); pk.innerHTML = '';
+  ['joy_1f602', 'rofl_1f923', 'heart-eyes_1f60d', 'star-struck_1f929', 'partying-face_1f973', 'loudly-crying_1f62d', 'rage_1f621', 'mind-blown_1f92f', 'sunglasses-face_1f60e', 'money-face_1f911',
+   'clown_1f921', 'skull_1f480', 'fire_1f525', 'thumbs-up_1f44d', 'clap_1f44f', 'pig_1f416', 'party-popper_1f389', 'red-heart_2764_fe0f'].forEach(k => {
+    const i = img(`emoji-noto-animated/${k}/512.webp`, '', pk);
+    i.onclick = () => { pk.classList.remove('on'); showEmote(anchor(), k); sfx('pop'); };
+  });
+  pk.classList.toggle('on');
+}
+function showEmote(pt, key, ms = 2600) {
+  const e = img(`emoji-noto-animated/${key}/512.webp`, `left:${pt.x + (pt.y < 260 ? 90 : -75)}px;top:${Math.max(10, pt.y - 190)}px`, $('#garea'), 'emote');
+  later(() => { e.animate([{ opacity: 1 }, { opacity: 0, transform: 'translateY(-40px)' }], { duration: 300 }).onfinish = () => e.remove(); }, ms);
+}
+function emoteBtn(area, anchor) { const b = img('ui-jelly-pzuh/buttons-pastel/yellow/icon_like_yellow.png', 'position:absolute;right:34px;top:128px;width:92px;z-index:21', area, 'btn'); b.onclick = () => { sfx('click'); emotePicker(anchor); }; }
+
+// ------------------------------------------------------------------ CARD GAMES
+const SUITS = ['spades', 'clubs', 'diamonds', 'hearts'];
+const RANKS = ['3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A', '2'];
+const RF = { A: 'A', 2: '02', 3: '03', 4: '04', 5: '05', 6: '06', 7: '07', 8: '08', 9: '09', 10: '10', J: 'J', Q: 'Q', K: 'K' };
+const cardSrc = c => `cards-heocon/cards/card_${c.s}_${RF[c.r]}.png`;
+const BACK = 'cards-heocon/cards/card_back_pink.png';
+function newDeck() { const d = []; SUITS.forEach(s => RANKS.forEach(r => d.push({ s, r }))); for (let i = d.length - 1; i > 0; i--) { const j = ri(0, i); [d[i], d[j]] = [d[j], d[i]]; } return d; }
+const rv = c => RANKS.indexOf(c.r) * 4 + SUITS.indexOf(c.s);
+function gameCards(g, area) {
+  $('#gbg').src = A(`bg-tables-generated/with-table/table_scene_${g.theme}.png`); music('cards'); sfx('shuffle');
+  const deck = newDeck();
+  const opp = [seat(area, 150, 470, {}), seat(area, 960, 120, {}), seat(area, 1770, 470, {})];
+  const backs = [[310, 470], [1130, 140], [1600, 470]].map(([x, y], i) => {
+    const b = el('div', { class: 'backstack', style: `left:${x - 40}px;top:${y - 57}px` }, area);
+    for (let k = 0; k < 3; k++) img(BACK, `left:${k * 5}px;top:${-k * 4}px`, b);
+    const bd = el('div', { class: 'badge', text: g.n }, b); return { b, bd, n: g.n };
+  });
+  const meSeat = seat(area, 170, 880, { av: me.av, fr: me.fr, name: me.name, money: me.coins });
+  meSeat.nc.style.top = (880 + 70) + 'px';
+  const center = el('div', { style: 'position:absolute;left:960px;top:520px' }, area);
+  let hand = deck.splice(0, g.n).sort((a, b) => rv(a) - rv(b));
+  const faceDown = ['bai-cao', 'lieng'].includes(g.key);
+  let cardsEls = [];
+  function layout() {
+    cardsEls.forEach(e => e.remove()); cardsEls = [];
+    const n = hand.length, sp = Math.min(84, 800 / Math.max(1, n));
+    hand.forEach((c, i) => {
+      const t = i - (n - 1) / 2;
+      const e = img(c.hidden ? BACK : cardSrc(c), `left:${830 + t * sp - 70}px;top:${840 + t * t * 1.2 - (c.sel ? 36 : 0)}px;transform:rotate(${t * 2.2}deg);z-index:${i + 3}`, area, 'card' + (c.sel ? ' sel' : ''));
+      e.onclick = () => { if (c.hidden) return; c.sel = !c.sel; sfx('slide', .4); layout(); };
+      cardsEls.push(e);
+    });
+  }
+  function toCenter(cards, fromXY, who = 'me') {
+    center.innerHTML = '';
+    cards.forEach((c, i) => {
+      const e = img(cardSrc(c), `left:${(i - (cards.length - 1) / 2) * 70 - 70}px;top:-101px;transform:rotate(${rnd(-8, 8)}deg)`, center, 'card');
+      e.animate([{ transform: `translate(${fromXY.x - 960}px,${fromXY.y - 520}px) scale(.6)` }, { transform: 'translate(0,0) scale(1)' }], { duration: 320, easing: 'cubic-bezier(.2,1.2,.4,1)' });
+    });
+    sfx(pick(['card', 'card2']));
+  }
+  function bubble(s, txt) { const b = el('div', { class: 'bubble', text: txt, style: `left:${s.x - 60}px;top:${s.y - 150}px` }, area); later(() => b.remove(), 1400); }
+  function oppTurn(i, afterHeo) {
+    const s = opp[i], bs = backs[i];
+    if (afterHeo && i === 1) {
+      const r = pick(['7', '9', 'J', 'Q']); const quad = SUITS.map(su => ({ s: su, r }));
+      toCenter(quad, { x: s.x, y: s.y }); bs.n = Math.max(1, bs.n - 4); bs.bd.textContent = bs.n;
+      later(() => { callout('chat_heo', 1600); sfx('slash'); later(() => { sfx('boom'); shakeStage(); }, 200);
+        const m = rectOf(meSeat.box); flyCoins({ x: m.cx, y: m.cy }, { x: s.x, y: s.y }, 12); setCoins(me.coins - 200000);
+        showEmote({ x: s.x, y: s.y }, 'sunglasses-face_1f60e'); later(() => showEmote({ x: meSeat.x, y: meSeat.y }, 'loudly-crying_1f62d'), 500); }, 350);
+      return;
+    }
+    if (Math.random() < .35) { bubble(s, 'Bỏ lượt'); sfx('tick'); return; }
+    const c = deck.pop() || { s: 'hearts', r: 'K' }; toCenter([c], { x: s.x, y: s.y }); bs.n = Math.max(0, bs.n - 1); bs.bd.textContent = bs.n;
+    if (Math.random() < .25) showEmote({ x: s.x, y: s.y }, pick(['joy_1f602', 'smirk_1f60f', 'thinking-face_1f914', 'zany-face_1f92a']));
+  }
+  function roundAfter(playedHeo) {
+    later(() => oppTurn(2, playedHeo), 700);
+    later(() => oppTurn(1, playedHeo), 1500);
+    later(() => { if (!playedHeo) oppTurn(0, false); if (!(DEMO && playedHeo)) { callout('den_luot_ban', 1000, .7); sfx('turn'); } }, 2400);
+  }
+  const B = (label, color, fn, row = 0, col = 0) => gbutton(area, label, color, 1650 - col * 250, 975 - row * 100, fn, 240, 90);
+  const playSel = () => {
+    const sel = hand.filter(c => c.sel); if (!sel.length) { toast('Chọn bài trước đã nha 👆'); return null; }
+    hand = hand.filter(c => !c.sel); sel.forEach(c => c.sel = false); layout(); toCenter(sel, { x: 960, y: 880 }); return sel;
+  };
+  const winRound = (slug) => { callout(slug, 1500); sfx('win'); confetti(); const t = coinTarget(); flyCoins({ x: 960, y: 520 }, t, 14); later(() => setCoins(me.coins + ri(5, 30) * 10000), 700); };
+  const loseRound = (slug) => { callout(slug, 1400); sfx('lose'); setCoins(me.coins - ri(2, 10) * 10000); };
+  if (['tien-len', 'sam-loc'].includes(g.key)) {
+    B('Đánh', 'pink', () => { const s = playSel(); if (!s) return; if (!hand.length) { winRound(g.key === 'sam-loc' ? 'thang' : 'toi_trang'); return; }
+      const heo = s.some(c => c.r === '2'); if (s.length === 4 && new Set(s.map(c => c.r)).size === 1) callout('tu_quy', 1200); roundAfter(heo); if (heo) toast('Bạn đánh heo… cẩn thận bị chặt! 🐷'); });
+    B('Bỏ lượt', 'grey', () => { callout('bo_luot', 900, .6); roundAfter(false); }, 1);
+    B('Xếp bài', 'sky', () => { hand.sort((a, b) => rv(a) - rv(b)); sfx('fan'); layout(); }, 0, 1);
+    if (g.key === 'sam-loc') B('Báo Sâm', 'lemon', () => { callout('bao_sam', 1400); sfx('power'); }, 1, 1);
+    else B('Gợi ý 🐷', 'lemon', () => { hand.forEach(c => c.sel = c.r === '2'); if (!hand.some(c => c.sel)) hand[hand.length - 1].sel = true; layout(); toast('Thử đánh heo để xem "CHẶT HEO!" nè'); }, 1, 1);
+  } else if (g.key === 'phom') {
+    B('Đánh', 'pink', () => { const s = playSel(); if (s) roundAfter(false); });
+    B('Bốc', 'sky', () => { const c = deck.pop(); hand.push(c); hand.sort((a, b) => rv(a) - rv(b)); sfx('slide'); layout(); }, 1);
+    B('Ăn', 'peach', () => { const top = center.querySelector('img'); if (!top) { toast('Chưa có bài để ăn'); return; } center.innerHTML = ''; const c = deck.pop(); hand.push(c); layout(); sfx('chip'); toast('Đã ăn 1 cây 😋'); }, 0, 1);
+    B('Ù!', 'lemon', () => { winRound(pick(['u', 'u_khan'])); }, 1, 1);
+  } else if (g.key === 'mau-binh') {
+    B('Xếp binh', 'lavender', () => {
+      cardsEls.forEach(e => e.remove()); cardsEls = [];
+      const brd = img('games/mau-binh/arrangement_board.png', 'position:absolute;left:580px;top:330px;width:760px;z-index:5', area);
+      const rows = [[3, 373], [5, 559], [5, 745]]; let k = 0; const sorted = [...hand].sort((a, b) => rv(a) - rv(b));
+      rows.forEach(([n, y], ri_) => { const x0 = 800 + (5 - n) * 52; for (let i = 0; i < n; i++) { const c = sorted[k++]; const e = img(cardSrc(c), `left:${x0 + i * 104 - 22}px;top:${y - 3}px;width:96px;height:138px;z-index:6`, area, 'card small'); e.animate([{ transform: 'translateY(300px) scale(.5)', opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: 300, delay: k * 50 }); } });
+      sfx('fan');
+    });
+    B('Báo binh', 'pink', () => { Math.random() < .5 ? winRound(pick(['mau_binh', 'sanh_rong', 'dong_hoa'])) : loseRound('binh_lung'); }, 1);
+  } else if (g.key === 'xi-dach') {
+    const dealer = el('div', { style: 'position:absolute;left:960px;top:330px' }, area);
+    [0, 1].forEach(i => img(i ? BACK : cardSrc(deck.pop()), `left:${i * 80 - 110}px;top:-80px;width:110px;height:158px`, dealer, 'card small'));
+    const score = () => hand.reduce((s, c) => s + ({ A: 11, J: 10, Q: 10, K: 10 }[c.r] || +c.r), 0);
+    B('Rút', 'sky', () => { hand.push(deck.pop()); sfx('slide'); layout(); const sc = score(); toast('Điểm: ' + sc); if (sc > 21) loseRound('quac'); else if (hand.length === 5) winRound('ngu_linh'); });
+    B('Dằn', 'pink', () => { const sc = score(); if (hand.length === 2 && hand.every(c => c.r === 'A')) winRound('xi_bang'); else if (sc === 21 && hand.length === 2) winRound('xi_dach'); else if (sc >= 16 && Math.random() < .55) winRound('thang'); else loseRound('thua'); }, 1);
+  } else {
+    // poker / lieng / bai-cao : chips + pot
+    if (faceDown) hand.forEach(c => c.hidden = true);
+    const pot = el('div', { class: 'pill', style: 'left:820px;top:640px;transform:scale(.8);padding-right:40px' }, area); img('emoji-fluent-3d/game/money_bag.png', '', pot, 'ic'); const potT = el('span', { text: '0' }, pot);
+    let potV = 0; const addPot = (v, from) => { potV += v; const ch = img(pick(['games/card-shared/chips/chip_10k.png', 'games/card-shared/chips/chip_50k.png', 'games/card-shared/chips/chip_100k.png']), `position:absolute;width:70px;left:${from.x - 35}px;top:${from.y - 35}px`, FX);
+      ch.animate([{ transform: 'none' }, { transform: `translate(${940 - from.x}px,${600 - from.y}px)` }], { duration: 450, easing: 'ease-in' }).onfinish = () => { ch.remove(); potT.textContent = fmt(potV); sfx('chip'); }; };
+    opp.forEach(s => later(() => addPot(20000, { x: s.x, y: s.y }), ri(200, 900)));
+    if (g.key === 'poker') {
+      const comm = deck.splice(0, 5); let shown = 0;
+      const slots = el('div', { style: 'position:absolute;left:640px;top:330px' }, area);
+      comm.forEach((c, i) => { img('games/card-shared/card_slot.png', `position:absolute;left:${i * 130}px;top:0;width:110px;height:158px`, slots); });
+      const reveal = n => { while (shown < n) { const c = comm[shown]; const e = img(cardSrc(c), `left:${shown * 130}px;top:0;width:110px;height:158px`, slots, 'card small'); e.animate([{ transform: 'rotateY(90deg)' }, { transform: 'none' }], { duration: 300 }); shown++; sfx('card'); } };
+      B('Theo', 'mint', () => { addPot(20000, { x: 960, y: 880 }); setCoins(me.coins - 20000); reveal(shown < 3 ? 3 : Math.min(5, shown + 1)); if (shown === 5) later(() => Math.random() < .5 ? winRound('thang') : loseRound('thua'), 900); });
+      B('Tố', 'pink', () => { addPot(100000, { x: 960, y: 880 }); setCoins(me.coins - 100000); callout('sap', 900, .6); }, 1);
+      B('All in', 'lemon', () => { for (let i = 0; i < 5; i++) later(() => addPot(200000, { x: 960 + rnd(-80, 80), y: 880 }), i * 90); callout('all_in', 1300); later(() => { reveal(5); later(() => Math.random() < .5 ? winRound('jackpot') : loseRound('thua'), 900); }, 900); }, 0, 1);
+      B('Bỏ', 'grey', () => { loseRound('thua'); hand.forEach(c => c.hidden = true); layout(); }, 1, 1);
+    } else {
+      const points = () => hand.reduce((s, c) => s + ({ A: 1, J: 10, Q: 10, K: 10 }[c.r] || +c.r), 0) % 10;
+      B('Lật bài', 'pink', () => { hand.forEach(c => c.hidden = false); sfx('fan'); layout(); const ba = hand.every(c => 'JQK'.includes(c.r)); const same = new Set(hand.map(c => c.r)).size === 1;
+        later(() => { if (g.key === 'lieng' && same) winRound('sap'); else if (ba) winRound('ba_tay'); else { toast(points() + ' nút'); points() >= 6 ? winRound('thang') : loseRound('thua'); } }, 500); });
+      B('Tố', 'lemon', () => { addPot(50000, { x: 960, y: 880 }); setCoins(me.coins - 50000); }, 1);
+      B('Theo', 'mint', () => { addPot(20000, { x: 960, y: 880 }); setCoins(me.coins - 20000); }, 0, 1);
+      B('Úp bỏ', 'grey', () => loseRound('thua'), 1, 1);
+    }
+  }
+  emoteBtn(area, () => ({ x: meSeat.x, y: meSeat.y }));
+  G.forceHeo = () => { if (!hand.some(c => c.r === '2')) { hand[hand.length - 1] = { s: 'hearts', r: '2' }; } hand.forEach(c => c.sel = c.r === '2'); layout(); };
+  layout();
+  cardsEls.forEach((e, i) => e.animate([{ transform: 'translate(0,-420px) scale(.4)', opacity: 0 }, { opacity: 1 }], { duration: 380, delay: i * 45, easing: 'cubic-bezier(.2,1.2,.4,1)' }));
+  later(() => callout('san_sang', 1000, .7), 300);
+}
+
+// ------------------------------------------------------------------ DICE GAMES (shared)
+function diceStage(area, bowlStyle, plateStyle) {
+  const plate = img(`games/shared/plate_${plateStyle}.png`, 'position:absolute;left:960px;top:150px;width:520px;transform:translateX(-50%)', area);
+  const tray = el('div', { style: 'position:absolute;left:960px;top:228px;width:380px;height:150px;transform:translateX(-50%)' }, area);
+  const bowl = img(`games/shared/bowl_${bowlStyle}.png`, 'position:absolute;left:960px;top:60px;width:430px;transform:translateX(-50%);transition:top .45s cubic-bezier(.3,1.4,.5,1), opacity .3s;z-index:3', area);
+  return { plate, tray, bowl };
+}
+function chipSelector(area, y = 960) {
+  const vals = [['1k', 1000], ['10k', 10000], ['50k', 50000], ['100k', 100000], ['500k', 500000]];
+  const box = el('div', { class: 'chipsel', style: `top:${y}px` }, area); let cur = vals[1];
+  vals.forEach(v => { const i = img(`games/card-shared/chips/chip_${v[0]}.png`, '', box); if (v === cur) i.classList.add('on'); i.onclick = () => { cur = v; $$('img', box).forEach(x => x.classList.remove('on')); i.classList.add('on'); sfx('chip'); }; });
+  return () => cur;
+}
+function betArea(area, x, y, w, h, imgSrc, key, getChip, bets, html) {
+  const b = el('div', { class: 'betarea', style: `left:${x}px;top:${y}px;width:${w}px;height:${h}px` }, area);
+  if (imgSrc) img(imgSrc, 'width:100%;height:100%', b); if (html) b.insertAdjacentHTML('beforeend', html);
+  const st = el('div', { class: 'stack' }, b); const amt = el('div', { class: 'amt' }, b);
+  b.onclick = () => {
+    const [k, v] = getChip(); if (me.coins < v) { toast('Hết xu rồi, ghé Shop nha!'); return; }
+    bets[key] = (bets[key] || 0) + v; setCoins(me.coins - v, false); $$('.coinTxt').forEach(e => e.textContent = fmt(me.coins));
+    const n = st.children.length; const c = img(`games/card-shared/chips/chip_${k}.png`, `top:${-n * 8}px`, st);
+    c.animate([{ transform: 'translateY(-120px) scale(1.3)', opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: 260, easing: 'cubic-bezier(.2,1.4,.4,1)' });
+    amt.style.display = 'block'; amt.textContent = fmt(bets[key]); sfx('chip');
+  };
+  b.reset = () => { st.innerHTML = ''; amt.style.display = 'none'; b.classList.remove('win'); };
+  return b;
+}
+async function shakeBowl(stage, fillTray) {
+  sfx('diceShake'); stage.bowl.style.top = '150px'; await sleep(420);
+  stage.tray.innerHTML = ''; fillTray(stage.tray);
+  stage.bowl.classList.add('bowlshake'); sfx('diceShake'); await sleep(1100); stage.bowl.classList.remove('bowlshake');
+  sfx('diceThrow'); await sleep(450);
+  stage.bowl.style.top = '-260px'; sfx('pop'); await sleep(400);
+}
+function settle(bets, winFn, areas) {
+  let won = 0, lost = 0;
+  for (const [k, v] of Object.entries(bets)) { const m = winFn(k); if (m > 0) { won += v * (m + 1); areas[k] && areas[k].classList.add('win'); } else lost += v; }
+  if (!Object.keys(bets).length) return toast('Đặt cược trước khi lắc nha 🎲');
+  if (won > 0) { callout('thang', 1500); sfx('win'); confetti(70); flyCoins({ x: 960, y: 300 }, coinTarget(), 14); later(() => setCoins(me.coins + won), 750); later(() => plusText(1560, 120, '+' + fmt(won)), 750); }
+  else { callout('thua', 1300); sfx('lose'); }
+}
+function history(area, x, y) { const h = el('div', { class: 'hist', style: `left:${x}px;top:${y}px` }, area); return src => { const i = img(src, '', h); i.animate([{ transform: 'scale(0)' }, { transform: 'scale(1)' }], { duration: 300, easing: 'cubic-bezier(.2,1.6,.4,1)' }); if (h.children.length > 12) h.firstChild.remove(); }; }
+
+function gameBauCua(g, area) {
+  $('#gbg').src = A('ui-premium-generated/lobby-backgrounds/lobby_mint_1920x1080.png'); music('dice');
+  const stage = diceStage(area, 'red', 'gold'); const getChip = chipSelector(area, 950); const bets = {}; const areas = {};
+  const keys = ['bau', 'cua', 'tom', 'ca', 'ga', 'nai'];
+  keys.forEach((k, i) => { areas[k] = betArea(area, 300 + (i % 6) * 222, 560, 200, 231, `games/bau-cua/tiles/${k}.png`, k, getChip, bets); });
+  const hist = history(area, 40, 160);
+  gbutton(area, 'Lắc!', 'pink', 1620, 830, async () => {
+    if (!Object.keys(bets).length) return toast('Đặt cược vào ô trước nha 🦀');
+    Object.values(areas).forEach(a => a.classList.remove('win'));
+    const res = [pick(keys), pick(keys), pick(keys)];
+    if (DEMO) res[0] = res[2] = Object.keys(bets)[0];
+    await shakeBowl(stage, tray => res.forEach((k, i) => img(`games/bau-cua/dice-faces/${k}.png`, `position:absolute;left:${30 + i * 112}px;top:${i % 2 ? 28 : 2}px;width:118px;transform:rotate(${rnd(-14, 14)}deg)`, tray)));
+    res.forEach(k => hist(`games/bau-cua/symbols/${k}.png`));
+    settle(bets, k => res.filter(r => r === k).length, areas);
+    later(() => { Object.values(areas).forEach(a => a.reset()); for (const k in bets) delete bets[k]; stage.bowl.style.top = '60px'; }, 2600);
+  }, 280, 110);
+  gbutton(area, 'Xóa cược', 'grey', 1620, 955, () => { let back = Object.values(bets).reduce((a, b) => a + b, 0); setCoins(me.coins + back); Object.values(areas).forEach(a => a.reset()); for (const k in bets) delete bets[k]; }, 280, 90);
+  emoteBtn(area, () => ({ x: 960, y: 600 }));
+}
+function gameTaiXiu(g, area) {
+  $('#gbg').src = A('ui-premium-generated/lobby-backgrounds/lobby_dream_1920x1080.png'); music('dice');
+  const stage = diceStage(area, 'pink', 'pink'); const getChip = chipSelector(area, 950); const bets = {}; const areas = {};
+  const mk = (k, x, color, label, rng) => betArea(area, x, 520, 560, 380, null, k, getChip, bets,
+    `<div style="position:absolute;inset:0;border-radius:60px;background:linear-gradient(${color[0]},${color[1]});box-shadow:0 14px 0 ${color[2]},0 20px 30px rgba(80,20,60,.25)"></div>
+     <img src="${A('ui-premium-generated/callouts/' + label + '.png')}" style="position:absolute;left:50%;top:40px;transform:translateX(-50%);width:330px">
+     <div style="position:absolute;left:0;right:0;top:220px;text-align:center;font:400 54px 'Grandstander Black';color:#fff;-webkit-text-stroke:6px ${color[2]};paint-order:stroke fill">${rng}</div>`);
+  areas.tai = mk('tai', 300, ['#ffb3b3', '#ff5a5a', '#c22f3a'], 'tai', '11 – 17'); areas.xiu = mk('xiu', 1060, ['#cfe8ff', '#4fa8ff', '#2368c4'], 'xiu', '4 – 10');
+  const hist = history(area, 40, 160);
+  const sumEl = el('div', { class: 'cb', style: 'position:absolute;left:960px;top:410px;transform:translateX(-50%);font-size:70px;color:#fff;-webkit-text-stroke:10px #6c4bd1;paint-order:stroke fill;z-index:4' }, area);
+  gbutton(area, 'Lắc!', 'lavender', 1620, 945, async () => {
+    if (!Object.keys(bets).length) return toast('Chọn TÀI hoặc XỈU trước nha 🎲');
+    sumEl.textContent = ''; Object.values(areas).forEach(a => a.classList.remove('win'));
+    let d = [ri(1, 6), ri(1, 6), ri(1, 6)];
+    if (DEMO) d = Object.keys(bets)[0] === 'tai' ? [6, 5, 4] : [1, 2, 3];
+    const s = d[0] + d[1] + d[2], r = s >= 11 ? 'tai' : 'xiu';
+    await shakeBowl(stage, tray => d.forEach((n, i) => img(`games/tai-xiu/dice/white/die_${n}.png`, `position:absolute;left:${40 + i * 110}px;top:${i % 2 ? 30 : 4}px;width:104px;transform:rotate(${rnd(-16, 16)}deg)`, tray)));
+    sumEl.textContent = s; callout(r, 1100, .8); hist(`games/tai-xiu/history_${r}.png`);
+    later(() => settle(bets, k => k === r ? 1 : 0, areas), 1000);
+    later(() => { Object.values(areas).forEach(a => a.reset()); for (const k in bets) delete bets[k]; stage.bowl.style.top = '60px'; }, 3400);
+  }, 280, 110);
+  emoteBtn(area, () => ({ x: 960, y: 600 }));
+}
+function gameXocDia(g, area) {
+  $('#gbg').src = A('ui-premium-generated/lobby-backgrounds/lobby_tet_1920x1080.png'); music('dice');
+  const stage = diceStage(area, 'porcelain', 'porcelain'); const getChip = chipSelector(area, 960); const bets = {}; const areas = {};
+  const big = (k, x, color, label) => betArea(area, x, 470, 600, 250, null, k, getChip, bets,
+    `<div style="position:absolute;inset:0;border-radius:50px;background:linear-gradient(${color[0]},${color[1]});box-shadow:0 12px 0 ${color[2]}"></div><img src="${A('ui-premium-generated/callouts/' + label + '.png')}" style="position:absolute;left:50%;top:30px;transform:translateX(-50%);width:300px">`);
+  areas.chan = big('chan', 300, ['#ffd1e3', '#ff6fa8', '#c2407a'], 'chan'); areas.le = big('le', 1020, ['#c9f6e6', '#3ccf9b', '#1f9a70'], 'le');
+  const subs = [['r4', '4 ĐỎ', [1, 1, 1, 1]], ['w4', '4 TRẮNG', [0, 0, 0, 0]], ['r3', '3 ĐỎ', [1, 1, 1, 0]], ['w3', '3 TRẮNG', [0, 0, 0, 1]]];
+  subs.forEach(([k, lab, cs], i) => { areas[k] = betArea(area, 300 + i * 335, 740, 310, 180, null, k, getChip, bets,
+    `<div style="position:absolute;inset:0;border-radius:40px;background:linear-gradient(#fff6d6,#ffc93c);box-shadow:0 10px 0 #c08f00"></div>
+     <div style="position:absolute;left:0;right:0;top:20px;display:flex;justify-content:center;gap:6px">${cs.map(c => `<img src="${A('games/xoc-dia/coin_' + (c ? 'red' : 'white') + '.png')}" style="width:52px">`).join('')}</div>
+     <div style="position:absolute;left:0;right:0;top:92px;text-align:center;font:400 34px 'Grandstander Black';color:#fff;-webkit-text-stroke:6px #c08f00;paint-order:stroke fill">${lab}</div>`); });
+  const hist = history(area, 40, 160);
+  gbutton(area, 'Xóc!', 'pink', 1620, 945, async () => {
+    if (!Object.keys(bets).length) return toast('Đặt cửa Chẵn/Lẻ trước nha 🪙');
+    Object.values(areas).forEach(a => a.classList.remove('win'));
+    const coins = DEMO ? (Object.keys(bets)[0] === 'chan' ? [1, 1, 0, 0] : [1, 0, 0, 0]) : [0, 0, 0, 0].map(() => Math.random() < .5 ? 1 : 0), reds = coins.reduce((a, b) => a + b, 0), r = reds % 2 === 0 ? 'chan' : 'le';
+    await shakeBowl(stage, tray => coins.forEach((c, i) => img(`games/xoc-dia/coin_${c ? 'red' : 'white'}.png`, `position:absolute;left:${60 + i * 70 + rnd(-10, 10)}px;top:${30 + rnd(-14, 24)}px;width:76px`, tray)));
+    callout(r, 1000, .8); hist(`games/xoc-dia/history_${r}.png`);
+    const hit = k => k === r ? 1 : (k === 'r4' && reds === 4) || (k === 'w4' && reds === 0) ? 12 : (k === 'r3' && reds === 3) || (k === 'w3' && reds === 1) ? 2.5 : 0;
+    later(() => settle(bets, hit, areas), 900);
+    later(() => { Object.values(areas).forEach(a => a.reset()); for (const k in bets) delete bets[k]; stage.bowl.style.top = '60px'; }, 3300);
+  }, 280, 110);
+  emoteBtn(area, () => ({ x: 960, y: 600 }));
+}
+
+// ------------------------------------------------------------------ BOARD GAMES
+function gameXiangqi(g, area) {
+  $('#gbg').src = A('ui-premium-generated/lobby-backgrounds/lobby_sunset_1920x1080.png'); music('board');
+  let style = 'cute';
+  const W = 860, H = 950, sc = 0.9, ox = 960 - W * sc / 2, oy = 125;
+  const board = img(`games/co-tuong/board_${style}.png`, `position:absolute;left:${ox}px;top:${oy}px;width:${W * sc}px`, area);
+  const P = (c, r) => ({ x: ox + (70 + c * 90) * sc, y: oy + (70 + r * 90) * sc });
+  const SET = [['chariot', 0, 0], ['horse', 1, 0], ['elephant', 2, 0], ['advisor', 3, 0], ['general', 4, 0], ['advisor', 5, 0], ['elephant', 6, 0], ['horse', 7, 0], ['chariot', 8, 0], ['cannon', 1, 2], ['cannon', 7, 2], ['soldier', 0, 3], ['soldier', 2, 3], ['soldier', 4, 3], ['soldier', 6, 3], ['soldier', 8, 3]];
+  let pieces = [];
+  SET.forEach(([n, c, r]) => { pieces.push({ side: 'black', n, c, r }); pieces.push({ side: 'red', n, c, r: 9 - r }); });
+  let sel = null; const dots = [];
+  function draw() {
+    $$('.piece', area).forEach(e => e.remove());
+    pieces.forEach(p => { const pt = P(p.c, p.r); const e = img(`games/co-tuong/pieces-${style}/${p.side}_${p.n}.png`, `left:${pt.x - 38}px;top:${pt.y - 40}px;width:76px;height:76px`, area, 'piece' + (sel === p ? ' sel' : '')); p.el = e;
+      e.onclick = ev => { ev.stopPropagation(); if (sel && sel.side !== p.side) { moveTo(p.c, p.r); return; } sel = sel === p ? null : p; sfx('click'); draw(); }; });
+  }
+  function moveTo(c, r) {
+    if (!sel) return; const tgt = pieces.find(p => p.c === c && p.r === r);
+    if (tgt && tgt.side === sel.side) return;
+    if (tgt) { pieces = pieces.filter(p => p !== tgt); sfx('boom', .5); if (tgt.n === 'general') { callout('thang', 1500); confetti(); sfx('win'); } else toast('Ăn quân! 😋'); }
+    sel.c = c; sel.r = r; sfx('card'); const s0 = sel; sel = null; draw();
+    if (s0.side === 'red') later(aiMove, 700);
+  }
+  function aiMove() {
+    const blacks = pieces.filter(p => p.side === 'black'); const p = pick(blacks); if (!p) return;
+    const opts = [[0, 1], [1, 0], [-1, 0], [0, -1]].map(([dc, dr]) => [p.c + dc, p.r + dr]).filter(([c, r]) => c >= 0 && c <= 8 && r >= 0 && r <= 9 && !pieces.some(q => q.c === c && q.r === r && q.side === 'black'));
+    if (!opts.length) return; const [c, r] = pick(opts); const tgt = pieces.find(q => q.c === c && q.r === r); if (tgt) pieces = pieces.filter(q => q !== tgt);
+    p.c = c; p.r = r; sfx('card2'); draw(); if (Math.random() < .2) { callout('chieu_tuong', 1100, .7); sfx('turn'); }
+  }
+  for (let c = 0; c <= 8; c++) for (let r = 0; r <= 9; r++) { const pt = P(c, r); el('div', { class: 'cell', style: `left:${pt.x - 40}px;top:${pt.y - 40}px;width:80px;height:80px;border-radius:50%`, onclick: () => moveTo(c, r) }, area); }
+  draw();
+  gbutton(area, 'Đổi kiểu', 'peach', 1560, 860, () => { style = style === 'cute' ? 'classic' : 'cute'; board.src = A(`games/co-tuong/board_${style}.png`); draw(); }, 300, 100);
+  el('div', { class: 'bubble', style: 'left:60px;top:470px;font-size:26px;white-space:normal;width:300px', text: 'Bấm quân đỏ rồi bấm điểm đến. Demo không kiểm luật nha!' }, area);
+}
+function gameLudo(g, area) {
+  $('#gbg').src = A('ui-premium-generated/lobby-backgrounds/lobby_sky_1920x1080.png'); music('board');
+  const sc = 0.92, size = 1000 * sc, ox = 960 - size / 2, oy = 120;
+  img('games/co-ca-ngua/board.png', `position:absolute;left:${ox}px;top:${oy}px;width:${size}px`, area);
+  const C = (r, c) => ({ x: ox + (20 + c * 64 + 32) * sc, y: oy + (20 + r * 64 + 32) * sc });
+  const path = [];
+  for (let c = 1; c <= 5; c++) path.push([6, c]); for (let r = 5; r >= 0; r--) path.push([r, 6]); path.push([0, 7]); path.push([0, 8]);
+  for (let r = 1; r <= 5; r++) path.push([r, 8]); for (let c = 9; c <= 14; c++) path.push([6, c]); path.push([7, 14]); path.push([8, 14]);
+  for (let c = 13; c >= 9; c--) path.push([8, c]); for (let r = 9; r <= 14; r++) path.push([r, 8]); path.push([14, 7]); path.push([14, 6]);
+  for (let r = 13; r >= 9; r--) path.push([r, 6]); for (let c = 5; c >= 0; c--) path.push([8, c]); path.push([7, 0]);
+  for (let c = 1; c <= 5; c++) path.push([7, c]);
+  const yard = { red: [[1.5, 1.5], [1.5, 3.5], [3.5, 1.5], [3.5, 3.5]], green: [[1.5, 10.5], [1.5, 12.5], [3.5, 10.5], [3.5, 12.5]], yellow: [[10.5, 10.5], [10.5, 12.5], [12.5, 10.5], [12.5, 12.5]], blue: [[10.5, 1.5], [10.5, 3.5], [12.5, 1.5], [12.5, 3.5]] };
+  const tok = {};
+  Object.entries(yard).forEach(([col, ps]) => ps.forEach(([r, c], i) => { const pt = C(r - .55, c - .5); const e = img(`games/co-ca-ngua/token_${col}.png`, `position:absolute;left:${pt.x - 33}px;top:${pt.y - 36}px;width:66px;transition:left .18s, top .18s;z-index:3`, area); if (col === 'red') tok[i] = { e, pos: -1 }; }));
+  const die = img('games/tai-xiu/dice/white/die_6.png', 'position:absolute;left:1560px;top:520px;width:170px', area, 'float');
+  gbutton(area, 'Tung xúc xắc', 'sky', 1500, 760, async () => {
+    sfx('diceShake'); for (let i = 0; i < 8; i++) { die.src = A(`games/tai-xiu/dice/white/die_${ri(1, 6)}.png`); die.style.transform = `rotate(${rnd(-30, 30)}deg)`; await sleep(70); }
+    const n = ri(1, 6); die.src = A(`games/tai-xiu/dice/white/die_${n}.png`); die.style.transform = 'none'; sfx('diceThrow');
+    const t = Object.values(tok).find(t => t.pos >= 0 && t.pos < path.length - 1) || Object.values(tok).find(t => t.pos < 0);
+    if (!t) return;
+    if (t.pos < 0) { if (n !== 6 && Math.random() < .5) { toast('Cần 6 để xuất chuồng 🐴'); return; } t.pos = 0; }
+    else { for (let k = 0; k < n && t.pos < path.length - 1; k++) { t.pos++; const [r, c] = path[t.pos]; const pt = C(r, c); t.e.style.left = (pt.x - 33) + 'px'; t.e.style.top = (pt.y - 36) + 'px'; sfx('jump', .4); await sleep(190); } }
+    const [r, c] = path[t.pos]; const pt = C(r, c); t.e.style.left = (pt.x - 33) + 'px'; t.e.style.top = (pt.y - 36) + 'px';
+    if (t.pos === path.length - 1) { callout('thang', 1400); confetti(); sfx('win'); }
+    if (n === 6) callout('kinh', 700, .5);
+  }, 360, 110);
+}
+function gameCaro(g, area) {
+  $('#gbg').src = A('ui-premium-generated/lobby-backgrounds/lobby_pink_1920x1080.png'); music('board');
+  const N = 15, sc = 0.9, size = 1020 * sc, ox = 960 - size / 2, oy = 120, cell = 64 * sc;
+  img('games/co-caro/board_15x15.png', `position:absolute;left:${ox}px;top:${oy}px;width:${size}px`, area);
+  const B = Array.from({ length: N }, () => Array(N).fill(0)); let over = false;
+  const put = (r, c, v) => { B[r][c] = v; const e = img(`games/co-caro/piece_${v === 1 ? 'x' : 'o'}.png`, `position:absolute;left:${ox + 30 * sc + c * cell + 4}px;top:${oy + 30 * sc + r * cell + 2}px;width:${cell - 8}px`, area); e.animate([{ transform: 'scale(0)' }, { transform: 'scale(1.2)' }, { transform: 'scale(1)' }], { duration: 260 }); sfx(v === 1 ? 'pop' : 'pop2'); };
+  const win = (r, c, v) => [[0, 1], [1, 0], [1, 1], [1, -1]].some(([dr, dc]) => { let k = 1; for (const s of [1, -1]) { let rr = r + dr * s, cc = c + dc * s; while (rr >= 0 && rr < N && cc >= 0 && cc < N && B[rr][cc] === v) { k++; rr += dr * s; cc += dc * s; } } return k >= 5; });
+  const score = (r, c, v) => [[0, 1], [1, 0], [1, 1], [1, -1]].reduce((m, [dr, dc]) => { let k = 0; for (const s of [1, -1]) { let rr = r + dr * s, cc = c + dc * s; while (rr >= 0 && rr < N && cc >= 0 && cc < N && B[rr][cc] === v) { k++; rr += dr * s; cc += dc * s; } } return Math.max(m, k); }, 0);
+  for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) el('div', { class: 'cell', style: `left:${ox + 30 * sc + c * cell}px;top:${oy + 30 * sc + r * cell}px;width:${cell}px;height:${cell}px`, onclick: () => {
+    if (over || B[r][c]) return; put(r, c, 1); if (win(r, c, 1)) { over = true; callout('thang', 1500); confetti(); sfx('win'); flyCoins({ x: 960, y: 540 }, coinTarget(), 10); setCoins(me.coins + 50000); return; }
+    later(() => { let best = null, bs = -1; for (let i = 0; i < N; i++) for (let j = 0; j < N; j++) if (!B[i][j]) { const s = score(i, j, 2) * 1.1 + score(i, j, 1) + Math.random() * .5; if (s > bs) { bs = s; best = [i, j]; } }
+      if (!best) return; put(best[0], best[1], 2); if (win(best[0], best[1], 2)) { over = true; callout('thua', 1300); sfx('lose'); } }, 420);
+  } }, area);
+  gbutton(area, 'Ván mới', 'pink', 1560, 860, () => openGame(g), 300, 100);
+}
+function gameBaiMau(g, area) {
+  $('#gbg').src = A('bg-tables-generated/with-table/table_scene_lavender.png'); music('cards');
+  const colors = ['red', 'yellow', 'green', 'blue'], vals = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'draw2', 'skip', 'reverse'];
+  const draw = () => Math.random() < .06 ? { c: 'wild', v: pick(['wild', 'wild_draw4']) } : { c: pick(colors), v: pick(vals) };
+  const src = k => `games/bai-mau/cards/${k.c === 'wild' ? k.v : k.c + '_' + k.v}.png`;
+  let hand = Array.from({ length: 7 }, draw), top = { c: pick(colors), v: pick(vals.slice(0, 10)) };
+  const opp = [seat(area, 150, 470, {}), seat(area, 960, 120, {}), seat(area, 1770, 470, {})];
+  const pile = el('div', { style: 'position:absolute;left:960px;top:520px' }, area);
+  img('games/bai-mau/cards/back.png', 'position:absolute;left:690px;top:410px;width:140px;transform:rotate(-8deg);filter:drop-shadow(0 6px 6px rgba(60,20,80,.3))', area);
+  const setTop = (k, from) => { const e = img(src(k), `position:absolute;left:-75px;top:-112px;width:150px;transform:rotate(${rnd(-12, 12)}deg)`, pile); if (from) e.animate([{ transform: `translate(${from.x - 960}px,${from.y - 520}px) scale(.6)` }, { transform: 'none' }], { duration: 320, easing: 'cubic-bezier(.2,1.2,.4,1)' }); if (pile.children.length > 6) pile.firstChild.remove(); top = k; sfx('card'); };
+  setTop(top);
+  let els = [];
+  const ok = k => k.c === 'wild' || k.c === top.c || k.v === top.v || top.c === 'wild';
+  function layout() {
+    els.forEach(e => e.remove()); els = [];
+    const n = hand.length, sp = Math.min(110, 900 / Math.max(1, n));
+    hand.forEach((k, i) => { const t = i - (n - 1) / 2; const e = img(src(k), `left:${960 + t * sp - 75}px;top:${820 + t * t * 1.4}px;width:150px;height:225px;transform:rotate(${t * 2.4}deg);z-index:${i + 3}`, area, 'card');
+      e.onclick = () => { if (!ok(k)) { e.animate([{ transform: e.style.transform + ' translateX(-10px)' }, { transform: e.style.transform + ' translateX(10px)' }, { transform: e.style.transform }], { duration: 200 }); sfx('cancel'); return; }
+        hand.splice(i, 1); layout(); setTop(k, { x: 960 + t * sp, y: 900 }); if (k.v === 'draw2' || k.v === 'wild_draw4') toast('Đối thủ phải rút thêm bài 😈');
+        if (!hand.length) { callout('thang', 1500); confetti(); sfx('win'); return; }
+        later(() => { const s = pick(opp); setTop({ c: pick(colors), v: pick(vals) }, { x: s.x, y: s.y }); }, 800); };
+      els.push(e); });
+  }
+  gbutton(area, 'Rút bài', 'lavender', 1580, 960, () => { hand.push(draw()); sfx('slide'); layout(); });
+  layout(); emoteBtn(area, () => ({ x: 200, y: 880 }));
+}
+function gameLoto(g, area) {
+  $('#gbg').src = A('ui-premium-generated/lobby-backgrounds/lobby_tet_1920x1080.png'); music('loto');
+  const t = img('games/lo-to/ticket_pink.png', 'position:absolute;left:260px;top:130px;width:780px', area); const k = 780 / 944;
+  const tray = el('div', { style: 'position:absolute;left:1120px;top:560px;width:720px;display:flex;flex-wrap:wrap;gap:6px' }, area);
+  const big = el('div', { style: 'position:absolute;left:1290px;top:150px;width:300px;height:300px' }, area);
+  let data = null, drawn = new Set(), marks = Array.from({ length: 9 }, () => 0);
+  fetch(A('games/lo-to/ticket_pink.json')).then(r => r.json()).then(d => data = d).catch(() => {});
+  gbutton(area, 'Quay số', 'lemon', 1290, 940, () => {
+    if (drawn.size >= 90) return; let n; do n = ri(1, 90); while (drawn.has(n)); drawn.add(n);
+    big.innerHTML = ''; const b = img(`games/lo-to/balls/ball_${String(n).padStart(2, '0')}.png`, 'width:300px', big); b.animate([{ transform: 'translateY(-300px) rotate(-360deg) scale(.3)' }, { transform: 'none' }], { duration: 600, easing: 'cubic-bezier(.2,1.3,.4,1)' }); sfx('bounce');
+    later(() => { const s = img(`games/lo-to/balls/ball_${String(n).padStart(2, '0')}.png`, 'width:64px', tray); if (tray.children.length > 30) tray.firstChild.remove(); }, 500);
+    if (data) data.grid.forEach((row, r) => row.forEach((v, c) => { if (v === n) {
+      const m = img('games/lo-to/marker_heart.png', `position:absolute;left:${260 + (data.origin[0] + c * data.cell + 6) * k}px;top:${130 + (data.origin[1] + r * data.cell + 6) * k}px;width:${84 * k}px;z-index:4`, area);
+      m.animate([{ transform: 'scale(2.5)', opacity: 0 }, { transform: 'scale(1)', opacity: 1 }], { duration: 320 }); sfx('pop'); marks[r]++;
+      if (marks[r] === 5) { later(() => { callout('kinh', 1600); sfx('win'); confetti(); flyCoins({ x: 650, y: 500 }, coinTarget(), 14); setCoins(me.coins + 500000); }, 400); }
+      else if (marks[r] === 4) { toast('Chờ 1 số nữa là KINH! 🤞'); } } }));
+  }, 300, 110);
+  gbutton(area, 'Tự quay', 'mint', 1610, 940, (e, b) => { if (G.auto) { clearInterval(G.auto); G.auto = null; b.querySelector('span').textContent = 'Tự quay'; return; } b.querySelector('span').textContent = 'Dừng'; G.auto = setInterval(() => $$('.gbtn', area)[0].click(), 1100); }, 260, 110);
+  G.cleanup = () => clearInterval(G.auto);
+}
+function gameBanCa(g, area) {
+  $('#gbg').src = A('games/ban-ca/bg_underwater_1920x1080.png'); music('sea');
+  const FISH = [['tropical_fish', 130, 2000], ['fish', 120, 1000], ['blowfish', 120, 3000], ['octopus', 150, 5000], ['squid', 140, 4000], ['jellyfish', 130, 3000], ['shark', 230, 20000], ['dolphin', 200, 10000], ['turtle', 170, 8000], ['crab', 110, 1500], ['spouting_whale', 260, 50000], ['shrimp', 100, 1000], ['lobster', 140, 6000], ['seal', 180, 9000]];
+  const layer = el('div', { style: 'position:absolute;inset:0' }, area);
+  let lvl = 1;
+  const can = img(`games/ban-ca/cannon_lv1_pink.png`, 'position:absolute;left:870px;top:820px;width:180px;transform-origin:50% 62%;z-index:5', area);
+  const cols = ['pink', 'mint', 'sky', 'lavender', 'gold'];
+  img('games/ban-ca/seat_plate_pink.png', 'position:absolute;left:780px;top:960px;width:360px;z-index:4', area);
+  const minus = img('ui-jelly-pzuh/buttons-pastel/pink/icon_minus_pink.png', 'position:absolute;left:700px;top:960px;width:80px;z-index:6', area, 'btn');
+  const plus = img('ui-jelly-pzuh/buttons-pastel/pink/icon_plus_pink.png', 'position:absolute;left:1140px;top:960px;width:80px;z-index:6', area, 'btn');
+  const setL = d => { lvl = Math.max(1, Math.min(5, lvl + d)); can.src = A(`games/ban-ca/cannon_lv${lvl}_${cols[lvl - 1]}.png`); sfx('power', .4); };
+  minus.onclick = e => { e.stopPropagation(); setL(-1); }; plus.onclick = e => { e.stopPropagation(); setL(1); };
+  function spawn() {
+    const [n, w, val] = pick(FISH), ltr = Math.random() < .5, y = rnd(150, 720), dur = rnd(7000, 14000) * (w > 200 ? 1.4 : 1);
+    const f = img(`emoji-fluent-3d/sea/${n}.png`, `left:${SHOT ? rnd(150, 1650) : ltr ? -300 : 2000}px;top:${y}px;width:${w}px;transform:scaleX(${ltr ? -1 : 1})`, layer, 'fish');
+    f.dataset.val = val; f.dataset.w = w;
+    const an = f.animate([{ left: (ltr ? -300 : 2000) + 'px', top: y + 'px' }, { left: (ltr ? 900 : 900) + 'px', top: (y + rnd(-120, 120)) + 'px', offset: .5 }, { left: (ltr ? 2050 : -320) + 'px', top: (y + rnd(-60, 60)) + 'px' }], { duration: dur, easing: 'linear' });
+    an.onfinish = () => f.remove(); f._an = an;
+  }
+  for (let i = 0; i < 8; i++) later(spawn, i * 400);
+  G.sp = setInterval(spawn, 900); G.cleanup = () => clearInterval(G.sp);
+  area.onmousemove = ev => { const p = stagePt(ev); const a = Math.atan2(p.y - 930, p.x - 960) * 180 / Math.PI + 90; can.style.transform = `rotate(${Math.max(-80, Math.min(80, a))}deg)`; };
+  area.onclick = ev => {
+    if (ev.target.closest('.gbtn,#emopick') || ev.target === minus || ev.target === plus) return;
+    const p = stagePt(ev); if (p.y > 840) return; const cost = lvl * 1000; if (me.coins < cost) return toast('Hết xu rồi 🥲');
+    setCoins(me.coins - cost, false); $$('.coinTxt').forEach(e => e.textContent = fmt(me.coins)); sfx('laser', .4);
+    const b = img('games/ban-ca/bullet.png', `position:absolute;left:940px;top:900px;width:${30 + lvl * 4}px;z-index:4`, area);
+    b.animate([{ transform: 'none' }, { transform: `translate(${p.x - 955}px,${p.y - 915}px)` }], { duration: 260, easing: 'linear' }).onfinish = () => {
+      b.remove(); const net = img('games/ban-ca/net.png', `position:absolute;left:${p.x - 110}px;top:${p.y - 110}px;width:220px;z-index:4`, area);
+      net.animate([{ transform: 'scale(.2)', opacity: 1 }, { transform: 'scale(1)', opacity: 1, offset: .4 }, { transform: 'scale(1.1)', opacity: 0 }], { duration: 600 }).onfinish = () => net.remove(); sfx('pop2', .5);
+      $$('.fish', layer).forEach(f => { const r = rectOf(f); if (Math.hypot(r.cx - p.x, r.cy - p.y) < 100 + lvl * 10 && Math.random() < .55 + lvl * .07 - (+f.dataset.w > 200 ? .3 : 0)) {
+        f._an && f._an.pause(); f.classList.add('caught'); const v = +f.dataset.val * lvl; plusText(r.cx - 40, r.cy - 40, '+' + fmt(v)); sfx('gold', .5);
+        flyCoins({ x: r.cx, y: r.cy }, coinTarget(), 5); later(() => setCoins(me.coins + v), 700); later(() => f.remove(), 600);
+        if (v >= 20000) { callout(v >= 50000 ? 'jackpot' : 'no_hu', 1200, .7); confetti(40); } } });
+    };
+  };
+}
+
+// ------------------------------------------------------------------ 3D hero mascot + floating decor
+const MASCOTS = [
+  { key: 'adv_mage', name: 'Pháp Sư Tím' }, { key: 'adv_knight', name: 'Hiệp Sĩ Bạc' }, { key: 'adv_rogue_hooded', name: 'Ninja Lá' },
+  { key: 'adv_ranger', name: 'Cung Thủ' }, { key: 'adv_barbarian', name: 'Chiến Binh Gấu' }, { key: 'adv_rogue', name: 'Tiểu Thư Rừng' },
+  { key: 'mini_bear', name: 'Gấu Nâu' }, { key: 'mini_dog', name: 'Cún Vàng' }, { key: 'mini_duck', name: 'Vịt Bông' },
+];
+const HERO_LINES = ['Chơi Tiến Lên không? 🃏', 'Hôm nay chặt heo phát tài! 🐷', 'Nhận quà ngày đi bạn ơi 🎁', 'Bắn cá vui lắm nha 🐟', 'Lì xì đầu năm nè 🧧', 'Vào bàn Cao Thủ thử sức! 💪', 'Bấm vào mình nữa đi 😆', 'Bầu Cua lắc là trúng! 🦀'];
+let mascotIdx = (new URLSearchParams(location.search).get('mascot') != null ? +new URLSearchParams(location.search).get('mascot') : store.get('mascot', 0)) % MASCOTS.length, hero = null, heroBusy = false;
+function heroSay(t) { const b = $('#heroBubble'); b.textContent = t; b.style.display = 'block'; b.animate([{ transform: 'scale(.4)', opacity: 0 }, { transform: 'scale(1.06)', opacity: 1, offset: .6 }, { transform: 'scale(1)', opacity: 1 }], { duration: 320, easing: 'cubic-bezier(.2,1.5,.4,1)' }); clearTimeout(b._h); b._h = setTimeout(() => b.style.display = 'none', 2600); }
+async function initHero() {
+  const cv = $('#mascotCv');
+  if (!window.HC3D || !HC3D.ok) { cv.style.display = 'none'; $('#mascotImg').style.display = 'block'; setMascot(mascotIdx); return; }
+  try {
+    const st = new HC3D.Stage(cv, { width: 560, height: 560, fov: 30, shadows: true, pixelRatio: 1.5 });
+    st.camera.position.set(0, 2.9, 9.4); st.camera.lookAt(0, 1.7, 0);
+    HC3D.podium(st, 0xff86b8, 0xe0457f);
+    const orbit = new THREE.Group(); st.add(orbit);
+    const keys = ['bgb_coin_gold', 'mini_star', 'mini_heart_red', 'mini_diamond_blue', 'bgb_d6_yellow', 'mini_diamond_yellow', 'bgb_coin_10_gold', 'mini_heart_blue'];
+    keys.forEach(async (k, i) => {
+      const p = await HC3D.prop(st, k, { faceCamera: k.includes('coin'), scale: k.includes('coin') ? 0.62 : k.includes('d6') ? 0.75 : 0.5 });
+      st.remove(p); orbit.add(p); p.userData = { a: i / keys.length * Math.PI * 2, r: 2.3, y: 1.0 + (i % 3) * 0.8 };
+    });
+    st.onUpdate((dt, t) => { orbit.children.forEach(p => { const u = p.userData; const a = u.a + t * 0.45; p.position.set(Math.cos(a) * u.r, u.y + Math.sin(t * 2 + u.a) * 0.18, Math.sin(a) * u.r * 0.55); p.rotation.y += dt * 2.2; }); });
+    hero = { st, ch: null };
+    st.start();
+    await setMascot(mascotIdx);
+    setInterval(() => { if (!heroBusy && document.visibilityState === 'visible' && $('#lobby').classList.contains('on')) { heroAct(false); } }, 9000);
+  } catch (e) { console.warn('3D off', e); cv.style.display = 'none'; $('#mascotImg').style.display = 'block'; setMascot(mascotIdx); }
+}
+async function setMascot(i) {
+  mascotIdx = (i + MASCOTS.length) % MASCOTS.length; store.set('mascot', mascotIdx);
+  const m = MASCOTS[mascotIdx];
+  $('#mascotName').textContent = m.name;
+  $('#mascotImg').src = A(`3d/renders/full/${m.key}_idle.png`);
+  if (!hero) return;
+  const old = hero.ch; hero.ch = null;
+  const ch = await HC3D.character(hero.st, m.key, { anim: 'Idle_A', scale: m.key.startsWith('mini') ? 1.5 : 1.32 });
+  if (old) old.dispose();
+  ch.root.position.y = 0.04; ch.root.rotation.y = 0.3;
+  hero.ch = ch;
+  if (!SHOT) heroAct(true);
+}
+function heroAct(big) {
+  if (!hero || !hero.ch) return;
+  const ch = hero.ch, adv = ch.key.startsWith('adv');
+  heroBusy = true; setTimeout(() => heroBusy = false, 1800);
+  if (adv) ch.play(big ? pick(['Jump_Full_Short', 'Spawn_Ground']) : pick(['Interact', 'Use_Item', 'Idle_B']), { once: true, then: 'Idle_A' });
+  else ch.play(big ? 'cheer' : 'Interact');
+  if (big) { sfx(pick(['jump', 'bounce'])); heroSay(pick(HERO_LINES)); }
+}
+$('#mascotCv').addEventListener('click', () => heroAct(true));
+$('#mascotImg').addEventListener('click', () => heroSay(pick(HERO_LINES)));
+$('#mPrev').onclick = () => { sfx('click'); setMascot(mascotIdx - 1); };
+$('#mNext').onclick = () => { sfx('click'); setMascot(mascotIdx + 1); };
+$('#cta').onclick = () => { sfx('accept'); openGame(GAMES[0]); };
+async function initDeco() {
+  if (!window.HC3D || !HC3D.ok || SHOT) return;
+  try {
+    const st = new HC3D.Stage($('#deco3d'), { width: 1920, height: 1080, ortho: true, pixelRatio: 1 });
+    const keys = ['mini_star', 'mini_heart_red', 'mini_diamond_blue', 'bgb_coin_gold', 'mini_heart_yellow', 'mini_diamond_red', 'mini_star', 'mini_heart_blue', 'mini_diamond_yellow', 'bgb_coin_gold', 'mini_star', 'mini_heart_red'];
+    const items = [];
+    for (let i = 0; i < keys.length; i++) {
+      const s = 26 + Math.random() * 26;
+      const h = await HC3D.decor(st, keys[i], { faceCamera: keys[i].includes('coin'), scale: keys[i].includes('coin') ? s * 1.3 : s, opacity: .55 });
+      h.position.set(620 + Math.random() * 1280, -(Math.random() * 1080), -200);
+      items.push({ h, vy: 18 + Math.random() * 26, rs: (Math.random() - .5) * 2, ph: Math.random() * 6 });
+    }
+    st.onUpdate((dt, t) => { for (const it of items) { it.h.position.y += it.vy * dt; if (it.h.position.y > 80) { it.h.position.y = -1160; it.h.position.x = 620 + Math.random() * 1280; } it.h.position.x += Math.sin(t * .6 + it.ph) * 8 * dt; it.h.rotation.y += it.rs * dt; it.h.rotation.z = Math.sin(t + it.ph) * .3; } });
+    st.start();
+  } catch (e) { console.warn('deco off', e); }
+}
+initHero(); initDeco();
+
+// ------------------------------------------------------------------ start
+$('#toTown').onclick = () => { sfx('accept'); HC.goto('index.html', 'Đang về thị trấn…'); };
+refreshMe(); renderLobby(); boot();
+</script>
+</body>
+</html>

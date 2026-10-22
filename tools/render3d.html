@@ -1,0 +1,45 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>render3d</title>
+<style>html,body{margin:0;background:transparent;overflow:hidden}canvas{display:block}</style></head>
+<body>
+<canvas id="c" width="512" height="512" style="width:512px;height:512px"></canvas>
+<script>window.HC3D_BASE = '../assets/3d/js/';</script>
+<script src="../js/vendor/three.min.js"></script>
+<script src="../js/vendor/GLTFLoader.js"></script>
+<script src="../js/vendor/SkeletonUtils.js"></script>
+<script src="../js/hc3d.js"></script>
+<script>
+// ?model=adv_mage&mode=portrait|full|prop&anim=Idle_A&t=0.4&rot=20&size=512
+(async () => {
+  const Q = new URLSearchParams(location.search);
+  const key = Q.get('model') || 'adv_mage', mode = Q.get('mode') || 'portrait', size = +(Q.get('size') || 512);
+  const c = document.getElementById('c'); c.width = c.height = size; c.style.width = c.style.height = size + 'px';
+  const st = new HC3D.Stage(c, { width: size, height: size, pixelRatio: 1, fov: 30, preserve: true, exposure: 1.2 });
+  let obj;
+  if (key.startsWith('adv_') || key.startsWith('mini_bear') || key.startsWith('mini_dog') || key.startsWith('mini_duck')) {
+    const ch = await HC3D.character(st, key, { anim: Q.get('anim') || 'Idle_A' });
+    if (ch.mixer) { ch.mixer.update(+(Q.get('t') || 0.4)); }
+    obj = ch.root;
+  } else {
+    obj = await HC3D.prop(st, key, { faceCamera: Q.get('face') === '1' });
+  }
+  obj.rotation.y = (+(Q.get('rot') || 0)) * Math.PI / 180;
+  obj.updateMatrixWorld(true);
+  const box = new THREE.Box3().setFromObject(obj), sz = box.getSize(new THREE.Vector3()), ctr = box.getCenter(new THREE.Vector3());
+  const cam = st.camera;
+  if (mode === 'portrait') {
+    const adv = key.startsWith('adv_');
+    const headY = box.max.y - sz.y * (adv ? 0.31 : 0.38);
+    cam.position.set(0, headY + sz.y * 0.06, sz.y * (adv ? 1.9 : 2.25)); cam.lookAt(0, headY - sz.y * (adv ? 0.05 : 0.08), 0);
+  } else if (mode === 'full') {
+    cam.position.set(0, sz.y * 0.55, sz.y * 2.6); cam.lookAt(0, sz.y * 0.45, 0);
+  } else {
+    const r = Math.max(sz.x, sz.y, sz.z);
+    cam.position.set(ctr.x + r * 0.9, ctr.y + r * 0.9, ctr.z + r * 2.1); cam.lookAt(ctr);
+  }
+  cam.updateProjectionMatrix();
+  st.renderer.render(st.scene, cam);
+  setTimeout(() => { st.renderer.render(st.scene, cam); document.title = 'READY'; }, 50);
+})().catch(e => { document.title = 'ERR ' + e.message; document.body.dataset.err = e.stack; });
+</script>
+</body></html>

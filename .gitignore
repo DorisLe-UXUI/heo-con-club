@@ -1,0 +1,25 @@
+# Bộ Cute Cards của Dani Maccari không cho phân phối lại asset (xem CREDITS.md),
+# nên không đưa lên repo công khai: thư mục bộ bài, trang duyệt asset và các ảnh ghép/chụp có bộ bài đó.
+assets/cards-cute-danimaccari/
+preview.html
+preview-cute-kit.png
+preview-overview.png
+demo-mockup.png
+demo-mockup-tet.png
+screenshots/01_sanh_game.jpg
+screenshots/02_tien_len_chat_heo.jpg
+screenshots/12_poker.jpg
+screenshots/13_mau_binh.jpg
+screenshots/14_xi_dach.jpg
+screenshots/15_popup_qua_ngay.jpg
+screenshots/16_popup_ho_so_avatar.jpg
+screenshots/17_popup_cua_hang.jpg
+screenshots/18_popup_li_xi_tet.jpg
+screenshots/36_sanh_2d_nut_thi_tran.jpg
+
+# máy cục bộ và file build
+.claude/
+dist/
+.DS_Store
+__pycache__/
+*.pyc

@@ -1,0 +1,872 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Heo Con Club</title>
+<style>
+@font-face{font-family:"Grandstander Black";src:url("assets/fonts/GrandstanderBlack-Regular.ttf") format("truetype");font-display:swap}
+@font-face{font-family:"Baloo 2";src:url("assets/fonts/Baloo2%5Bwght%5D.ttf") format("truetype");font-weight:400 800;font-display:swap}
+@font-face{font-family:"Nunito";src:url("assets/fonts/Nunito%5Bwght%5D.ttf") format("truetype");font-weight:200 1000;font-display:swap}
+:root{--pink:#ff5c9a;--pinkd:#c2407a;--ink:#5a2342;--mint:#2fc58e;--mintd:#1f9a70;--sky:#3d9bff;--skyd:#2a7fd0;--lemon:#ffc93c;--lemond:#b07800;--lav:#8d6bff;--lavd:#5f3fc9;--glass:rgba(255,255,255,.92)}
+*{box-sizing:border-box;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+input{-webkit-user-select:text;user-select:text}
+html,body{margin:0;height:100%;overflow:hidden;font-family:Nunito,system-ui,sans-serif;color:var(--ink);touch-action:none;background:linear-gradient(135deg,#ffd6e8,#e6dcff 50%,#cdeaff)}
+img{-webkit-user-drag:none}
+.hide{display:none!important}
+/* full-window 3D world; every UI layer lives in #ui, which is scaled so 1 unit ≈ 1px of a 1080p screen */
+#town{position:fixed;inset:0;width:100vw;height:100vh;display:block}
+#ui{position:fixed;left:0;top:0;transform-origin:0 0;pointer-events:none}
+#ui > *{pointer-events:auto}
+#labels{position:absolute;inset:0;pointer-events:none!important;overflow:hidden;z-index:5}
+.frame{position:absolute;left:0;top:0;width:1920px;height:1080px;transform-origin:0 0}
+.btn{cursor:pointer;transition:transform .12s ease,filter .12s}
+.btn:hover{transform:translateY(-4px) scale(1.04);filter:brightness(1.06)}
+.btn:active{transform:translateY(2px) scale(.96)}
+.ol{color:#fff;paint-order:stroke fill;-webkit-text-stroke:8px var(--pinkd)}
+
+/* ---------------- world labels */
+.blabel,.nlabel,.bubble{position:absolute;left:0;top:0;transform-origin:50% 100%;will-change:transform}
+.blabel{display:flex;align-items:center;gap:12px;padding:8px 26px 8px 8px;border-radius:44px;background:#fff;border:4px solid var(--c);box-shadow:0 7px 0 var(--d),0 14px 24px rgba(60,10,50,.3);pointer-events:auto;cursor:pointer;white-space:nowrap;--c:#ff5c9a;--d:#c2407a;transition:opacity .2s}
+.blabel img{width:70px;height:70px;border-radius:20px;object-fit:cover}
+.blabel b{display:block;font:400 34px "Grandstander Black";color:var(--d);line-height:1.05}
+.blabel span{display:block;font:800 20px "Baloo 2";color:#2fae7a;line-height:1.15}
+.blabel span.cat{color:#8a7a99}
+.blabel .hot{position:absolute;right:-16px;top:-18px;font:400 19px "Grandstander Black";font-style:normal;color:#fff;background:linear-gradient(#ff8a5c,#ff3d6e);padding:3px 11px;border-radius:14px;box-shadow:0 3px 0 #c22a50;transform:rotate(8deg)}
+.blabel .bang{position:absolute;right:-14px;top:-22px;width:42px;height:42px;border-radius:50%;font:400 28px "Grandstander Black";font-style:normal;color:#fff;background:#ff4f6d;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 0 #b82a45;animation:bang 1s ease-in-out infinite}
+@keyframes bang{50%{transform:translateY(-8px) scale(1.1)}}
+.blabel::after{content:"";position:absolute;left:50%;bottom:-19px;margin-left:-12px;border:12px solid transparent;border-top-color:var(--c)}
+.blabel.hov{box-shadow:0 7px 0 var(--d),0 0 0 8px rgba(255,255,255,.75),0 16px 28px rgba(60,10,50,.35)}
+.c-bai{--c:#ff5c9a;--d:#c2407a}.c-xx{--c:#ffb300;--d:#a86d00}.c-co{--c:#2fc58e;--d:#168a60}.c-khac{--c:#3d9bff;--d:#1f6fc0}.c-sp{--c:#8d6bff;--d:#5f3fc9}
+.nlabel{padding:5px 16px 6px;border-radius:20px;background:rgba(50,22,60,.78);color:#fff;text-align:center;white-space:nowrap;box-shadow:0 4px 10px rgba(0,0,0,.2)}
+.nlabel b{font:800 23px "Baloo 2";line-height:1}.nlabel span{margin-left:8px;font:800 18px "Baloo 2";color:#ffe27a}
+.nlabel.me{background:linear-gradient(#ff8fc0,#ff4f95);box-shadow:0 4px 0 #c2407a}
+.bubble{padding:10px 22px;border-radius:26px;background:#fff;border:3px solid #ffd0e4;box-shadow:0 6px 16px rgba(90,30,70,.25);font:800 25px "Baloo 2";color:#7a3a5c;white-space:nowrap}
+.bubble::after{content:"";position:absolute;left:50%;bottom:-15px;margin-left:-10px;border:10px solid transparent;border-top-color:#fff}
+.bubble.me{background:#fff7d6;border-color:#ffe08a;font-size:42px;padding:6px 18px}
+.bubble.me::after{border-top-color:#fff7d6}
+
+/* ---------------- loading */
+#loading{position:absolute;inset:0;z-index:50;overflow:hidden;background:#f6d9f3 url(assets/ui-premium-generated/lobby-backgrounds/bg_loading.jpg) center/cover;transition:opacity .6s ease}
+#loading.out{opacity:0;pointer-events:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+.logoimg{position:absolute;left:50%;filter:drop-shadow(0 14px 18px rgba(120,30,80,.3));animation:logoBob 2.4s ease-in-out infinite alternate}
+@keyframes logoBob{from{transform:translateX(-50%) translateY(0) rotate(-1deg)}to{transform:translateX(-50%) translateY(-12px) rotate(1deg)}}
+@keyframes hcb{from{transform:translateY(10px) rotate(-6deg)}to{transform:translateY(-18px) rotate(6deg)}}
+#loading .logoimg{top:70px;width:700px}
+#lbox{position:absolute;left:50%;top:812px;width:820px;transform:translateX(-50%);padding:22px 34px 16px;border-radius:40px;background:rgba(255,255,255,.66);backdrop-filter:blur(6px);border:4px solid #fff;box-shadow:0 8px 0 rgba(194,64,122,.25),0 16px 30px rgba(90,30,90,.2)}
+#lbar{position:relative;height:40px;border-radius:20px;background:#fff;border:4px solid #ffd0e4;box-shadow:inset 0 3px 8px rgba(160,60,110,.18)}
+#lfill{position:absolute;left:3px;top:3px;height:26px;width:0;border-radius:13px;background:repeating-linear-gradient(-45deg,#ff5c9a 0 16px,#ff8fc0 16px 32px);box-shadow:inset 0 -4px 0 rgba(0,0,0,.1),inset 0 4px 0 rgba(255,255,255,.35);animation:stripes 1s linear infinite;transition:width .25s ease}
+@keyframes stripes{to{background-position:45px 0}}
+#lpig{position:absolute;top:-30px;width:64px;margin-left:-32px;transition:left .25s ease;animation:hcb .5s ease-in-out infinite alternate}
+#lrow{display:flex;align-items:baseline;justify-content:space-between;gap:20px;margin-top:10px}
+#ltext{font:800 26px "Baloo 2";color:#8a3a66;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#lpct{font:400 32px "Grandstander Black";color:#fff;-webkit-text-stroke:7px #c2407a;paint-order:stroke fill}
+#ltip{position:absolute;left:50%;bottom:26px;transform:translateX(-50%);padding:8px 28px;border-radius:26px;background:rgba(255,255,255,.75);white-space:nowrap;font:800 22px "Baloo 2";color:#6a4a7a}
+#ltip b{color:#c2407a}
+#lver{position:absolute;right:24px;bottom:14px;font:800 17px "Baloo 2";color:rgba(110,60,110,.7)}
+#lcred{position:absolute;left:24px;bottom:14px;font:800 16px "Baloo 2";color:rgba(110,60,110,.65)}
+
+/* ---------------- auth */
+#auth{position:absolute;inset:0;z-index:40;background:#f6d9f3 url(assets/ui-premium-generated/lobby-backgrounds/bg_login.jpg) center/cover;transition:opacity .5s}
+#auth::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 50% 50%,rgba(255,240,248,.32) 0,rgba(255,240,248,.12) 45%,rgba(70,20,70,.22) 100%);pointer-events:none}
+#auth.out{opacity:0;pointer-events:none}
+#brand{position:absolute;left:284px;top:0;width:700px;height:1080px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px}
+#brand::before{content:"";position:absolute;left:-40px;right:-40px;top:250px;bottom:250px;border-radius:50%;background:radial-gradient(closest-side,rgba(255,255,255,.32),rgba(255,255,255,0));z-index:-1}
+#brand .lg{width:640px;filter:drop-shadow(0 16px 20px rgba(120,30,80,.35));animation:brandBob 2.4s ease-in-out infinite alternate}
+@keyframes brandBob{from{transform:translateY(0) rotate(-1deg)}to{transform:translateY(-12px) rotate(1deg)}}
+#brand .tag{padding:6px 30px 8px;border-radius:28px;background:rgba(255,255,255,.88);font:800 28px "Baloo 2";color:#b0306e;white-space:nowrap;box-shadow:0 6px 0 rgba(194,64,122,.28),0 12px 22px rgba(90,20,60,.18)}
+#brand .feats{display:flex;gap:14px}
+#brand .feats div{display:flex;align-items:center;gap:8px;padding:6px 18px 6px 8px;border-radius:26px;background:rgba(255,255,255,.8);font:800 22px "Baloo 2";color:#7a3a62;white-space:nowrap;box-shadow:0 4px 0 rgba(194,64,122,.22)}
+#brand .feats img{width:38px}
+#pwrap{position:absolute;left:1074px;top:0;width:562px;height:1080px;display:flex;align-items:center}
+#panel{position:relative;flex:none;width:720px;zoom:.78;padding:120px 56px 46px;border-radius:60px;background:linear-gradient(#fff,#fff4f9);border:6px solid #ffd0e4;box-shadow:0 16px 0 #f2a9c8,0 40px 70px rgba(90,20,60,.35);animation:popin .5s cubic-bezier(.2,1.5,.4,1) both}
+@keyframes popin{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
+#panel.shake{animation:shake .45s}
+@keyframes shake{20%{transform:translateX(-18px)}40%{transform:translateX(16px)}60%{transform:translateX(-10px)}80%{transform:translateX(6px)}}
+#atabs{position:absolute;left:56px;right:56px;top:28px;height:84px;display:flex;border-radius:42px;background:#ffe4ef;padding:8px;box-shadow:inset 0 4px 8px rgba(194,64,122,.15)}
+#atabs div{flex:1;display:flex;align-items:center;justify-content:center;border-radius:34px;font:400 36px "Grandstander Black";color:#d07aa2;cursor:pointer;transition:all .2s}
+#atabs div.on{background:linear-gradient(#ff9cc4,#ff5c9a);color:#fff;box-shadow:0 5px 0 #c2407a}
+.field{position:relative;margin:18px 0}
+.field img.ic{position:absolute;left:18px;top:50%;width:48px;margin-top:-24px;pointer-events:none}
+.field input{width:100%;height:84px;border-radius:30px;border:4px solid #ffd3e5;background:#fff;padding:0 74px 0 82px;font:800 32px "Baloo 2";color:#5a2342;outline:none;transition:border-color .15s,box-shadow .15s}
+.field input:focus{border-color:#ff8fc0;box-shadow:0 0 0 7px rgba(255,143,192,.25)}
+.field input::placeholder{color:#c99ab2}
+.field .eye{position:absolute;right:16px;top:50%;margin-top:-26px;width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:30px;cursor:pointer;background:#fff1f7}
+.field .hint{position:absolute;right:22px;top:50%;margin-top:-16px;font:800 22px "Baloo 2"}
+.hint.ok{color:#1fb07c}.hint.bad{color:#e0446a}
+.row2{display:flex;align-items:center;justify-content:space-between;margin:8px 4px 0;font:800 26px "Baloo 2";color:#9a6a84}
+.row2 a{color:#c2407a;cursor:pointer;text-decoration:underline}
+.tog{display:flex;align-items:center;gap:12px;cursor:pointer}
+.tog i{width:74px;height:40px;border-radius:20px;background:#e6d6e0;position:relative;transition:background .2s}
+.tog i::after{content:"";position:absolute;left:4px;top:4px;width:32px;height:32px;border-radius:50%;background:#fff;box-shadow:0 2px 4px rgba(0,0,0,.2);transition:left .2s}
+.tog.on i{background:#2fc58e}.tog.on i::after{left:38px}
+.big{position:relative;display:flex;align-items:center;justify-content:center;gap:14px;height:104px;margin-top:26px;border-radius:52px;font:400 44px "Grandstander Black";color:#fff;cursor:pointer;text-shadow:0 4px 0 rgba(0,0,0,.18);transition:transform .12s,filter .12s}
+.big:hover{transform:translateY(-3px);filter:brightness(1.06)}.big:active{transform:translateY(3px)}
+.big.pink{background:linear-gradient(#ff9cc4,#ff4f95);box-shadow:0 9px 0 #c2407a,0 16px 24px rgba(194,64,122,.35)}
+.big.mint{background:linear-gradient(#7ff0c4,#2fc58e);box-shadow:0 9px 0 #1f9a70,0 16px 24px rgba(31,154,112,.3);font-size:29px;height:88px;white-space:nowrap}
+.big.rainbow{background:linear-gradient(90deg,#ff7eb3,#ffb35c,#ffe066,#5fe0a8,#6fc2ff,#b18cff);background-size:200% 100%;animation:rb 4s linear infinite;box-shadow:0 9px 0 #c2407a,0 16px 24px rgba(120,40,100,.35);-webkit-text-stroke:7px #c2407a;paint-order:stroke fill;text-shadow:none}
+@keyframes rb{to{background-position:200% 0}}
+.big .spin{width:44px;height:44px;border:6px solid rgba(255,255,255,.5);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite}
+.or{display:flex;align-items:center;gap:16px;margin:26px 0 0;font:800 24px "Baloo 2";color:#c9a2b6}
+.or::before,.or::after{content:"";flex:1;height:3px;background:#ffd8e8;border-radius:2px}
+#aerr{min-height:40px;margin-top:14px;text-align:center;font:800 26px "Baloo 2";color:#e0446a}
+.note{margin-top:14px;text-align:center;font:700 22px Nunito;color:#a07890}
+#mpick{display:flex;gap:10px;margin:14px 0 0;justify-content:space-between}
+#mpick img{width:56px;height:56px;border-radius:50%;background:#fff1f7;border:4px solid #ffe0ee;cursor:pointer;transition:transform .15s}
+#mpick img.on{border-color:#ff5c9a;transform:scale(1.18);box-shadow:0 0 0 5px rgba(255,92,154,.25)}
+#strength{height:12px;border-radius:6px;background:#f6e3ec;margin:-8px 10px 0;overflow:hidden}
+#strength i{display:block;height:100%;width:0;border-radius:6px;transition:width .2s,background .2s}
+.lbl{font:800 24px "Baloo 2";color:#a06d88;margin:16px 6px -8px}
+#panel.reg{padding-top:112px;padding-bottom:30px}
+#panel.reg .field{margin:12px 0}#panel.reg .field input{height:74px}
+#panel.reg .or,#panel.reg #btnGuest,#panel.reg .note{display:none}
+#panel.reg .back{display:block}
+#panel .back{display:none;margin-top:12px;text-align:center;font:800 24px "Baloo 2";color:#c2407a;text-decoration:underline;cursor:pointer}
+
+/* ---------------- HUD (anchored to the window edges) */
+#hud{position:absolute;inset:0;pointer-events:none!important;z-index:20}
+#hud > *{pointer-events:auto}
+#hud.enter #prof{animation:slideL .6s cubic-bezier(.2,1.3,.4,1) both}
+#hud.enter #topR,#hud.enter #money{animation:slideT .6s .1s cubic-bezier(.2,1.3,.4,1) both}
+#hud.enter #dock{animation:slideB .7s .2s cubic-bezier(.2,1.3,.4,1) both}
+#hud.enter #mini,#hud.enter #playnow,#hud.enter #emoteBtn,#hud.enter #evcard,#hud.enter #qcard{animation:pop .6s .35s cubic-bezier(.2,1.5,.4,1) both}
+@keyframes slideL{from{transform:translateX(-500px)}}@keyframes slideT{from{transform:translateY(-200px)}}@keyframes slideB{from{transform:translateY(300px)}}@keyframes pop{from{transform:scale(0)}}
+.card{background:var(--glass);border:4px solid #fff;border-radius:40px;box-shadow:0 8px 0 rgba(194,64,122,.28),0 14px 28px rgba(60,10,50,.22)}
+#prof{position:absolute;left:16px;top:14px;width:540px;height:132px;cursor:pointer;border-radius:70px 40px 40px 70px}
+#prof .avb{position:absolute;left:-8px;top:-14px;width:160px;height:160px}
+#prof .avb .av{position:absolute;left:25px;top:25px;width:110px;height:110px;border-radius:50%;object-fit:cover;background:#fff}
+#prof .avb .fr{position:absolute;inset:0;width:160px}
+#prof .nm{position:absolute;left:162px;top:12px;max-width:360px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:400 38px "Grandstander Black";color:#b0306e}
+#prof .vip{position:absolute;left:160px;top:62px;width:56px}
+#prof .lv{position:absolute;left:226px;top:72px;width:290px;height:36px;border-radius:18px;background:#f6e3ec;box-shadow:inset 0 3px 6px rgba(160,60,110,.18)}
+#prof .lv i{position:absolute;left:4px;top:4px;bottom:4px;border-radius:14px;background:linear-gradient(90deg,#ff8fc0,#ffb35c)}
+#prof .lv b{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:800 22px "Baloo 2";color:#7a2a56}
+#money{position:absolute;left:580px;top:26px;display:flex;gap:22px}
+.pill{position:relative;height:80px;padding:0 64px 0 88px;border-radius:40px;background:var(--glass);border:4px solid #fff;box-shadow:0 7px 0 rgba(194,64,122,.28),0 12px 22px rgba(60,10,50,.2);display:flex;align-items:center;font:400 38px "Grandstander Black";color:#a86d00;white-space:nowrap}
+.pill img.ic{position:absolute;left:4px;top:-2px;width:80px}
+.pill img.plus{position:absolute;right:8px;top:10px;width:54px;cursor:pointer}
+.pill.gem{color:#1f6fc0}
+#ticker{position:absolute;left:50%;top:124px;transform:translateX(-50%);width:760px;height:54px;border-radius:27px;background:rgba(50,22,60,.62);overflow:hidden;box-shadow:0 6px 16px rgba(0,0,0,.18)}
+#ticker img{position:absolute;left:10px;top:4px;width:46px;z-index:2}
+#ticker::before{content:"";position:absolute;left:0;top:0;bottom:0;width:66px;background:linear-gradient(90deg,rgba(50,22,60,1) 70%,rgba(50,22,60,0));z-index:1;border-radius:27px 0 0 27px}
+#ticker span{position:absolute;top:8px;left:100%;white-space:nowrap;font:800 26px "Baloo 2";color:#fff}
+#topR{position:absolute;right:16px;top:16px;display:flex;gap:14px}
+.rbtn{position:relative;width:96px;height:96px;cursor:pointer}
+.rbtn img{width:100%;filter:drop-shadow(0 6px 8px rgba(60,10,50,.25))}
+.rbtn .dot,.dk .dot{position:absolute;right:-4px;top:-6px;min-width:36px;height:36px;padding:0 8px;border-radius:18px;background:#ff3d6e;border:3px solid #fff;color:#fff;font:800 20px "Baloo 2";display:flex;align-items:center;justify-content:center;box-shadow:0 3px 0 #b82a45}
+#evcard{position:absolute;right:16px;top:130px;width:236px;height:236px;cursor:pointer;background:linear-gradient(160deg,#ffcfe4,#c9b4ff);border:4px solid #fff;border-radius:40px;box-shadow:0 8px 0 #8d6bff,0 16px 26px rgba(80,40,140,.3);overflow:hidden}
+#evcard img{position:absolute;left:44px;top:14px;width:148px;animation:hcb 1s ease-in-out infinite alternate}
+#evcard b{position:absolute;left:0;right:0;top:158px;text-align:center;font:400 30px "Grandstander Black";color:#fff;-webkit-text-stroke:6px #5f3fc9;paint-order:stroke fill}
+#evcard span{position:absolute;left:0;right:0;top:198px;text-align:center;font:800 20px "Baloo 2";color:#4a2fa0}
+#qcard{position:absolute;right:16px;top:392px;width:316px;padding:16px 18px 18px;cursor:pointer}
+#qcard .h{display:flex;align-items:center;gap:10px;font:400 26px "Grandstander Black";color:#5f3fc9}
+#qcard .h img{width:40px}
+#qcard .q{margin-top:10px;font:800 22px "Baloo 2";color:#5a2342;line-height:1.2}
+#qcard .q small{display:block;font:800 18px "Baloo 2";color:#a07890}
+#qcard .bar{height:18px;border-radius:9px;background:#efe6f7;overflow:hidden;margin-top:6px}
+#qcard .bar i{display:block;height:100%;background:linear-gradient(90deg,#b18cff,#ff8fc0);border-radius:9px;transition:width .3s}
+#qcard .claim{margin-top:10px;text-align:center;font:400 24px "Grandstander Black";color:#fff;background:linear-gradient(#ff9cc4,#ff4f95);border-radius:20px;padding:4px 0 6px;box-shadow:0 4px 0 #c2407a;animation:bang 1s infinite}
+#mini{position:absolute;left:18px;bottom:18px;width:280px;height:280px}
+#mini canvas{width:280px;height:280px;border-radius:50%;cursor:crosshair;box-shadow:0 8px 0 rgba(194,64,122,.35),0 14px 26px rgba(60,10,50,.3)}
+#mini .n{position:absolute;left:122px;top:-14px;width:36px;height:36px;border-radius:50%;background:#ff4f95;border:3px solid #fff;color:#fff;font:400 20px "Grandstander Black";display:flex;align-items:center;justify-content:center}
+#mini .cap{position:absolute;left:34px;right:34px;bottom:-10px;text-align:center;font:400 22px "Grandstander Black";color:#fff;background:linear-gradient(#ff9cc4,#ff5c9a);border:3px solid #fff;border-radius:20px;padding:1px 0 4px;box-shadow:0 4px 0 #c2407a}
+#dock{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);display:flex;align-items:flex-end;gap:16px;padding:14px 24px 14px;border-radius:52px;background:var(--glass);border:4px solid #fff;box-shadow:0 8px 0 rgba(194,64,122,.28),0 16px 30px rgba(60,10,50,.25)}
+.dk{position:relative;width:124px;text-align:center;cursor:pointer;transition:transform .12s}
+.dk:hover{transform:translateY(-8px)}.dk:active{transform:translateY(2px)}
+.dk .sq{width:124px;height:116px;border-radius:34px;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 -8px 0 rgba(0,0,0,.12),inset 0 6px 0 rgba(255,255,255,.4),0 6px 0 var(--d)}
+.dk .sq img{width:86px;filter:drop-shadow(0 4px 4px rgba(0,0,0,.15))}
+.dk b{display:block;margin-top:10px;font:400 24px "Grandstander Black";color:#fff;-webkit-text-stroke:6px var(--d);paint-order:stroke fill;white-space:nowrap}
+.dk.main{width:164px}.dk.main .sq{width:164px;height:150px;border-radius:46px}.dk.main .sq img{width:118px}
+.dk .dot{animation:bang 1s infinite}
+#playnow{position:absolute;right:18px;bottom:22px;width:340px;height:112px;font-size:40px;margin:0;white-space:nowrap;gap:10px}
+#playnow img{width:64px}
+#emoteBtn{position:absolute;right:130px;bottom:160px;width:104px;height:104px;border-radius:50%;background:linear-gradient(#fff7c7,#ffd25a);border:4px solid #fff;box-shadow:0 7px 0 #b07800,0 12px 20px rgba(120,80,0,.3);display:flex;align-items:center;justify-content:center;cursor:pointer}
+#emoteBtn img{width:72px}
+#emotes{position:absolute;right:20px;bottom:290px;display:none;grid-template-columns:repeat(4,92px);gap:12px;padding:18px;border-radius:36px;background:#fff;border:4px solid #ffd0e4;box-shadow:0 8px 0 #f2a9c8,0 18px 30px rgba(90,20,60,.25)}
+#emotes.on{display:grid}
+#emotes img{width:92px;height:92px;padding:8px;border-radius:24px;cursor:pointer;background:#fff4f9;transition:transform .12s}
+#emotes img:hover{transform:scale(1.15)}
+#near{position:absolute;left:50%;bottom:232px;transform:translateX(-50%);display:none;align-items:center;gap:16px;padding:10px 34px 10px 12px;border-radius:50px;background:#fff;border:4px solid var(--c,#ff5c9a);box-shadow:0 8px 0 var(--d,#c2407a),0 16px 26px rgba(90,20,60,.3);cursor:pointer;animation:pop .35s cubic-bezier(.2,1.5,.4,1) both}
+#near.on{display:flex}
+#near img{width:76px;height:76px;border-radius:22px}
+#near b{font:400 38px "Grandstander Black";color:var(--d,#c2407a)}
+#near kbd{font:800 22px "Baloo 2";color:#fff;background:var(--d,#c2407a);border-radius:10px;padding:2px 12px;margin-left:6px}
+/* first-visit tutorial */
+#tut{position:absolute;inset:0;z-index:70;display:flex;align-items:center;justify-content:center;background:rgba(50,20,60,.45);backdrop-filter:blur(3px)}
+#tut .box{display:flex;gap:28px;padding:40px 44px 34px;border-radius:56px;background:#fff;border:6px solid #ffd0e4;box-shadow:0 14px 0 #f2a9c8,0 30px 60px rgba(60,10,40,.4);flex-direction:column;align-items:center;animation:popin .45s cubic-bezier(.2,1.5,.4,1) both}
+#tut h2{margin:0;font:400 56px "Grandstander Black";color:#c2407a}
+#tut .steps{display:flex;gap:26px}
+#tut .st{width:300px;padding:22px;border-radius:36px;background:#fff4f9;text-align:center}
+#tut .st img{width:120px;height:120px}
+#tut .st b{display:block;margin-top:10px;font:400 30px "Grandstander Black";color:#9b2c5e}
+#tut .st span{display:block;margin-top:6px;font:800 24px "Baloo 2";color:#7a5a6e;line-height:1.25}
+#tut .big{width:420px;margin-top:4px}
+
+/* ---------------- modals */
+#modal{position:absolute;inset:0;z-index:60;display:none;align-items:center;justify-content:center;background:rgba(50,20,50,.5);backdrop-filter:blur(4px)}
+#modal.on{display:flex}
+.mwrap{transform-origin:center center}
+.panel{position:relative;width:1100px;border-radius:56px;background:linear-gradient(#ffd1e3,#ff8fbf);border:5px solid #fff;box-shadow:0 14px 0 #c2407a,0 30px 60px rgba(60,10,40,.4);padding:110px 40px 40px;animation:popin .38s cubic-bezier(.2,1.6,.4,1) both}
+.panel.sky{background:linear-gradient(#d3ecff,#6fbfff);box-shadow:0 14px 0 #2a7fd0,0 30px 60px rgba(10,40,80,.35)}
+.panel.mint{background:linear-gradient(#c9f6e6,#5fd9ac);box-shadow:0 14px 0 #1f9a70,0 30px 60px rgba(10,60,40,.35)}
+.panel.lemon{background:linear-gradient(#fff3c4,#ffd25a);box-shadow:0 14px 0 #b07800,0 30px 60px rgba(80,60,0,.35)}
+.panel.lavender{background:linear-gradient(#ece3ff,#b79bff);box-shadow:0 14px 0 #5f3fc9,0 30px 60px rgba(40,20,90,.35)}
+.panel .inner{background:linear-gradient(#fffdf8,#fff3ea);border-radius:40px;padding:26px 30px;box-shadow:inset 0 4px 10px rgba(160,80,110,.12);max-height:720px;overflow:auto}
+.panel .ttl{position:absolute;left:50%;top:-40px;transform:translateX(-50%);width:640px;height:132px}
+.panel .ttl img{width:100%;height:100%}
+.panel .ttl span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding-bottom:22px;font:400 48px "Grandstander Black";color:#fff;-webkit-text-stroke:8px rgba(0,0,0,.28);paint-order:stroke fill;white-space:nowrap}
+.panel .x{position:absolute;right:-24px;top:-24px;width:96px;cursor:pointer}
+.mbtns{display:flex;justify-content:center;gap:30px;margin-top:26px}
+.mbtns .big{min-width:300px;padding:0 40px;margin:0;height:96px;font-size:38px}
+.big.grey{background:linear-gradient(#f2eef6,#bdb3c9);box-shadow:0 9px 0 #8a8496;color:#fff}
+.big.sky{background:linear-gradient(#a8dcff,#3d9bff);box-shadow:0 9px 0 #2a7fd0}
+.big.lemon{background:linear-gradient(#ffe68a,#ffb81c);box-shadow:0 9px 0 #b07800}
+.big.small{height:72px;font-size:28px;margin:0;min-width:0;padding:0 26px}
+.ggrid{display:grid;grid-template-columns:repeat(6,1fr);gap:18px}
+.gt{position:relative;border-radius:30px;background:#fff;box-shadow:0 6px 0 #f0d1df;padding:12px 10px 14px;text-align:center;cursor:pointer;transition:transform .12s}
+.gt:hover{transform:translateY(-6px)}
+.gt img{width:150px;height:150px;border-radius:28px}
+.gt b{display:block;font:400 28px "Grandstander Black";color:#9b2c5e}
+.gt span{font:800 18px "Baloo 2";color:#2fae7a}
+.gt .new{position:absolute;right:6px;top:6px;font:400 18px "Grandstander Black";color:#fff;background:linear-gradient(#7ff0c4,#2fc58e);padding:2px 10px;border-radius:12px;box-shadow:0 3px 0 #1f9a70}
+.gtabs{display:flex;gap:12px;margin-bottom:20px}
+.gtabs div{padding:8px 26px;border-radius:26px;background:#fff;box-shadow:0 4px 0 #f0bcd2;font:400 28px "Grandstander Black";color:#c2407a;cursor:pointer}
+.gtabs div.on{background:linear-gradient(#ff9cc4,#ff6fa8);color:#fff;box-shadow:0 4px 0 #c2407a}
+.enterbox{display:flex;gap:40px;align-items:center}
+.enterbox .ic{position:relative;flex:none;width:330px;height:330px}
+.enterbox .ic img{width:330px;height:330px;border-radius:60px;box-shadow:0 10px 0 rgba(0,0,0,.08)}
+.enterbox .ic span{position:absolute;left:50%;bottom:-18px;transform:translateX(-50%);white-space:nowrap;font:800 24px "Baloo 2";color:#fff;background:#2fc58e;border-radius:20px;padding:2px 18px;box-shadow:0 4px 0 #1f9a70}
+.enterbox h2{margin:0;font:400 72px "Grandstander Black";color:#9b2c5e;line-height:1}
+.enterbox .chip{display:inline-block;margin:14px 0;font:800 24px "Baloo 2";color:#fff;padding:4px 18px;border-radius:18px}
+.enterbox p{margin:0;font:800 32px "Baloo 2";color:#6a4a5e;line-height:1.35}
+.days{display:grid;grid-template-columns:repeat(7,1fr);gap:14px}
+.day{position:relative;text-align:center}
+.day img{width:100%}
+.day.done img{filter:grayscale(.7) brightness(1.08);opacity:.7}
+.day.done::after{content:"✓";position:absolute;left:50%;top:38%;transform:translate(-50%,-50%);font:400 80px "Grandstander Black";color:#2fc58e;-webkit-text-stroke:6px #fff;paint-order:stroke fill}
+.day.today{animation:bang 1s infinite}
+.day b{display:block;font:800 24px "Baloo 2";color:#9b2c5e}
+.list .it{display:flex;align-items:center;gap:20px;padding:14px 22px;border-radius:28px;background:#fff;box-shadow:0 5px 0 #f0d1df;margin:12px 0}
+.list .it .rk{width:64px;text-align:center;font:400 40px "Grandstander Black";color:#c9a2b6}
+.list .it .rk img{width:60px}
+.list .it .pic{width:82px;height:82px;border-radius:50%;object-fit:cover;background:#fff4f9}
+.list .it .who{flex:1;min-width:0}
+.list .it .who b{display:block;font:400 32px "Grandstander Black";color:#9b2c5e}
+.list .it .who small{display:block;font:800 22px "Baloo 2";color:#8a6a80}
+.list .it .amt{font:400 34px "Grandstander Black";color:#a86d00}
+.list .it.me{background:linear-gradient(#fff8d6,#ffeaa6);box-shadow:0 5px 0 #f0c860}
+.bar{height:22px;border-radius:11px;background:#f6e3ec;overflow:hidden;margin-top:6px}
+.bar i{display:block;height:100%;border-radius:11px;background:linear-gradient(90deg,#ff8fc0,#ffb35c)}
+.srow{display:flex;align-items:center;justify-content:space-between;margin:16px 6px;font:800 34px "Baloo 2";color:#6a2a4c}
+.seg{display:flex;gap:8px}
+.seg span{padding:6px 22px;border-radius:24px;background:#fff;box-shadow:0 4px 0 #f0bcd2;font:400 28px "Grandstander Black";color:#c2407a;cursor:pointer}
+.seg span.on{background:linear-gradient(#ff9cc4,#ff6fa8);color:#fff;box-shadow:0 4px 0 #c2407a}
+.pickgrid{display:flex;flex-wrap:wrap;gap:14px}
+.pickgrid img{width:96px;height:96px;border-radius:50%;object-fit:cover;background:#fff4f9;border:5px solid #fff;cursor:pointer;box-shadow:0 4px 0 #f0d1df}
+.pickgrid img.on{border-color:#ff5c9a;transform:scale(1.08)}
+.namein{width:100%;height:80px;border-radius:28px;border:4px solid #ffd3e5;padding:0 26px;font:800 34px "Baloo 2";color:#5a2342;outline:none}
+#toast{position:absolute;left:50%;top:200px;transform:translateX(-50%);z-index:90;display:none;align-items:center;gap:14px;padding:14px 36px 14px 18px;border-radius:40px;background:#fff;border:4px solid #ffd0e4;color:#7a2a56;font:800 30px "Baloo 2";white-space:nowrap;box-shadow:0 8px 0 rgba(194,64,122,.3),0 14px 26px rgba(60,10,50,.25)}
+#toast img{width:52px}
+#fx{position:absolute;inset:0;pointer-events:none!important;z-index:95;overflow:hidden}
+.confetti{position:absolute;top:-30px;width:16px;height:26px;border-radius:4px}
+.plustxt{position:absolute;font:400 46px "Grandstander Black";color:#ffe27a;-webkit-text-stroke:8px #a86d00;paint-order:stroke fill;animation:up 1s ease-out forwards}
+@keyframes up{to{transform:translateY(-120px);opacity:0}}
+</style>
+</head>
+<body>
+<canvas id="town" width="1920" height="1080"></canvas>
+<div id="ui">
+  <div id="labels"></div>
+
+  <div id="hud" class="hide">
+    <div id="prof" class="card" title="Hồ sơ">
+      <div class="avb"><img class="av" id="meAv"><img class="fr" id="meFr"></div>
+      <div class="nm" id="meName">Bạn Heo Con</div>
+      <img class="vip" id="meVip">
+      <div class="lv"><i id="meLvBar" style="width:60%"></i><b id="meLv">Lv 1</b></div>
+    </div>
+    <div id="money">
+      <div class="pill"><img class="ic" src="assets/emoji-fluent-3d/game/coin.png"><span class="coinTxt" id="coinTxt">0</span><img class="plus btn" data-open="shop" src="assets/ui-jelly-pzuh/buttons-pastel/mint/icon_plus_mint.png"></div>
+      <div class="pill gem"><img class="ic" src="assets/emoji-fluent-3d/game/gem_stone.png"><span id="gemTxt">2.480</span><img class="plus btn" data-open="shop" src="assets/ui-jelly-pzuh/buttons-pastel/mint/icon_plus_mint.png"></div>
+    </div>
+    <div id="ticker"><img src="assets/emoji-fluent-3d/game/loudspeaker.png"><span id="tickTxt"></span></div>
+    <div id="topR">
+      <div class="rbtn btn" data-open="mail" title="Hộp thư"><img src="assets/ui-jelly-pzuh/buttons-pastel/purple/icon_mail_purple.png"><div class="dot" id="mailDot">2</div></div>
+      <div class="rbtn btn" id="mapBtn" title="Bản đồ"><img src="assets/ui-jelly-pzuh/buttons-pastel/mint/icon_home_mint.png"></div>
+      <div class="rbtn btn" data-open="games" title="Danh sách game"><img src="assets/ui-jelly-pzuh/buttons-pastel/yellow/icon_grid_yellow.png"></div>
+      <div class="rbtn btn" data-open="settings" title="Cài đặt"><img src="assets/ui-jelly-pzuh/buttons-pastel/pink/icon_settings_pink.png"></div>
+    </div>
+    <div id="evcard" data-open="event"><img src="assets/emoji-fluent-3d/game/party_popper.png"><b>Lễ hội Heo Con</b><span id="evTime">Còn 6 ngày 12 giờ</span></div>
+    <div id="qcard" class="card" data-open="event"><div class="h"><img src="assets/emoji-fluent-3d/game/scroll.png">Nhiệm vụ</div><div id="qbody"></div></div>
+    <div id="mini"><canvas id="miniCv" width="280" height="280"></canvas><div class="n">B</div><div class="cap">Thị trấn Heo Con</div></div>
+    <div id="dock">
+      <div class="dk" data-open="daily" style="--d:#c2407a"><div class="sq" style="background:linear-gradient(#ffc6dd,#ff7eb3)"><img src="assets/emoji-fluent-3d/game/wrapped_gift.png"></div><b>Quà ngày</b><div class="dot hide" id="dailyDot">!</div></div>
+      <div class="dk" data-open="event" style="--d:#5f3fc9"><div class="sq" style="background:linear-gradient(#e2d6ff,#a98bff)"><img src="assets/emoji-fluent-3d/game/scroll.png"></div><b>Nhiệm vụ</b><div class="dot hide" id="questDot">!</div></div>
+      <div class="dk main" data-open="games" style="--d:#b07800"><div class="sq" style="background:linear-gradient(#fff2b0,#ffc93c)"><img src="assets/emoji-fluent-3d/game/joystick.png"></div><b>Chọn game</b></div>
+      <div class="dk" data-open="shop" style="--d:#1f9a70"><div class="sq" style="background:linear-gradient(#c9f6e6,#4fd9a6)"><img src="assets/emoji-fluent-3d/game/shopping_bags.png"></div><b>Cửa hàng</b></div>
+      <div class="dk" data-open="rank" style="--d:#2a7fd0"><div class="sq" style="background:linear-gradient(#d3ecff,#6fbfff)"><img src="assets/emoji-fluent-3d/game/trophy.png"></div><b>Xếp hạng</b></div>
+    </div>
+    <div id="emoteBtn" title="Biểu cảm"><img src="assets/emoji-fluent-3d/reactions/grinning_squinting_face.png"></div>
+    <div id="emotes"></div>
+    <div class="big rainbow" id="playnow"><img src="assets/3d/renders/icons/bgb_d6_red.png">CHƠI NGAY</div>
+    <div id="near"><img id="nearImg"><b id="nearTxt"></b><kbd>E</kbd></div>
+  </div>
+
+  <div id="auth" class="hide"><div class="frame">
+    <div id="brand">
+      <img class="lg" src="assets/ui-premium-generated/logo_heo_con_club.png" alt="Heo Con Club">
+      <div class="tag">Game bài & game dân gian siêu dễ thương</div>
+      <div class="feats">
+        <div><img src="assets/emoji-fluent-3d/game/joystick.png">18 trò chơi</div>
+        <div><img src="assets/emoji-fluent-3d/game/wrapped_gift.png">Quà mỗi ngày</div>
+        <div><img src="assets/emoji-fluent-3d/game/locked.png">Lưu trên máy</div>
+      </div>
+    </div>
+    <div id="pwrap"><div id="panel">
+      <div id="atabs"><div data-t="login" class="on">Đăng nhập</div><div data-t="reg">Đăng ký</div></div>
+      <form id="flogin" autocomplete="on" onsubmit="return false">
+        <div class="field"><img class="ic" src="assets/emoji-fluent-3d/reactions/smiling_face_with_halo.png"><input id="lu" name="username" autocomplete="username" placeholder="Tên đăng nhập" maxlength="16" autocapitalize="off" spellcheck="false"></div>
+        <div class="field"><img class="ic" src="assets/emoji-fluent-3d/game/key.png"><input id="lp" name="password" type="password" autocomplete="current-password" placeholder="Mật khẩu" maxlength="64"><div class="eye" data-for="lp">🙈</div></div>
+        <div class="row2"><div class="tog on" id="remember"><i></i>Ghi nhớ</div><a id="forgot">Quên mật khẩu?</a></div>
+        <div class="big pink" id="btnLogin">ĐĂNG NHẬP</div>
+      </form>
+      <form id="freg" class="hide" autocomplete="on" onsubmit="return false">
+        <div class="field"><img class="ic" src="assets/emoji-fluent-3d/reactions/smiling_face_with_halo.png"><input id="ru" name="username" autocomplete="username" placeholder="Tên đăng nhập (a-z, 0-9)" maxlength="16" autocapitalize="off" spellcheck="false"><div class="hint" id="ruHint"></div></div>
+        <div class="field"><img class="ic" src="assets/emoji-fluent-3d/game/crown.png"><input id="rn" placeholder="Tên trong game" maxlength="14"><div class="hint" id="rnHint" style="color:#c9a2b6">0/14</div></div>
+        <div class="field"><img class="ic" src="assets/emoji-fluent-3d/game/key.png"><input id="rp" type="password" autocomplete="new-password" placeholder="Mật khẩu (ít nhất 6 ký tự)" maxlength="64"><div class="eye" data-for="rp">🙈</div></div>
+        <div id="strength"><i></i></div>
+        <div class="field"><img class="ic" src="assets/emoji-fluent-3d/game/locked.png"><input id="rp2" type="password" autocomplete="new-password" placeholder="Nhập lại mật khẩu" maxlength="64"><div class="hint" id="rp2Hint"></div></div>
+        <div class="lbl">Chọn linh vật 3D</div>
+        <div id="mpick"></div>
+        <div class="big pink" id="btnReg">TẠO TÀI KHOẢN</div>
+      </form>
+      <div id="aerr"></div>
+      <div class="or">hoặc</div>
+      <div class="big mint" id="btnGuest"><img src="assets/emoji-fluent-3d/hands/waving_hand.png" style="width:52px">Chơi ngay không cần tài khoản</div>
+      <div class="note">Tài khoản lưu ngay trên máy này, không gửi đi đâu.</div>
+      <div class="back" id="toLoginTab">Đã có tài khoản? Đăng nhập</div></div>
+    </div>
+  </div></div>
+
+  <div id="loading">
+    <div class="frame">
+      <img class="logoimg" src="assets/ui-premium-generated/logo_heo_con_club.png" alt="Heo Con Club">
+      <div id="lbox">
+        <div id="lbar"><div id="lfill"></div><img id="lpig" src="assets/emoji-fluent-3d/animals/pig.png" style="left:4px"></div>
+        <div id="lrow"><div id="ltext">Đang mở cửa thị trấn…</div><div id="lpct">0%</div></div>
+      </div>
+    </div>
+    <div id="ltip"></div>
+    <div id="lcred">Mô hình 3D: KayKit · Tiny Treats (CC0)</div>
+    <div id="lver">v3.2 · bản chơi offline</div>
+  </div>
+
+  <div id="tut" class="hide"><div class="box">
+    <h2>Cách chơi trong thị trấn</h2>
+    <div class="steps">
+      <div class="st"><img src="assets/emoji-fluent-3d/hands/waving_hand.png"><b>Chạm để đi</b><span>Chạm xuống đường hoặc vỉa hè, nhân vật sẽ chạy tới đó.</span></div>
+      <div class="st"><img src="assets/emoji-fluent-3d/game/house.png"><b>Chạm cửa hàng</b><span>Mỗi cửa hàng là một game. Chạm vào để đi tới cửa và vào chơi.</span></div>
+      <div class="st"><img src="assets/emoji-fluent-3d/game/joystick.png"><b>Xoay & phóng to</b><span>Kéo để xoay camera. Cuộn chuột hoặc chụm 2 ngón để phóng to.</span></div>
+    </div>
+    <div class="big pink" id="tutOk">HIỂU RỒI!</div>
+  </div></div>
+
+  <div id="modal"></div>
+  <div id="toast"><img id="toastImg" src="assets/emoji-fluent-3d/game/party_popper.png"><span id="toastTxt"></span></div>
+  <div id="fx"></div>
+</div>
+
+<script src="js/vendor/three.min.js"></script>
+<script src="js/vendor/GLTFLoader.js"></script>
+<script src="js/vendor/SkeletonUtils.js"></script>
+<script src="js/hc3d.js"></script>
+<script src="js/hc-core.js"></script>
+<script src="js/town3d.js"></script>
+<script>
+'use strict';
+// ------------------------------------------------------------------ helpers
+const Q = new URLSearchParams(location.search);
+const SHOT = Q.has('shot');
+const $ = (s, e = document) => e.querySelector(s), $$ = (s, e = document) => [...e.querySelectorAll(s)];
+const A = HC.A, fmt = HC.fmt, store = HC.store, sfx = HC.sfx;
+const rnd = (a, b) => a + Math.random() * (b - a), pick = a => a[Math.floor(Math.random() * a.length)];
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+function el(tag, attrs = {}, parent) {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) { if (k === 'style') e.style.cssText = v; else if (k === 'html') e.innerHTML = v; else if (k === 'text') e.textContent = v; else if (k.startsWith('on')) e.addEventListener(k.slice(2), v); else e.setAttribute(k, v); }
+  if (parent) parent.appendChild(e); return e;
+}
+const img = (src, style = '', parent, cls = '') => el('img', { src: A(src), style, class: cls }, parent);
+if (SHOT) document.head.appendChild(Object.assign(document.createElement('style'), { textContent: '#panel,.panel,#hud.enter *,#near,#tut .box{animation:none!important}' }));
+if (SHOT) Element.prototype.animate = function (kf, o) { o = typeof o === 'number' ? { duration: o } : (o || {}); let cb = null; const t = setTimeout(() => cb && cb(), (o.duration || 0) + (o.delay || 0)); return { set onfinish(f) { cb = f; }, get onfinish() { return cb; }, cancel() { clearTimeout(t); }, finished: Promise.resolve() }; };
+let uiS = 1, UW = 1920, UH = 1080;
+/** One UI unit ≈ one pixel of a 1080p screen. The HUD hugs the window edges; the 3D town always fills the window. */
+function fit() {
+  uiS = HC.uiScale(1640);
+  UW = innerWidth / uiS; UH = innerHeight / uiS;
+  const ui = $('#ui'); ui.style.width = UW + 'px'; ui.style.height = UH + 'px'; ui.style.transform = `scale(${uiS})`;
+  const f = Math.min(UW / 1920, UH / 1080);
+  $$('.frame').forEach(fr => { fr.style.transform = `translate(${(UW - 1920 * f) / 2}px,${(UH - 1080 * f) / 2}px) scale(${f})`; });
+  const tw = window.town; if (tw && tw.st) { tw.uiScale = uiS; tw.resize(innerWidth, innerHeight, pixelRatio()); }
+  fitModal();
+}
+addEventListener('resize', fit);
+const GFX = { cao: 1.5, vua: 1, thap: .75 };
+function pixelRatio() { return Math.max(.6, Math.min(GFX[HC.settings.gfx || 'cao'] || 1, devicePixelRatio || 1)); }
+function fitModal() { const w = $('#modal .mwrap'); if (!w) return; const p = w.firstElementChild; const k = Math.min(1.25, (UW - 60) / p.offsetWidth, (UH - 50) / (p.offsetHeight + 40)); /* popups are read, so they may grow past the HUD scale */ w.style.transform = `scale(${k})`; }
+fit();
+
+const MASCOTS = [
+  { key: 'adv_mage', name: 'Pháp Sư Tím' }, { key: 'adv_knight', name: 'Hiệp Sĩ Bạc' }, { key: 'adv_rogue_hooded', name: 'Ninja Lá' },
+  { key: 'adv_ranger', name: 'Cung Thủ' }, { key: 'adv_barbarian', name: 'Chiến Binh Gấu' }, { key: 'adv_rogue', name: 'Tiểu Thư Rừng' },
+  { key: 'mini_bear', name: 'Gấu Nâu' }, { key: 'mini_dog', name: 'Cún Vàng' }, { key: 'mini_duck', name: 'Vịt Bông' },
+];
+const portrait = k => `3d/renders/avatars/${k}.png`;
+const FRAMES = [['pink', 0], ['gold', 0], ['mint', 0], ['sky', 0], ['lavender', 300000], ['silver', 500000], ['rainbow', 1500000], ['tet', 3000000]];
+
+// ------------------------------------------------------------------ player state
+const me = {};
+function loadMe() {
+  const guest = !HC.auth.user();
+  Object.assign(me, {
+    user: HC.auth.user(), guest,
+    name: store.get('name', 'Bạn Heo Con'), av: store.get('av', 'avatars-dicebear/fun-emoji/png/bong.png'), fr: store.get('fr', 'gold'),
+    coins: store.get('coins', 1250000), gems: store.get('gems', 2480), vip: store.get('vip', guest ? 5 : 1), lv: store.get('lv', guest ? 27 : 1), xp: store.get('xp', 40),
+    mascot: store.get('mascot', 0) % MASCOTS.length,
+  });
+}
+function refreshMe() {
+  $('#meAv').src = A(me.av); $('#meFr').src = A(`ui-premium-generated/avatar-frames/frame_${me.fr}.png`);
+  $('#meName').textContent = me.name; $('#meVip').src = A(`ui-premium-generated/badges/vip_${Math.min(8, me.vip)}.png`);
+  $('#meLv').textContent = 'Lv ' + me.lv; $('#meLvBar').style.width = Math.max(8, me.xp) + '%';
+  $('#coinTxt').textContent = fmt(me.coins); $('#gemTxt').textContent = fmt(me.gems);
+  $('#dailyDot').classList.toggle('hide', !dailyAvailable());
+  $('#questDot').classList.toggle('hide', !questsClaimable());
+  renderQuestCard();
+  const mails = mailList().filter(m => !m.read).length; $('#mailDot').textContent = mails; $('#mailDot').classList.toggle('hide', !mails);
+}
+function setCoins(v) {
+  const from = me.coins; me.coins = Math.max(0, Math.round(v)); store.set('coins', me.coins);
+  const e = $('#coinTxt'), t0 = performance.now();
+  const step = t => { const k = Math.min(1, (t - t0) / 700); e.textContent = fmt(from + (me.coins - from) * (1 - Math.pow(1 - k, 3))); if (k < 1) requestAnimationFrame(step); };
+  requestAnimationFrame(step);
+}
+function addXp(n) { me.xp += n; while (me.xp >= 100) { me.xp -= 100; me.lv++; toast(`Lên cấp ${me.lv}! 🎉`); confetti(60); } store.set('xp', me.xp); store.set('lv', me.lv); refreshMe(); }
+
+// ------------------------------------------------------------------ fx
+function toast(msg, icon = 'emoji-fluent-3d/game/party_popper.png') { const t = $('#toast'); $('#toastTxt').textContent = msg; $('#toastImg').src = A(icon); t.style.display = 'flex'; t.animate([{ opacity: 0, transform: 'translate(-50%,-20px)' }, { opacity: 1, transform: 'translate(-50%,0)' }], { duration: 250 }); clearTimeout(t._h); t._h = setTimeout(() => t.style.display = 'none', 2400); }
+function confetti(n = 90) {
+  if (SHOT) return;
+  const cols = ['#ff6fa8', '#ffc93c', '#3ccf9b', '#4fb3ff', '#a07bff', '#ff9e6b', '#fff'];
+  for (let i = 0; i < n; i++) {
+    const c = el('div', { class: 'confetti', style: `left:${rnd(0, 1920)}px;background:${pick(cols)};${Math.random() < .4 ? 'border-radius:50%;width:18px;height:18px' : ''}` }, $('#fx'));
+    c.animate([{ transform: 'translate(0,0) rotate(0)' }, { transform: `translate(${rnd(-200, 200)}px,${rnd(1100, 1300)}px) rotate(${rnd(-900, 900)}deg)` }], { duration: rnd(1600, 2800), delay: rnd(0, 400), easing: 'cubic-bezier(.3,.6,.6,1)' }).onfinish = () => c.remove();
+  }
+}
+function flyCoins(n = 12, from = { x: 960, y: 600 }) {
+  if (SHOT) return;
+  const r = $('#coinTxt').getBoundingClientRect();
+  const to = { x: r.left / uiS + 20, y: r.top / uiS + 20 }; from = { x: from.x * UW / 1920, y: from.y * UH / 1080 };
+  for (let i = 0; i < n; i++) {
+    const c = img('emoji-fluent-3d/game/coin.png', `position:absolute;width:60px;left:${from.x - 30}px;top:${from.y - 30}px`, $('#fx'));
+    const mx = (from.x + to.x) / 2 + rnd(-200, 200), my = Math.min(from.y, to.y) - rnd(60, 220);
+    c.animate([{ transform: 'translate(0,0) scale(.6)' }, { transform: `translate(${mx - from.x}px,${my - from.y}px) scale(1.15)`, offset: .45 }, { transform: `translate(${to.x - from.x}px,${to.y - from.y}px) scale(.7)` }], { duration: rnd(700, 1000), delay: i * 50, easing: 'ease-in-out' }).onfinish = () => { c.remove(); if (i % 3 === 0) sfx('coin', .3); };
+  }
+}
+function plusText(x, y, txt) { const p = el('div', { class: 'plustxt', text: txt, style: `left:${x}px;top:${y}px` }, $('#fx')); setTimeout(() => p.remove(), 1000); }
+function reward(coins, why) { setCoins(me.coins + coins); flyCoins(14); plusText(UW / 2 - 100, UH / 2 - 20, '+' + fmt(coins)); sfx('gold'); if (why) toast(why, 'emoji-fluent-3d/game/coin.png'); }
+
+// ------------------------------------------------------------------ loading screen
+const TIPS = ['<b>Mẹo:</b> 3 đôi thông chặt được một con heo!', '<b>Mẹo:</b> chạm vào ngôi nhà để đi tới cửa trò chơi.', '<b>Mẹo:</b> chạm vào người đi đường để kết bạn.',
+  '<b>Mẹo:</b> ghé Quà Ngày mỗi ngày để nhận xu.', '<b>Mẹo:</b> kéo màn hình để xoay camera quanh thị trấn.', '<b>Mẹo:</b> tứ quý chặt được đôi heo.', '<b>Mẹo:</b> làm nhiệm vụ Lễ hội Heo Con để lên cấp.'];
+const STEPS = [[0, 'Đang mở cửa thị trấn…'], [.12, 'Đang gọi các bạn nhỏ ra phố…'], [.35, 'Đang trồng cây hoa anh đào…'], [.55, 'Đang trải đường và vỉa hè…'], [.72, 'Đang mở cửa các cửa hàng…'], [.9, 'Đang thả chim bồ câu…']];
+function setLoad(p) {
+  const w = Math.round(($('#lbar').clientWidth - 6) * p); $('#lfill').style.width = w + 'px'; $('#lpig').style.left = (3 + w) + 'px';
+  $('#lpct').textContent = Math.round(p * 100) + '%';
+  let t = STEPS[0][1]; for (const [k, s] of STEPS) if (p >= k) t = s; $('#ltext').textContent = t;
+}
+function startLoadingFx() {
+  let k = 0; const tip = () => { $('#ltip').innerHTML = TIPS[k++ % TIPS.length]; }; tip(); return setInterval(tip, 3200);
+}
+function loadScript(src) { return new Promise((res, rej) => { const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = () => rej(new Error(src)); document.head.appendChild(s); }); }
+
+// ------------------------------------------------------------------ auth screen
+let authTab = 'login', regMascot = 0;
+function showAuth() {
+  $('#auth').classList.remove('hide', 'out');
+  $('#lu').value = HC.auth.lastUser() || '';
+  const mp = $('#mpick'); mp.innerHTML = '';
+  MASCOTS.forEach((m, i) => { const im = img(portrait(m.key), '', mp, i === regMascot ? 'on' : ''); im.title = m.name; im.onclick = () => { regMascot = i; $$('#mpick img').forEach((x, j) => x.classList.toggle('on', j === i)); sfx('pop'); }; });
+  if (Q.get('tab') === 'reg') setTab('reg');
+  if (!SHOT) setTimeout(() => (authTab === 'login' && $('#lu').value ? $('#lp') : $(authTab === 'login' ? '#lu' : '#ru')).focus(), 400);
+}
+function setTab(t) {
+  authTab = t; $$('#atabs div').forEach(d => d.classList.toggle('on', d.dataset.t === t));
+  $('#flogin').classList.toggle('hide', t !== 'login'); $('#freg').classList.toggle('hide', t !== 'reg');
+  $('#panel').classList.toggle('reg', t === 'reg'); $('#aerr').textContent = '';
+}
+$$('#atabs div').forEach(d => d.onclick = () => { sfx('click'); setTab(d.dataset.t); });
+$$('.eye').forEach(e => e.onclick = () => { const i = $('#' + e.dataset.for); i.type = i.type === 'password' ? 'text' : 'password'; e.textContent = i.type === 'password' ? '🙈' : '👀'; });
+$('#remember').onclick = () => $('#remember').classList.toggle('on');
+$('#toLoginTab').onclick = () => { sfx('click'); setTab('login'); };
+$('#forgot').onclick = () => openModal('forgot');
+function authErr(msg) { $('#aerr').textContent = msg; const p = $('#panel'); p.classList.remove('shake'); void p.offsetWidth; p.classList.add('shake'); sfx('error', .5); }
+async function busy(btn, fn) {
+  if (btn.dataset.busy) return; btn.dataset.busy = 1; const html = btn.innerHTML; btn.innerHTML = '<div class="spin"></div>';
+  try { await fn(); } catch (e) { authErr(e.message); } finally { delete btn.dataset.busy; btn.innerHTML = html; }
+}
+$('#btnLogin').onclick = () => busy($('#btnLogin'), async () => {
+  const u = $('#lu').value.trim(), p = $('#lp').value;
+  if (!u || !p) throw new Error('Nhập tên đăng nhập và mật khẩu nha.');
+  await HC.auth.login(u, p, $('#remember').classList.contains('on'));
+  sfx('accept'); enterTown();
+});
+$('#btnReg').onclick = () => busy($('#btnReg'), async () => {
+  if ($('#rp').value !== $('#rp2').value) throw new Error('Hai lần nhập mật khẩu chưa giống nhau.');
+  await HC.auth.register({ user: $('#ru').value, pass: $('#rp').value, display: $('#rn').value, mascot: regMascot });
+  sfx('win'); confetti(120); enterTown();
+});
+$('#btnGuest').onclick = () => { sfx('accept'); HC.auth.guest(); enterTown(); };
+[['#lu', '#lp'], ['#lp', '#btnLogin'], ['#ru', '#rn'], ['#rn', '#rp'], ['#rp', '#rp2'], ['#rp2', '#btnReg']].forEach(([a, b]) => $(a).addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); const t = $(b); t.tagName === 'INPUT' ? t.focus() : t.click(); } }));
+$('#ru').addEventListener('input', () => {
+  const v = $('#ru').value = $('#ru').value.toLowerCase().replace(/\s/g, ''), h = $('#ruHint');
+  if (!v) { h.textContent = ''; return; }
+  if (!HC.auth.USER_RE.test(v)) { h.textContent = v.length < 3 ? 'ít nhất 3 ký tự' : 'chỉ a-z 0-9 _ .'; h.className = 'hint bad'; }
+  else if (HC.auth.exists(v)) { h.textContent = '✗ đã có người dùng'; h.className = 'hint bad'; }
+  else { h.textContent = '✓ dùng được'; h.className = 'hint ok'; }
+});
+$('#rn').addEventListener('input', () => { $('#rnHint').textContent = $('#rn').value.length + '/14'; });
+$('#rp').addEventListener('input', () => {
+  const p = $('#rp').value; let s = 0; if (p.length >= 6) s++; if (p.length >= 10) s++; if (/[0-9]/.test(p) && /[a-z]/i.test(p)) s++; if (/[^a-z0-9]/i.test(p)) s++;
+  const b = $('#strength i'); b.style.width = (p ? 20 + s * 20 : 0) + '%'; b.style.background = ['#ff6f8f', '#ff9f5a', '#ffc93c', '#7fd8a8', '#3ccf9b'][s];
+  $('#rp2').dispatchEvent(new Event('input'));
+});
+$('#rp2').addEventListener('input', () => { const a = $('#rp').value, b = $('#rp2').value, h = $('#rp2Hint'); if (!b) { h.textContent = ''; return; } h.textContent = a === b ? '✓ khớp' : '✗ chưa khớp'; h.className = 'hint ' + (a === b ? 'ok' : 'bad'); });
+
+// ------------------------------------------------------------------ town
+let town = null;
+async function enterTown() {
+  loadMe();
+  $('#auth').classList.add('out'); setTimeout(() => $('#auth').classList.add('hide'), 500);
+  await town.setPlayer(MASCOTS[me.mascot].key, me.name);
+  town.setMode('play');
+  refreshMe();
+  const h = $('#hud'); h.classList.remove('hide'); h.classList.add('enter'); setTimeout(() => h.classList.remove('enter'), 1500);
+  HC.music('music-bgm/opengameart/happy-adventure__TinyWorlds.mp3', .28);
+  ticker();
+  if (Q.get('look')) town.goToBuilding(Q.get('look'), true, true);
+  if (Q.get('yaw')) town.camYaw = +Q.get('yaw'); if (Q.get('dist')) town.camDist = +Q.get('dist'); if (Q.get('pitch')) town.camPitch = +Q.get('pitch');
+  if (Q.get('open')) { setTimeout(() => openModal(Q.get('open')), SHOT ? 0 : 900); if (!SHOT) return; }
+  if (SHOT || Q.get('selftest')) { if (Q.get('tut')) showTutorial(); if (Q.get('modal')) openModal(Q.get('modal'), Q.get('arg')); return; }
+  if (Q.get('tut') || !store.get('tut', false)) setTimeout(showTutorial, 1600);
+  setTimeout(() => {
+    if (!$('#tut').classList.contains('hide')) return;
+    if (store.get('welcome', false)) { store.set('welcome', false); openModal('welcome'); }
+    else if (dailyAvailable()) openModal('daily');
+    else toast(`Chào mừng ${me.name} quay lại thị trấn! 👋`);
+  }, 2600);
+}
+function ticker() {
+  const names = HCTown.NPCS.map(n => n.name), games = HCTown.BUILDINGS.filter(b => !b.action).map(b => b.name);
+  const msgs = Array.from({ length: 4 }, () => `🎉 ${pick(names)} vừa thắng ${fmt(Math.round(rnd(2, 90)) * 50000)} xu ở ${pick(games)}!`);
+  const sp = $('#tickTxt'); sp.textContent = msgs.join('     ·     ');
+  if (SHOT) { sp.style.left = '70px'; return; }
+  const run = () => { const w = sp.offsetWidth + 760; sp.animate([{ transform: 'translateX(0)' }, { transform: `translateX(${-w}px)` }], { duration: w * 9, easing: 'linear' }).onfinish = run; };
+  run();
+}
+
+function showTutorial() { $('#tut').classList.remove('hide'); sfx('open', .4); }
+$('#tutOk').onclick = () => { sfx('accept'); store.set('tut', true); $('#tut').classList.add('hide');
+  if (store.get('welcome', false)) { store.set('welcome', false); openModal('welcome'); } else if (dailyAvailable()) openModal('daily'); };
+// HUD buttons
+$$('[data-open]').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); sfx('click'); openModal(b.dataset.open); }));
+$('#prof').onclick = () => { sfx('click'); openModal('profile'); };
+$('#mapBtn').onclick = () => { sfx('click'); HC.goto('lobby.html?from=town', 'Đang mở bản đồ…'); };
+$('#playnow').onclick = () => { sfx('accept'); playGame('tien-len'); };
+const EMOTES = [['hands/waving_hand', '👋'], ['reactions/face_with_tears_of_joy', '😂'], ['reactions/smiling_face_with_heart_eyes', '😍'], ['reactions/smiling_face_with_sunglasses', '😎'], ['reactions/partying_face', '🥳'], ['hands/thumbs_up', '👍'], ['hands/clapping_hands', '👏'], ['animals/pig_face', '🐷']];
+EMOTES.forEach(([p, e]) => { const i = img(`emoji-fluent-3d/${p}.png`, '', $('#emotes')); i.onclick = () => { $('#emotes').classList.remove('on'); town.say('me', e, 2600); town.emote(); sfx('pop'); questBump('emote'); }; });
+$('#emoteBtn').onclick = e => { e.stopPropagation(); sfx('click'); $('#emotes').classList.toggle('on'); };
+document.addEventListener('pointerdown', e => { if (!e.target.closest('#emotes,#emoteBtn')) $('#emotes').classList.remove('on'); });
+let nearB = null;
+function showNear(b) {
+  nearB = b; const n = $('#near'); n.style.setProperty('--c', HCTown.CAT[b.cat].css);
+  $('#nearImg').src = A(gameIcon(b)); $('#nearTxt').textContent = (b.action ? 'Mở ' : 'Vào ') + b.name; n.classList.add('on');
+  clearTimeout(n._h); n._h = setTimeout(() => n.classList.remove('on'), 5000);
+}
+$('#near').onclick = () => { if (nearB) { sfx('click'); $('#near').classList.remove('on'); openBuilding(nearB); } };
+addEventListener('keydown', e => {
+  if (/input/i.test(document.activeElement.tagName)) return;
+  if (e.key === 'Escape' && $('#modal').classList.contains('on')) closeModal();
+  if ((e.key === 'e' || e.key === 'E' || e.key === 'Enter') && $('#near').classList.contains('on') && nearB && !$('#modal').classList.contains('on')) { $('#near').classList.remove('on'); openBuilding(nearB); }
+});
+const gameIcon = b => b.action ? { shop: 'emoji-fluent-3d/game/shopping_bags.png', rank: 'emoji-fluent-3d/game/trophy.png', event: 'emoji-fluent-3d/game/party_popper.png', daily: 'emoji-fluent-3d/game/wrapped_gift.png', hall: 'emoji-fluent-3d/game/joystick.png' }[b.action] : `games/lobby-icons/${b.key}.png`;
+function openBuilding(b) {
+  questVisit(b.key);
+  if (b.action === 'hall') return HC.goto('lobby.html?from=town', 'Đang mở bản đồ…');
+  if (b.action) return openModal(b.action);
+  openModal('enter', b.key);
+}
+function playGame(key) {
+  const b = HCTown.BUILDINGS.find(x => x.key === key);
+  if (key === 'tien-len') HC.goto('tien-len.html?from=town', 'Đang vào bàn Tiến Lên…');
+  else if (key === 'day-xu') HC.goto('pusher.html?from=town', 'Đang bật máy đẩy xu…');
+  else HC.goto(`play3d.html?game=${key}&from=town`, `Đang vào ${b ? b.name : 'game'}…`);
+}
+// minimap
+function bindMinimap() {
+  const cv = $('#miniCv'), ctx = cv.getContext('2d');
+  let acc = 0; town.onFrame = (dt) => { acc += dt; if (acc > .1) { acc = 0; town.drawMinimap(ctx, 280); } trackWalk(dt); };
+  cv.addEventListener('pointerdown', e => { const r = cv.getBoundingClientRect(); const p = town.minimapToWorld((e.clientX - r.left) / r.width * 280, (e.clientY - r.top) / r.height * 280, 280); town.walkTo(p.x, p.z); sfx('tick'); });
+}
+
+// ------------------------------------------------------------------ quests, daily, mail
+const today = () => new Date().toISOString().slice(0, 10);
+function dailyState() { return store.get('daily', { last: '', day: 0 }); }
+function dailyAvailable() { return dailyState().last !== today(); }
+const DAILY = [50000, 80000, 120000, 160000, 220000, 300000, 600000];
+const QUESTS = [
+  { id: 'walk', name: 'Dạo phố 300 mét', goal: 300, coins: 50000, ic: 'emoji-fluent-3d/game/round_pushpin.png' },
+  { id: 'greet', name: 'Chào hỏi 3 người bạn', goal: 3, coins: 60000, ic: 'emoji-fluent-3d/hands/waving_hand.png' },
+  { id: 'visit', name: 'Ghé thăm 5 cửa hàng', goal: 5, coins: 100000, ic: 'emoji-fluent-3d/game/house.png' },
+  { id: 'emote', name: 'Thả 3 biểu cảm', goal: 3, coins: 30000, ic: 'emoji-fluent-3d/reactions/partying_face.png' },
+  { id: 'daily', name: 'Nhận quà ngày', goal: 1, coins: 40000, ic: 'emoji-fluent-3d/game/wrapped_gift.png' },
+];
+function qs() { return store.get('quests', { walk: 0, greet: [], visit: [], emote: 0, daily: 0, claimed: [] }); }
+function qprog(q, s = qs()) { const v = s[q.id]; return Math.min(q.goal, Array.isArray(v) ? v.length : Math.floor(v)); }
+function questsClaimable() { const s = qs(); return QUESTS.some(q => qprog(q, s) >= q.goal && !s.claimed.includes(q.id)); }
+function questBump(id, val) { const s = qs(); if (Array.isArray(s[id])) { if (!s[id].includes(val)) s[id].push(val); } else s[id] = (s[id] || 0) + (val || 1); store.set('quests', s); $('#questDot').classList.toggle('hide', !questsClaimable()); renderQuestCard(); }
+let qcardKey = '';
+function renderQuestCard() {
+  const s = qs(), q = QUESTS.find(q => !s.claimed.includes(q.id) && qprog(q, s) >= q.goal) || QUESTS.find(q => !s.claimed.includes(q.id));
+  const b = $('#qbody'); if (!b) return;
+  if (!q) { if (qcardKey !== 'done') { qcardKey = 'done'; b.innerHTML = '<div class="q">Xong hết nhiệm vụ rồi! 🎉<small>Mai có nhiệm vụ mới nha</small></div>'; } return; }
+  const pr = qprog(q, s), done = pr >= q.goal, key = q.id + ':' + Math.floor(pr) + ':' + done;
+  if (key === qcardKey) return; qcardKey = key;
+  b.innerHTML = `<div class="q">${q.name}<small>${q.id === 'walk' ? Math.floor(pr) + ' / ' + q.goal + ' m' : pr + ' / ' + q.goal} · thưởng ${HC.short(q.coins)} xu</small></div><div class="bar"><i style="width:${pr / q.goal * 100}%"></i></div>${done ? '<div class="claim">Nhận thưởng!</div>' : ''}`;
+}
+const questVisit = key => questBump('visit', key);
+let walkAcc = 0, lastP = null;
+function trackWalk() {
+  if (!town.player) return; const p = town.player.ch.root.position;
+  if (lastP) { const d = Math.hypot(p.x - lastP.x, p.z - lastP.z); if (d < 2) walkAcc += d; }
+  lastP = { x: p.x, z: p.z };
+  if (walkAcc > 5) { questBump('walk', walkAcc); walkAcc = 0; }
+}
+const MAIL_TEXT = {
+  1: { from: 'Heo Con Club', title: 'Chào mừng bạn đến thị trấn!', body: 'Thị trấn có 18 game, cứ đi dạo và ghé cửa hàng bất kỳ nhé. Quà gặp mặt nè!' },
+  2: { from: 'Ban tổ chức', title: 'Lễ hội Heo Con đã mở', body: 'Làm nhiệm vụ trong thị trấn để nhận xu và lên cấp.' },
+};
+/** Saved mail keeps only id/coins/read; the wording always comes from MAIL_TEXT so text fixes reach old saves. */
+function mailList() {
+  return store.get('mail', [{ id: 1, coins: 100000, read: false }, { id: 2, coins: 50000, read: false }]).map(m => Object.assign({}, m, MAIL_TEXT[m.id] || {}));
+}
+
+// ------------------------------------------------------------------ modals
+function closeModal() { $('#modal').classList.remove('on'); $('#modal').innerHTML = ''; sfx('close', .4); }
+$('#modal').addEventListener('pointerdown', e => { if (e.target.id === 'modal') closeModal(); });
+function panel(title, color = '', ribbon = 'pink', w = 1100) {
+  const m = $('#modal'); m.innerHTML = ''; m.classList.add('on'); sfx('open', .4);
+  const wrap = el('div', { class: 'mwrap' }, m);
+  const p = el('div', { class: 'panel ' + color, style: `width:${w}px` }, wrap);
+  requestAnimationFrame(fitModal);
+  const t = el('div', { class: 'ttl' }, p); img(`ui-premium-generated/ribbons/ribbon_${ribbon}.png`, '', t); el('span', { text: title }, t);
+  const x = img('ui-jelly-pzuh/buttons/icon_close_red.png', '', p, 'x btn'); x.onclick = closeModal;
+  return { p, inner: el('div', { class: 'inner' }, p) };
+}
+function bigBtn(parent, label, cls, fn) { const b = el('div', { class: 'big ' + cls, html: label }, parent); b.onclick = () => { sfx('click'); fn(); }; return b; }
+function openModal(kind, arg) {
+  const B = HCTown.BUILDINGS, CAT = HCTown.CAT;
+  if (kind === 'enter') {
+    const b = B.find(x => x.key === arg) || B[0], c = CAT[b.cat], tb = town && town.buildings.find(x => x.key === b.key);
+    const { p, inner } = panel(b.name, { bai: '', xx: 'lemon', co: 'mint', khac: 'sky', sp: 'lavender' }[b.cat], { bai: 'pink', xx: 'lemon', co: 'mint', khac: 'sky', sp: 'lavender' }[b.cat], 1100);
+    const box = el('div', { class: 'enterbox' }, inner);
+    const ic = el('div', { class: 'ic' }, box); img(gameIcon(b), '', ic); el('span', { text: `● ${fmt(tb && tb.online || 4321)} đang chơi` }, ic);
+    const tx = el('div', {}, box); el('h2', { text: b.name }, tx); el('div', { class: 'chip', text: c.name, style: `background:${c.css}` }, tx); el('p', { text: b.desc }, tx);
+    el('p', { html: `Cược từ <b style="color:#c08f00">1K</b> · ${b.hot ? '🔥 Đang hot' : '⭐ Dễ chơi'}`, style: 'margin-top:14px;font-size:28px' }, tx);
+    const bs = el('div', { class: 'mbtns' }, p);
+    bigBtn(bs, 'Để sau', 'grey', closeModal); bigBtn(bs, '▶ VÀO CHƠI', 'pink', () => playGame(b.key));
+    return;
+  }
+  if (kind === 'games') {
+    const { p, inner } = panel('Danh sách game', 'lemon', 'lemon', 1400);
+    const tabs = el('div', { class: 'gtabs' }, inner), grid = el('div', { class: 'ggrid' }, inner);
+    const draw = cat => {
+      grid.innerHTML = ''; $$('div', tabs).forEach(d => d.classList.toggle('on', d.dataset.c === cat));
+      for (const b of B.filter(x => !x.action && (cat === 'all' || x.cat === cat))) {
+        const t = el('div', { class: 'gt' }, grid); img(gameIcon(b), '', t); el('b', { text: b.name }, t); if (b.isNew) el('i', { class: 'new', text: 'MỚI' }, t);
+        const tb = town && town.buildings.find(x => x.key === b.key); el('span', { text: `● ${fmt(tb && tb.online || 1000)}` }, t);
+        t.onclick = () => { sfx('accept'); closeModal(); town.goToBuilding(b.key, true); };
+      }
+    };
+    [['all', 'Tất cả'], ['bai', 'Game bài'], ['xx', 'Xúc xắc'], ['co', 'Cờ'], ['khac', 'Vui khác']].forEach(([c, l]) => { const d = el('div', { text: l }, tabs); d.dataset.c = c; d.onclick = () => { sfx('click'); draw(c); }; });
+    draw('all');
+    const bs = el('div', { class: 'mbtns' }, p); bigBtn(bs, '🗺️ Mở bản đồ', 'sky small', () => HC.goto('lobby.html?from=town', 'Đang mở bản đồ…'));
+    el('div', { class: 'note', text: 'Chọn một game để bay tới ngay cửa tiệm của nó.', style: 'color:#7a5a00' }, p);
+    return;
+  }
+  if (kind === 'daily') {
+    const { p, inner } = panel('Quà mỗi ngày', '', 'pink', 1300);
+    const st = dailyState(), avail = dailyAvailable(), idx = avail ? st.day % 7 : (st.day - 1 + 7) % 7;
+    const row = el('div', { class: 'days' }, inner);
+    DAILY.forEach((c, i) => { const d = el('div', { class: 'day' + (i < idx || (!avail && i === idx) ? ' done' : '') + (avail && i === idx ? ' today' : '') }, row); img(`ui-premium-generated/daily-reward/day_${i + 1}.png`, '', d); el('b', { text: fmt(c) }, d); });
+    const bs = el('div', { class: 'mbtns' }, p);
+    if (avail) bigBtn(bs, `NHẬN ${fmt(DAILY[idx])} XU`, 'pink', () => { store.set('daily', { last: today(), day: st.day + 1 }); questBump('daily'); closeModal(); reward(DAILY[idx], 'Đã nhận quà ngày ' + (idx + 1) + '! 🎁'); addXp(15); refreshMe(); });
+    else bigBtn(bs, 'Mai quay lại nhé!', 'grey', closeModal);
+    return;
+  }
+  if (kind === 'event') {
+    const { p, inner } = panel('Lễ hội Heo Con', 'lavender', 'lavender', 1100);
+    const s = qs(), list = el('div', { class: 'list' }, inner);
+    for (const q of QUESTS) {
+      const pr = qprog(q, s), done = pr >= q.goal, got = s.claimed.includes(q.id);
+      const it = el('div', { class: 'it' }, list); img(q.ic, 'width:76px', it);
+      const who = el('div', { class: 'who' }, it); el('b', { text: q.name }, who); el('small', { text: `${q.id === 'walk' ? Math.floor(pr) + ' / ' + q.goal + ' m' : pr + ' / ' + q.goal} · thưởng ${fmt(q.coins)} xu` }, who);
+      const bar = el('div', { class: 'bar' }, who); el('i', { style: `width:${pr / q.goal * 100}%` }, bar);
+      if (got) el('div', { class: 'big grey small', text: 'Đã nhận', style: 'min-width:170px' }, it);
+      else if (done) { const b = el('div', { class: 'big pink small', text: 'Nhận', style: 'min-width:170px' }, it); b.onclick = () => { const s2 = qs(); s2.claimed.push(q.id); store.set('quests', s2); reward(q.coins, 'Hoàn thành: ' + q.name); addXp(25); openModal('event'); }; }
+      else el('div', { class: 'big sky small', text: 'Đang làm', style: 'min-width:170px;opacity:.75' }, it);
+    }
+    return;
+  }
+  if (kind === 'shop') {
+    const { p, inner } = panel('Cửa hàng', 'mint', 'mint', 1250);
+    const tabs = el('div', { class: 'gtabs' }, inner), body = el('div', {}, inner);
+    const packs = [['Heo Đất', 200000, 'emoji-fluent-3d/animals/pig.png'], ['Túi Vàng', 1000000, 'emoji-fluent-3d/game/money_bag.png'], ['Rương Báu', 5000000, 'emoji-fluent-3d/game/gem_stone.png'], ['Đại Gia', 20000000, 'emoji-fluent-3d/game/crown.png']];
+    const draw = t => {
+      body.innerHTML = ''; $$('div', tabs).forEach(d => d.classList.toggle('on', d.dataset.t === t));
+      if (t === 'xu') {
+        const g = el('div', { class: 'ggrid', style: 'grid-template-columns:repeat(4,1fr)' }, body);
+        packs.forEach(([n, c, ic]) => { const t2 = el('div', { class: 'gt' }, g); img(ic, 'width:140px;height:140px', t2); el('b', { text: n }, t2); el('span', { text: fmt(c) + ' xu', style: 'color:#c08f00;font-size:24px' }, t2); const b = el('div', { class: 'big pink small', text: 'Nhận thử', style: 'margin-top:10px' }, t2); b.onclick = e => { e.stopPropagation(); reward(c, `Đã thêm ${fmt(c)} xu (bản thử, không trả tiền thật)`); }; });
+        el('div', { class: 'note', text: 'Bản offline: các gói xu là quà thử, không có thanh toán thật.' }, body);
+      } else {
+        const g = el('div', { class: 'ggrid', style: 'grid-template-columns:repeat(4,1fr)' }, body);
+        const owned = store.get('frames', ['pink', 'gold', 'mint', 'sky']);
+        FRAMES.forEach(([f, price]) => {
+          const t2 = el('div', { class: 'gt' }, g); const w = el('div', { style: 'position:relative;width:150px;height:150px;margin:0 auto' }, t2);
+          img(me.av, 'position:absolute;left:24px;top:24px;width:102px;height:102px;border-radius:50%;object-fit:cover', w); img(`ui-premium-generated/avatar-frames/frame_${f}.png`, 'position:absolute;inset:0;width:150px;height:150px', w);
+          const has = owned.includes(f) || !price;
+          el('b', { text: f === me.fr ? 'Đang dùng' : has ? 'Đã có' : fmt(price) + ' xu', style: 'font-size:24px' }, t2);
+          t2.onclick = () => {
+            if (!has) { if (me.coins < price) { toast('Chưa đủ xu rồi 😅'); sfx('error'); return; } setCoins(me.coins - price); owned.push(f); store.set('frames', owned); sfx('gold'); }
+            me.fr = f; store.set('fr', f); refreshMe(); draw('khung'); toast('Đã đổi khung avatar ✨');
+          };
+        });
+      }
+    };
+    [['xu', 'Xu'], ['khung', 'Khung avatar']].forEach(([t, l]) => { const d = el('div', { text: l }, tabs); d.dataset.t = t; d.onclick = () => { sfx('click'); draw(t); }; });
+    draw('xu'); return;
+  }
+  if (kind === 'rank') {
+    const { p, inner } = panel('Bảng xếp hạng', 'sky', 'sky', 1000);
+    const rows = HCTown.NPCS.map((n, i) => ({ name: n.name, av: portrait(n.key), coins: [98500000, 64200000, 41800000, 30500000, 22100000, 15600000, 9800000, 6400000, 3100000][i], lv: n.lv }));
+    rows.push({ name: me.name, av: me.av, coins: me.coins, lv: me.lv, me: true }); rows.sort((a, b) => b.coins - a.coins);
+    const list = el('div', { class: 'list' }, inner);
+    rows.forEach((r, i) => { const it = el('div', { class: 'it' + (r.me ? ' me' : '') }, list); const rk = el('div', { class: 'rk' }, it); if (i < 3) img(`emoji-fluent-3d/game/${['1st', '2nd', '3rd'][i]}_place_medal.png`, '', rk); else rk.textContent = i + 1; img(r.av, '', it, 'pic'); const w = el('div', { class: 'who' }, it); el('b', { text: r.name + (r.me ? ' (bạn)' : '') }, w); el('small', { text: 'Lv ' + r.lv }, w); el('div', { class: 'amt', text: fmt(r.coins) }, it); });
+    return;
+  }
+  if (kind === 'mail') {
+    const { p, inner } = panel('Hộp thư', 'sky', 'sky', 1000);
+    const mails = mailList(), list = el('div', { class: 'list' }, inner);
+    mails.forEach(m => {
+      const it = el('div', { class: 'it' }, list); img(m.read ? 'emoji-fluent-3d/game/envelope.png' : 'emoji-fluent-3d/game/love_letter.png', 'width:76px;flex:none', it);
+      const w = el('div', { class: 'who' }, it); el('b', { text: m.title }, w); el('small', { text: m.from + ' · ' + m.body }, w);
+      if (m.read) el('div', { class: 'big grey small', text: 'Đã nhận', style: 'flex:none;width:170px' }, it);
+      else { const b = el('div', { class: 'big lemon small', text: '+' + HC.short(m.coins), style: 'flex:none;width:170px' }, it); b.onclick = () => { m.read = true; store.set('mail', mails); reward(m.coins, 'Đã nhận quà trong thư 💌'); refreshMe(); openModal('mail'); }; }
+    });
+    return;
+  }
+  if (kind === 'profile') {
+    const { p, inner } = panel('Hồ sơ', '', 'pink', 1200);
+    el('div', { class: 'lbl', text: 'Tên trong game' }, inner);
+    const nin = el('input', { class: 'namein', maxlength: 14, value: me.name }, inner);
+    el('div', { class: 'lbl', text: 'Linh vật 3D đi dạo thị trấn' }, inner);
+    const mg = el('div', { class: 'pickgrid', style: 'margin-top:16px' }, inner);
+    MASCOTS.forEach((m, i) => { const im = img(portrait(m.key), '', mg, i === me.mascot ? 'on' : ''); im.title = m.name; im.onclick = async () => { me.mascot = i; store.set('mascot', i); $$('img', mg).forEach((x, j) => x.classList.toggle('on', j === i)); sfx('pop'); await town.setPlayer(m.key, me.name); town.emote(); }; });
+    el('div', { class: 'lbl', text: 'Ảnh đại diện' }, inner);
+    const ag = el('div', { class: 'pickgrid', style: 'margin-top:16px' }, inner);
+    const avs = [...MASCOTS.map(m => portrait(m.key)), ...['bong', 'heo', 'meo', 'kem', 'mochi', 'xoai', 'gau', 'tho'].map(s => `avatars-dicebear/fun-emoji/png/${s}.png`)];
+    avs.forEach(a => { const im = img(a, '', ag, a === me.av ? 'on' : ''); im.onclick = () => { me.av = a; store.set('av', a); $$('img', ag).forEach(x => x.classList.toggle('on', x === im)); refreshMe(); sfx('pop'); }; });
+    el('div', { class: 'note', text: me.guest ? 'Bạn đang chơi tài khoản khách. Đăng ký để lưu riêng tiến trình.' : `Tài khoản: ${me.user}` }, inner);
+    const bs = el('div', { class: 'mbtns' }, p);
+    bigBtn(bs, 'LƯU', 'pink', () => { me.name = (nin.value.trim() || me.name).slice(0, 14); store.set('name', me.name); refreshMe(); if (town.player) { town.player.name = me.name; town.playerLabel.querySelector('b').textContent = me.name; } closeModal(); toast('Đã lưu hồ sơ ✨'); });
+    return;
+  }
+  if (kind === 'settings') {
+    const { p, inner } = panel('Cài đặt', 'sky', 'sky', 1000);
+    const S = HC.settings;
+    const row = (label, key) => { const r = el('div', { class: 'srow' }, inner); el('span', { text: label }, r); const t = el('div', { class: 'tog' + (S[key] ? ' on' : '') }, r); el('i', {}, t); t.onclick = () => { S[key] = !S[key]; HC.saveSettings(); t.classList.toggle('on', S[key]); if (key === 'music') S.music ? HC.music('music-bgm/opengameart/happy-adventure__TinyWorlds.mp3', .28) : HC.stopMusic(); }; };
+    row('🎵 Nhạc nền', 'music'); row('🔊 Âm thanh', 'sfx'); row('📳 Rung khi chặt heo', 'vibe');
+    const g = el('div', { class: 'srow' }, inner); el('span', { text: '✨ Đồ hoạ' }, g); const seg = el('div', { class: 'seg' }, g);
+    [['cao', 'Đẹp'], ['vua', 'Vừa'], ['thap', 'Nhẹ']].forEach(([k, l]) => { const s = el('span', { text: l, class: (S.gfx || 'cao') === k ? 'on' : '' }, seg); s.onclick = () => { S.gfx = k; HC.saveSettings(); $$('span', seg).forEach(x => x.classList.toggle('on', x === s)); town.resizePixelRatio(pixelRatio()); town.st.renderer.shadowMap.enabled = k !== 'thap'; town.st.scene.traverse(o => { if (o.material) o.material.needsUpdate = true; }); }; });
+    const z = el('div', { class: 'srow' }, inner); el('span', { text: '🔍 Cỡ giao diện' }, z); const zs = el('div', { class: 'seg' }, z);
+    [['nho', 'Nhỏ'], ['vua', 'Vừa'], ['lon', 'Lớn']].forEach(([k, l]) => { const s = el('span', { text: l, class: (S.ui || 'vua') === k ? 'on' : '' }, zs); s.onclick = () => { S.ui = k; HC.saveSettings(); $$('span', zs).forEach(x => x.classList.toggle('on', x === s)); fit(); }; });
+    const acc = el('div', { class: 'srow' }, inner); el('span', { text: me.guest ? '👤 Đang chơi: Khách' : `👤 Tài khoản: ${me.user}` }, acc);
+    const bs = el('div', { class: 'mbtns' }, p);
+    bigBtn(bs, 'Đăng xuất', 'grey', () => { HC.auth.logout(); HC.goto('index.html', 'Hẹn gặp lại nha!'); });
+    bigBtn(bs, 'Xong', 'pink', closeModal);
+    return;
+  }
+  if (kind === 'npc') {
+    const n = arg; const { p, inner } = panel(n.name, 'mint', 'mint', 900);
+    const box = el('div', { class: 'enterbox' }, inner);
+    const ic = el('div', { class: 'ic', style: 'width:260px;height:260px' }, box); img(portrait(n.key), 'width:260px;height:260px;border-radius:50%;background:#fff4f9', ic); el('span', { text: 'Lv ' + n.lv }, ic);
+    const tx = el('div', {}, box); el('h2', { text: n.name, style: 'font-size:60px' }, tx);
+    el('p', { text: `Đang có ${fmt([98.5, 64.2, 41.8, 30.5, 22.1, 15.6, 9.8, 6.4, 3.1][HCTown.NPCS.findIndex(x => x.name === n.name)] * 1e6)} xu`, style: 'margin-top:10px' }, tx);
+    el('p', { text: pick(['Thích nhất là chặt heo 🐷', 'Cao thủ Bầu Cua 🦀', 'Đang tìm bạn chơi Cờ Tướng ♟️', 'Mê Bắn Cá lắm 🐟']), style: 'color:#a07090;font-size:28px' }, tx);
+    const bs = el('div', { class: 'mbtns' }, p);
+    bigBtn(bs, '🤝 Kết bạn', 'sky', () => { closeModal(); toast(`Đã gửi lời mời kết bạn tới ${n.name}`); town.say(n, 'Okela bạn ơi! 🥰'); });
+    bigBtn(bs, '🃏 Rủ chơi Tiến Lên', 'pink', () => { town.say(n, 'Chơi luôn! 🃏'); playGame('tien-len'); });
+    return;
+  }
+  if (kind === 'welcome') {
+    const { p, inner } = panel('Chào bạn mới!', '', 'pink', 1000);
+    const box = el('div', { class: 'enterbox' }, inner); img('emoji-fluent-3d/game/wrapped_gift.png', 'width:260px', box);
+    const tx = el('div', {}, box); el('h2', { text: me.name, style: 'font-size:60px' }, tx); el('p', { text: 'Quà tân thủ 1.250.000 xu đã vào túi. Đi dạo thị trấn, chạm vào cửa hàng để chơi nhé!' }, tx);
+    const bs = el('div', { class: 'mbtns' }, p); bigBtn(bs, 'Tuyệt vời!', 'pink', () => { closeModal(); confetti(100); flyCoins(16); });
+    return;
+  }
+  if (kind === 'forgot') {
+    const { p, inner } = panel('Quên mật khẩu', 'sky', 'sky', 900);
+    el('p', { text: 'Đây là bản chơi offline nên tài khoản chỉ nằm trong trình duyệt này, không có máy chủ để gửi lại mật khẩu. Bạn có thể tạo tài khoản mới, hoặc chơi bằng tài khoản khách.', style: 'font:800 30px "Baloo 2";color:#5a4a6e;line-height:1.4;margin:0' }, inner);
+    const bs = el('div', { class: 'mbtns' }, p); bigBtn(bs, 'Tạo tài khoản mới', 'pink', () => { closeModal(); setTab('reg'); }); bigBtn(bs, 'Đóng', 'grey', closeModal);
+    return;
+  }
+}
+
+// ------------------------------------------------------------------ boot
+async function boot() {
+  HC.arrive();
+  const tipTimer = startLoadingFx();
+  setLoad(.02);
+  try { await Promise.race([Promise.all(['400 100px "Grandstander Black"', '400 40px "Grandstander Black"', '800 30px "Baloo 2"', '800 30px Nunito'].map(f => document.fonts.load(f))), sleep(3500)]); } catch (e) {}
+  setLoad(.05);
+  if (!window.HC3D || !HC3D.ok) {
+    $('#ltext').textContent = 'Máy chưa bật WebGL nên không vẽ được thị trấn 3D. Đang mở bản đồ thay thế…';
+    setTimeout(() => location.href = 'lobby.html', 2500); return;
+  }
+  await loadScript('assets/3d/js/tex_town.js'); setLoad(.08);
+  town = window.town = new HCTown.Town($('#town'), { labels: $('#labels'), pixelRatio: pixelRatio(), instant: SHOT, width: innerWidth, height: innerHeight });
+  town.uiScale = uiS;
+  town.on('enter', b => { $('#near').classList.remove('on'); openBuilding(b); });
+  town.on('near', b => showNear(b));
+  town.on('npc', n => { questBump('greet', n.name); town.say(n, pick(['Chào bạn! 👋', 'Hi hi 😆', 'Đi chơi không? 🃏'])); openModal('npc', n); });
+  town.on('walk', () => sfx('tick', .25));
+  await town.init(p => setLoad(.08 + p * .9));
+  bindMinimap();
+  if (Q.get('screen') === 'loading') { setLoad(.64); return; }
+  setLoad(1); clearInterval(tipTimer);
+  await sleep(SHOT ? 50 : 350);
+  $('#loading').classList.add('out'); setTimeout(() => $('#loading').classList.add('hide'), 700);
+  if (Q.get('as') === 'guest') HC.auth.guest();
+  const want = Q.get('screen');
+  if (want === 'aerial') return;   // just the town from the sky (for screenshots)
+  if (want === 'maprender') { const m = town.renderMap(innerWidth, innerHeight); $('#ui').style.display = 'none'; document.body.dataset.map = JSON.stringify(m); return; }
+  if (want === 'auth' || (!HC.auth.signedIn() && want !== 'town')) showAuth();
+  else { if (!HC.auth.signedIn()) HC.auth.guest(); enterTown(); }
+}
+if (Q.get('selftest')) loadScript('js/town-selftest.js');
+boot().catch(e => { console.error(e); $('#ltext').textContent = 'Có lỗi khi dựng thị trấn: ' + e.message; });
+</script>
+</body>
+</html>

@@ -1,0 +1,2 @@
+Generated for this project with code (Pillow). Uses Fluent Emoji (MIT) for a few decorations and Kenney clouds (CC0).
+The generated art itself is CC0; keep the Fluent MIT notice if you ship the decorated frames/rewards/pills.

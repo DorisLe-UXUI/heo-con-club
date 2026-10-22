@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Bản đồ · Heo Con Club</title>
+<style>
+@font-face{font-family:"Grandstander Black";src:url("assets/fonts/GrandstanderBlack-Regular.ttf") format("truetype");font-display:swap}
+@font-face{font-family:"Baloo 2";src:url("assets/fonts/Baloo2%5Bwght%5D.ttf") format("truetype");font-weight:400 800;font-display:swap}
+@font-face{font-family:"Nunito";src:url("assets/fonts/Nunito%5Bwght%5D.ttf") format("truetype");font-weight:200 1000;font-display:swap}
+*{box-sizing:border-box;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden;font-family:Nunito,system-ui,sans-serif;color:#5a2342;touch-action:none;background:#cfeec0}
+img{-webkit-user-drag:none}
+.hide{display:none!important}
+/* the map: a big picture of the 3D town that you drag and zoom */
+#view{position:fixed;inset:0;overflow:hidden;cursor:grab;background:radial-gradient(circle at 50% 50%,#d9f3c8,#bfe6a6)}
+#view.drag{cursor:grabbing}
+#world{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform}
+#world > img.map{display:block;width:2400px;height:2000px;border-radius:40px;box-shadow:0 30px 80px rgba(60,90,40,.35)}
+.pin{position:absolute;left:0;top:0;transform:translate(-50%,-100%);cursor:pointer;transition:filter .2s,opacity .25s;animation:bob 2.6s ease-in-out infinite;z-index:3}
+@keyframes bob{50%{margin-top:-10px}}
+.pin .bub{display:flex;flex-direction:column;align-items:center}
+.pin .ic{width:96px;height:96px;border-radius:50%;background:#fff;border:6px solid var(--c);box-shadow:0 6px 0 var(--d),0 12px 20px rgba(40,20,50,.3);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.pin img{width:78px;height:78px;border-radius:22px;object-fit:cover}
+.pin b{margin-top:-10px;padding:2px 14px 4px;border-radius:14px;background:var(--c);box-shadow:0 4px 0 var(--d);font:400 22px "Grandstander Black";color:#fff;white-space:nowrap;position:relative}
+.pin span{display:none}
+.pin i{position:absolute;right:-18px;top:-8px;font:400 15px "Grandstander Black";font-style:normal;color:#fff;padding:1px 8px;border-radius:10px;transform:rotate(10deg)}
+.pin i.hot{background:linear-gradient(#ff8a5c,#ff3d6e);box-shadow:0 3px 0 #c22a50}
+.pin i.new{background:linear-gradient(#7ff0c4,#2fc58e);box-shadow:0 3px 0 #1f9a70}
+.pin:hover{z-index:6}.pin:hover .ic{transform:scale(1.12)}.pin .ic{transition:transform .15s}
+.pin.dim{opacity:.25;filter:grayscale(.7)}
+.pin.sel .ic{transform:scale(1.25);box-shadow:0 6px 0 var(--d),0 0 0 10px rgba(255,255,255,.85),0 16px 30px rgba(40,20,50,.4)}
+.pin.sel{z-index:5;animation:none}
+.c-bai{--c:#ff5c9a;--d:#c2407a}.c-xx{--c:#ffb300;--d:#a86d00}.c-co{--c:#2fc58e;--d:#168a60}.c-khac{--c:#3d9bff;--d:#1f6fc0}.c-sp{--c:#8d6bff;--d:#5f3fc9}
+#me{position:absolute;transform:translate(-50%,-100%);z-index:4;pointer-events:none;text-align:center}
+#me .ring{width:110px;height:110px;border-radius:50%;border:6px solid #fff;background:#fff4f9;overflow:hidden;box-shadow:0 0 0 6px #ff5c9a,0 12px 24px rgba(60,10,50,.35);margin:0 auto}
+#me .ring img{width:100%;height:100%;object-fit:cover}
+#me b{display:inline-block;margin-top:10px;padding:4px 16px;border-radius:16px;background:#ff4f95;color:#fff;font:400 22px "Grandstander Black";box-shadow:0 4px 0 #c2407a}
+#me .pulse{position:absolute;left:50%;top:55px;width:110px;height:110px;margin-left:-55px;margin-top:-55px;border-radius:50%;border:5px solid #ff5c9a;animation:pulse 1.6s ease-out infinite}
+@keyframes pulse{from{transform:scale(1);opacity:.9}to{transform:scale(2.2);opacity:0}}
+.cloud{position:absolute;pointer-events:none;opacity:.75;filter:blur(1px);z-index:6}
+.cloud div{position:absolute;background:#fff;border-radius:50%}
+/* UI layer (1 unit ≈ 1px on a 1080p screen) */
+#ui{position:fixed;left:0;top:0;transform-origin:0 0;pointer-events:none}
+#ui > *{pointer-events:auto}
+.glass{background:rgba(255,255,255,.94);border:4px solid #fff;border-radius:36px;box-shadow:0 8px 0 rgba(194,64,122,.28),0 14px 28px rgba(60,10,50,.22)}
+#top{position:absolute;left:16px;right:16px;top:14px;height:100px;display:flex;align-items:center;gap:16px;pointer-events:none!important}
+#top > *{pointer-events:auto}
+#toTown{display:flex;align-items:center;gap:8px;height:92px;padding:0 30px 0 12px;border-radius:46px;background:linear-gradient(#8ff2c8,#2fc58e);box-shadow:0 8px 0 #1f9a70,0 14px 22px rgba(31,154,112,.3);font:400 32px "Grandstander Black";color:#fff;-webkit-text-stroke:6px #1f9a70;paint-order:stroke fill;cursor:pointer;white-space:nowrap}
+#toTown img{width:76px}
+#title{padding:10px 30px}
+#title b{display:block;font:400 40px "Grandstander Black";color:#b0306e;line-height:1.05}
+#title small{display:block;font:800 22px "Baloo 2";color:#8a6a80}
+#top .sp{flex:1}
+.pill{position:relative;height:78px;padding:0 30px 0 86px;border-radius:40px;display:flex;align-items:center;font:400 36px "Grandstander Black";color:#a86d00;white-space:nowrap}
+.pill img{position:absolute;left:4px;top:-2px;width:78px}
+#prof{display:flex;align-items:center;gap:10px;padding:6px 24px 6px 6px;border-radius:44px;cursor:pointer}
+#prof img{width:72px;height:72px;border-radius:50%;background:#fff4f9}
+#prof b{font:400 28px "Grandstander Black";color:#9b2c5e;max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#filters{position:absolute;left:16px;top:140px;display:flex;flex-direction:column;gap:12px;padding:16px}
+#filters div{display:flex;align-items:center;gap:10px;padding:8px 22px 8px 10px;border-radius:30px;font:400 26px "Grandstander Black";color:#9b2c5e;cursor:pointer;background:#fff4f9;white-space:nowrap}
+#filters div img{width:44px}
+#filters div.on{background:linear-gradient(#ff9cc4,#ff5c9a);color:#fff;box-shadow:0 5px 0 #c2407a}
+#list{position:absolute;right:16px;top:140px;bottom:240px;width:390px;padding:16px;display:flex;flex-direction:column}
+#list h3{margin:4px 8px 10px;font:400 30px "Grandstander Black";color:#5f3fc9}
+#rows{flex:1;overflow:auto;padding-right:4px}
+.row{display:flex;align-items:center;gap:12px;padding:8px;border-radius:24px;cursor:pointer;transition:background .15s}
+.row:hover,.row.sel{background:#fff0f6}
+.row img{width:64px;height:64px;border-radius:18px}
+.row b{display:block;font:400 26px "Grandstander Black";color:#9b2c5e}
+.row span{display:block;font:800 18px "Baloo 2";color:#8a7a99}
+.row .go{margin-left:auto;padding:6px 16px;border-radius:18px;font:400 20px "Grandstander Black";color:#fff;background:linear-gradient(#ff9cc4,#ff4f95);box-shadow:0 4px 0 #c2407a;white-space:nowrap}
+#zoom{position:absolute;right:16px;bottom:22px;display:flex;flex-direction:column;gap:12px}
+#zoom div{width:84px;height:84px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:400 46px "Grandstander Black";color:#fff;cursor:pointer;background:linear-gradient(#a8dcff,#3d9bff);box-shadow:0 7px 0 #2a7fd0}
+#zoom div.home{font-size:30px;background:linear-gradient(#ff9cc4,#ff4f95);box-shadow:0 7px 0 #c2407a}
+#card{position:absolute;left:50%;bottom:22px;transform:translateX(-50%);width:900px;display:none;gap:26px;align-items:center;padding:22px 26px;animation:pop .3s cubic-bezier(.2,1.5,.4,1) both}
+#card.on{display:flex}
+@keyframes pop{from{opacity:0;transform:translate(-50%,40px) scale(.9)}}
+#card > img{width:170px;height:170px;border-radius:40px;flex:none}
+#card h2{margin:0;font:400 52px "Grandstander Black";color:#9b2c5e;line-height:1}
+#card .chip{display:inline-block;margin:8px 0;padding:2px 16px;border-radius:16px;font:800 20px "Baloo 2";color:#fff}
+#card p{margin:0;font:800 24px "Baloo 2";color:#6a4a5e;line-height:1.3}
+#card .btns{display:flex;gap:16px;margin-top:14px}
+.gbtn{display:flex;align-items:center;justify-content:center;gap:8px;height:76px;padding:0 30px;border-radius:38px;font:400 30px "Grandstander Black";color:#fff;cursor:pointer;white-space:nowrap;text-shadow:0 3px 0 rgba(0,0,0,.18)}
+.gbtn.pink{background:linear-gradient(#ff9cc4,#ff4f95);box-shadow:0 7px 0 #c2407a}
+.gbtn.mint{background:linear-gradient(#7ff0c4,#2fc58e);box-shadow:0 7px 0 #1f9a70}
+#card .x{position:absolute;right:-16px;top:-16px;width:58px;height:58px;cursor:pointer}
+#hint{position:absolute;left:50%;bottom:30px;transform:translateX(-50%);padding:10px 30px;border-radius:30px;background:rgba(50,22,60,.7);color:#fff;font:800 26px "Baloo 2";white-space:nowrap}
+</style>
+</head>
+<body>
+<div id="view"><div id="world"><img class="map" id="mapImg" src="assets/3d/renders/town_map.jpg" alt="Bản đồ thị trấn"></div></div>
+<div id="ui">
+  <div id="top">
+    <div id="toTown" title="Vào thị trấn 3D"><img src="assets/emoji-fluent-3d/game/house.png">Thị trấn 3D</div>
+    <div id="title" class="glass"><b>Bản đồ Heo Con</b><small>Kéo để xem · chạm cửa tiệm để chơi</small></div>
+    <div class="sp"></div>
+    <div class="pill glass"><img src="assets/emoji-fluent-3d/game/coin.png"><span id="coinTxt">0</span></div>
+    <div id="prof" class="glass"><img id="meAv"><b id="meName"></b></div>
+  </div>
+  <div id="filters" class="glass"></div>
+  <div id="list" class="glass"><h3>Tất cả game</h3><div id="rows"></div></div>
+  <div id="zoom"><div id="zin">+</div><div id="zout">−</div><div class="home" id="zhome">⌂</div></div>
+  <div id="hint">Kéo bản đồ · cuộn hoặc chụm 2 ngón để phóng to</div>
+  <div id="card" class="glass"><img id="cImg"><div style="flex:1;min-width:0"><h2 id="cName"></h2><div class="chip" id="cCat"></div><p id="cDesc"></p><div class="btns" id="cBtns"></div></div><img class="x" id="cX" src="assets/ui-jelly-pzuh/buttons/icon_close_red.png"></div>
+</div>
+<script src="js/hc-core.js"></script>
+<script src="assets/3d/js/town_map.js"></script>
+<script>
+'use strict';
+const $ = s => document.querySelector(s), A = HC.A, Q = new URLSearchParams(location.search);
+function el(tag, attrs = {}, parent) { const e = document.createElement(tag); for (const [k, v] of Object.entries(attrs)) { if (k === 'style') e.style.cssText = v; else if (k === 'html') e.innerHTML = v; else if (k === 'text') e.textContent = v; else e.setAttribute(k, v); } if (parent) parent.appendChild(e); return e; }
+const MAP = window.HC_TOWN_MAP, MW = MAP.w, MH = MAP.h;
+const CAT = { bai: ['Game bài', '#ff5c9a'], xx: ['Xúc xắc', '#ffb300'], co: ['Cờ', '#2fc58e'], khac: ['Vui khác', '#3d9bff'], sp: ['Tiện ích', '#8d6bff'] };
+const ICON = p => p.action ? { shop: 'emoji-fluent-3d/game/shopping_bags.png', rank: 'emoji-fluent-3d/game/trophy.png', event: 'emoji-fluent-3d/game/party_popper.png', daily: 'emoji-fluent-3d/game/wrapped_gift.png', hall: 'emoji-fluent-3d/game/joystick.png' }[p.action] : `games/lobby-icons/${p.key}.png`;
+const sfx = n => HC.sfx(n, .4);
+
+// ---------------------------------------------------------------- where each pin leads
+function gameUrl(key) {
+  if (key === 'tien-len') return 'tien-len.html?from=map';
+  if (key === 'day-xu') return 'pusher.html?from=map';
+  return `play3d.html?game=${key}&from=map`;
+}
+function open(p) {
+  sfx('accept');
+  if (p.action === 'hall') { setFilter('all'); return; }
+  if (p.action) return HC.goto(`index.html?open=${p.action}&look=${p.key}`, 'Đang về thị trấn…');
+  HC.goto(gameUrl(p.key), `Đang vào ${p.name}…`);
+}
+// a deep link like lobby.html?game=bau-cua still works
+if (Q.get('game')) { const p = MAP.pins.find(x => x.key === Q.get('game')); if (p) location.replace(gameUrl(p.key)); }
+
+// ---------------------------------------------------------------- UI scale (like the other pages)
+let uiS = 1, UW = 1920, UH = 1080;
+function fitUI() { uiS = HC.uiScale(1600); UW = innerWidth / uiS; UH = innerHeight / uiS; const ui = $('#ui'); ui.style.width = UW + 'px'; ui.style.height = UH + 'px'; ui.style.transform = `scale(${uiS})`; $('#list').style.display = UW < 1700 ? 'none' : ''; }
+
+// ---------------------------------------------------------------- pan / zoom
+const world = $('#world'), view = $('#view');
+let sc = .5, tx = 0, ty = 0, minSc = .3, maxSc = 1.6;
+function clampView() {
+  const W = innerWidth, H = innerHeight, mw = MW * sc, mh = MH * sc;
+  tx = mw <= W ? (W - mw) / 2 : Math.min(60, Math.max(W - mw - 60, tx));
+  ty = mh <= H ? (H - mh) / 2 : Math.min(60, Math.max(H - mh - 60, ty));
+  world.style.transform = `translate(${tx}px,${ty}px) scale(${sc})`;
+}
+function zoomAt(f, cx = innerWidth / 2, cy = innerHeight / 2) { const n = Math.max(minSc, Math.min(maxSc, sc * f)); tx = cx - (cx - tx) * n / sc; ty = cy - (cy - ty) * n / sc; sc = n; clampView(); }
+function fitMap() { minSc = Math.min(innerWidth / MW, innerHeight / MH) * .9; sc = Math.max(minSc, Math.min(maxSc, Math.max(innerWidth / MW, innerHeight / MH) * .95)); tx = (innerWidth - MW * sc) / 2; ty = (innerHeight - MH * sc) / 2; clampView(); }
+function flyTo(p, z = Math.max(sc, .8)) {
+  const x = p.u * MW, y = p.v * MH, t0 = performance.now(), s0 = sc, x0 = tx, y0 = ty;
+  const tx1 = innerWidth / 2 - x * z, ty1 = innerHeight * .42 - y * z;
+  const step = t => { const k = Math.min(1, (t - t0) / 450), e = 1 - Math.pow(1 - k, 3); sc = s0 + (z - s0) * e; tx = x0 + (tx1 - x0) * e; ty = y0 + (ty1 - y0) * e; clampView(); if (k < 1) requestAnimationFrame(step); };
+  requestAnimationFrame(step);
+}
+const ptrs = new Map(); let drag = null, pinch = null, moved = 0;
+view.addEventListener('pointerdown', e => {
+  ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY }); view.setPointerCapture(e.pointerId); moved = 0;
+  if (ptrs.size === 2) { const [a, b] = [...ptrs.values()]; pinch = { d: Math.hypot(a.x - b.x, a.y - b.y), sc }; drag = null; }
+  else { drag = { x: e.clientX, y: e.clientY, tx, ty }; view.classList.add('drag'); }
+});
+view.addEventListener('pointermove', e => {
+  if (!ptrs.has(e.pointerId)) return; ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (pinch && ptrs.size === 2) { const [a, b] = [...ptrs.values()]; zoomAt(pinch.sc * Math.hypot(a.x - b.x, a.y - b.y) / pinch.d / sc, (a.x + b.x) / 2, (a.y + b.y) / 2); moved = 99; return; }
+  if (drag) { moved = Math.max(moved, Math.hypot(e.clientX - drag.x, e.clientY - drag.y)); tx = drag.tx + e.clientX - drag.x; ty = drag.ty + e.clientY - drag.y; clampView(); }
+});
+const up = e => { ptrs.delete(e.pointerId); if (ptrs.size < 2) pinch = null; if (!ptrs.size) { drag = null; view.classList.remove('drag'); } };
+view.addEventListener('pointerup', up); view.addEventListener('pointercancel', up);
+view.addEventListener('wheel', e => { e.preventDefault(); zoomAt(e.deltaY < 0 ? 1.12 : 1 / 1.12, e.clientX, e.clientY); }, { passive: false });
+$('#zin').onclick = () => { sfx('click'); zoomAt(1.25); }; $('#zout').onclick = () => { sfx('click'); zoomAt(1 / 1.25); }; $('#zhome').onclick = () => { sfx('click'); fitMap(); };
+
+// ---------------------------------------------------------------- pins, list, filters
+let filter = 'all', selected = null;
+const online = Object.fromEntries(MAP.pins.map(p => [p.key, p.action ? 0 : 300 + Math.floor(Math.random() * 9500)]));
+MAP.pins.forEach(p => {
+  const pin = el('div', { class: 'pin c-' + p.cat, style: `left:${p.u * MW}px;top:${p.v * MH + 10}px;animation-delay:${-Math.random() * 2.6}s` }, world);
+  pin.innerHTML = `<div class="bub"><div class="ic"><img src="${A(ICON(p))}"></div><b>${p.name}</b></div>${p.isNew ? '<i class="new">MỚI</i>' : p.hot ? '<i class="hot">HOT</i>' : ''}`;
+  pin.addEventListener('pointerup', e => { if (moved > 10) return; e.stopPropagation(); select(p); });
+  p.el = pin;
+});
+// "you are here" at the plaza
+const meMark = el('div', { id: 'me', style: `left:${MAP.plaza.u * MW}px;top:${MAP.plaza.v * MH}px`, html: `<div class="pulse"></div><div class="ring"><img src="${A(HC.store.get('av', 'avatars-dicebear/fun-emoji/png/bong.png'))}"></div><b>Bạn ở đây</b>` }, world);
+// drifting clouds for a bit of life
+for (let i = 0; i < 7; i++) {
+  const c = el('div', { class: 'cloud', style: `left:${Math.random() * MW}px;top:${Math.random() * MH}px` }, world);
+  for (let k = 0; k < 4; k++) el('div', { style: `left:${k * 60}px;top:${(k % 2) * -30}px;width:${110 + Math.random() * 60}px;height:${80 + Math.random() * 40}px` }, c);
+  c.animate([{ transform: 'translateX(-200px)' }, { transform: `translateX(${MW + 200}px)` }], { duration: 60000 + Math.random() * 40000, iterations: Infinity, delay: -Math.random() * 60000 });
+}
+const FILTERS = [['all', 'Tất cả', 'emoji-fluent-3d/game/joystick.png'], ['bai', 'Game bài', 'emoji-fluent-3d/game/joker.png'], ['xx', 'Xúc xắc', 'emoji-fluent-3d/game/game_die.png'], ['co', 'Cờ', 'emoji-fluent-3d/game-items/chess_pawn.png'], ['khac', 'Vui khác', 'emoji-fluent-3d/game/admission_tickets.png'], ['sp', 'Tiện ích', 'emoji-fluent-3d/game/wrapped_gift.png']];
+FILTERS.forEach(([k, l, ic]) => { const d = el('div', { html: `<img src="${A(ic)}">${l}` }, $('#filters')); d.dataset.k = k; d.onclick = () => { sfx('click'); setFilter(k); }; });
+function setFilter(k) {
+  filter = k; [...$('#filters').children].forEach(d => d.classList.toggle('on', d.dataset.k === k));
+  MAP.pins.forEach(p => p.el.classList.toggle('dim', k !== 'all' && p.cat !== k));
+  $('#list h3').textContent = k === 'all' ? 'Tất cả game' : FILTERS.find(f => f[0] === k)[1];
+  const rows = $('#rows'); rows.innerHTML = '';
+  MAP.pins.filter(p => k === 'all' ? !p.action : p.cat === k).forEach(p => {
+    const r = el('div', { class: 'row' + (selected === p ? ' sel' : '') }, rows);
+    r.innerHTML = `<img src="${A(ICON(p))}"><div><b>${p.name}</b><span>${p.action ? CAT[p.cat][0] : '● ' + HC.fmt(online[p.key]) + ' đang chơi'}</span></div><div class="go">${p.action ? 'Mở' : 'Chơi'}</div>`;
+    r.onclick = () => select(p, true); r.querySelector('.go').onclick = e => { e.stopPropagation(); open(p); };
+  });
+}
+function select(p, fly) {
+  sfx('pop'); selected = p;
+  MAP.pins.forEach(x => x.el.classList.toggle('sel', x === p));
+  [...$('#rows').children].forEach(r => r.classList.toggle('sel', r.querySelector('b').textContent === p.name));
+  $('#cImg').src = A(ICON(p)); $('#cName').textContent = p.name; $('#cCat').textContent = CAT[p.cat][0]; $('#cCat').style.background = CAT[p.cat][1]; $('#cDesc').textContent = p.desc + (online[p.key] ? ` · ${HC.fmt(online[p.key])} người đang chơi.` : '');
+  const b = $('#cBtns'); b.innerHTML = '';
+  const play = el('div', { class: 'gbtn pink', html: p.action ? 'MỞ NGAY' : '▶ CHƠI NGAY' }, b); play.onclick = () => open(p);
+  const go = el('div', { class: 'gbtn mint', html: '🏠 Tới tiệm trong thị trấn' }, b); go.onclick = () => { sfx('accept'); HC.goto(`index.html?look=${p.key}`, 'Đang về thị trấn…'); };
+  $('#card').classList.add('on'); $('#hint').classList.add('hide');
+  if (fly) flyTo(p);
+}
+$('#cX').onclick = () => { sfx('click'); $('#card').classList.remove('on'); selected = null; MAP.pins.forEach(x => x.el.classList.remove('sel')); };
+$('#toTown').onclick = () => { sfx('accept'); HC.goto('index.html', 'Đang về thị trấn…'); };
+$('#prof').onclick = () => HC.goto('index.html?open=profile', 'Đang mở hồ sơ…');
+$('#meAv').src = A(HC.store.get('av', 'avatars-dicebear/fun-emoji/png/bong.png')); $('#meName').textContent = HC.store.get('name', 'Bạn Heo Con');
+$('#coinTxt').textContent = HC.fmt(HC.store.get('coins', 1250000));
+
+addEventListener('resize', () => { fitUI(); clampView(); });
+const start = () => { HC.arrive(); fitUI(); fitMap(); setFilter('all'); if (Q.get('sel')) { const p = MAP.pins.find(x => x.key === Q.get('sel')); if (p) select(p, true); } HC.music('music-bgm/opengameart/happy-adventure__TinyWorlds.mp3', .25); };
+if ($('#mapImg').complete) start(); else $('#mapImg').onload = start;
+</script>
+</body>
+</html>

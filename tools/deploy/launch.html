@@ -1,0 +1,16 @@
+<title>Heo Con Club</title>
+<style>
+/* One fixed candy-pastel world (the game has no dark theme): full-bleed art, logo centred, one status line. */
+:root { --bg: #f6d9f3; --ink: #8a3a66; --card: rgba(255, 255, 255, .78); --display: "Baloo 2", "Trebuchet MS", system-ui, sans-serif; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--bg) url("assets/ui-premium-generated/lobby-backgrounds/bg_loading.jpg") center / cover no-repeat; color: var(--ink); font: 700 17px/1.4 var(--display); }
+.wrap { box-sizing: border-box; height: 100%; display: grid; place-content: center; justify-items: center; gap: 18px; padding-inline: 16px; text-align: center; }
+.wrap img { width: min(560px, 82vw); max-width: 100%; filter: drop-shadow(0 12px 16px rgba(120, 30, 80, .3)); }
+.wrap p { margin: 0; padding: 8px 22px; border-radius: 22px; background: var(--card); }
+.wrap a { color: var(--ink); }
+</style>
+<main class="wrap">
+  <img src="assets/ui-premium-generated/logo_heo_con_club.png" alt="Heo Con Club">
+  <p>Đang mở thị trấn… <a href="home.html">Bấm vào đây nếu chờ lâu</a></p>
+</main>
+<script>location.replace('home.html');</script>

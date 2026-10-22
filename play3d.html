@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Heo Con Club</title>
+<style>
+@font-face{font-family:"Grandstander Black";src:url("assets/fonts/GrandstanderBlack-Regular.ttf") format("truetype");font-display:swap}
+@font-face{font-family:"Baloo 2";src:url("assets/fonts/Baloo2%5Bwght%5D.ttf") format("truetype");font-weight:400 800;font-display:swap}
+@font-face{font-family:"Nunito";src:url("assets/fonts/Nunito%5Bwght%5D.ttf") format("truetype");font-weight:200 1000;font-display:swap}
+@font-face{font-family:"LXGW WenKai TC";src:url("assets/fonts/LXGWWenKaiTC-Bold.ttf") format("truetype");font-display:swap}
+*{box-sizing:border-box;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden;font-family:Nunito,system-ui,sans-serif;color:#5a2342;touch-action:none;background:radial-gradient(circle at 50% 0,#ffe3f0,#e9d9ff 55%,#c9e4ff)}
+img{-webkit-user-drag:none}
+.hide{display:none!important}
+#scene{position:fixed;inset:0;width:100vw;height:100vh;display:block}
+#ui{position:fixed;left:0;top:0;transform-origin:0 0;pointer-events:none}
+#ui > *{pointer-events:auto}
+#labels,#fx,#gameui{position:absolute;inset:0;pointer-events:none!important}
+#gameui > *{pointer-events:auto}
+#fx{z-index:40;overflow:hidden}
+.glass{background:rgba(255,255,255,.93);border:4px solid #fff;border-radius:36px;box-shadow:0 8px 0 rgba(194,64,122,.28),0 14px 28px rgba(60,10,50,.22)}
+/* top bar */
+#top{position:absolute;left:16px;right:16px;top:14px;height:100px;display:flex;align-items:center;gap:16px;pointer-events:none!important;z-index:20}
+#top > *{pointer-events:auto}
+#back{width:96px;height:96px;flex:none;cursor:pointer}
+#back img{width:96px;filter:drop-shadow(0 6px 8px rgba(60,10,50,.25))}
+#where{flex:none;padding:10px 30px;font:400 38px "Grandstander Black";color:#b0306e;max-width:720px}
+#where small{display:block;font:800 22px "Baloo 2";color:#8a6a80;margin-top:-4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#top .sp{flex:1}
+.pill{position:relative;height:78px;padding:0 30px 0 86px;border-radius:40px;display:flex;align-items:center;font:400 36px "Grandstander Black";color:#a86d00;white-space:nowrap}
+.pill img{position:absolute;left:4px;top:-2px;width:78px}
+.rbtn{width:88px;height:88px;cursor:pointer;flex:none}
+.rbtn img{width:88px;filter:drop-shadow(0 6px 8px rgba(60,10,50,.25))}
+/* module HUD kit */
+.gbar{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);display:flex;align-items:center;gap:18px;padding:16px 22px;border-radius:56px;white-space:nowrap}
+.gbtn{position:relative;display:flex;align-items:center;justify-content:center;gap:10px;min-width:200px;height:92px;padding:0 30px;border-radius:46px;font:400 36px "Grandstander Black";color:#fff;cursor:pointer;white-space:nowrap;text-shadow:0 4px 0 rgba(0,0,0,.18);transition:transform .12s,filter .12s,opacity .15s}
+.gbtn:hover{transform:translateY(-3px);filter:brightness(1.06)}.gbtn:active{transform:translateY(3px)}
+.gbtn img{width:54px}
+.gbtn.pink{background:linear-gradient(#ff9cc4,#ff4f95);box-shadow:0 8px 0 #c2407a}
+.gbtn.mint{background:linear-gradient(#7ff0c4,#2fc58e);box-shadow:0 8px 0 #1f9a70}
+.gbtn.sky{background:linear-gradient(#a8dcff,#3d9bff);box-shadow:0 8px 0 #2a7fd0}
+.gbtn.lemon{background:linear-gradient(#ffe68a,#ffb81c);box-shadow:0 8px 0 #b07800}
+.gbtn.lavender{background:linear-gradient(#e2d6ff,#8d6bff);box-shadow:0 8px 0 #5f3fc9}
+.gbtn.grey{background:linear-gradient(#f2eef6,#bdb3c9);box-shadow:0 8px 0 #8a8496}
+.gbtn.off{opacity:.42;filter:grayscale(.5);pointer-events:none}
+.chippick{position:absolute;left:16px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:12px;padding:18px 14px}
+.chipimg{width:84px;height:84px;cursor:pointer;transition:transform .15s;filter:drop-shadow(0 4px 4px rgba(0,0,0,.2))}
+.chipimg.on{transform:scale(1.22) translateX(8px);filter:drop-shadow(0 0 0 #fff) drop-shadow(0 0 10px #ffe27a)}
+.gstatus{position:absolute;left:16px;bottom:150px;max-width:760px;padding:10px 30px;border-radius:30px;background:rgba(50,22,60,.72);color:#fff;font:800 28px "Baloo 2";white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-shadow:0 6px 16px rgba(0,0,0,.2)}
+.gstatus b{color:#ffe27a}
+.lbl3{position:absolute;left:0;top:0;will-change:transform;white-space:nowrap}
+.seatlbl{display:flex;align-items:center;gap:10px;padding:6px 20px 6px 6px;border-radius:40px;background:rgba(255,255,255,.95);border:4px solid #fff;box-shadow:0 6px 0 rgba(194,64,122,.3),0 10px 18px rgba(60,10,50,.2);transition:box-shadow .2s}
+.seatlbl img{width:62px;height:62px;border-radius:50%;background:#fff4f9}
+.seatlbl b{display:block;font:400 26px "Grandstander Black";color:#9b2c5e;line-height:1.05}
+.seatlbl span{display:block;font:400 22px "Grandstander Black";color:#a86d00;line-height:1.1}
+.seatlbl.turn{border-color:#7ff0c4;box-shadow:0 0 0 6px rgba(127,240,196,.6),0 6px 0 #1f9a70}
+.seatlbl i{position:absolute;right:-14px;top:-16px;font:400 20px "Grandstander Black";font-style:normal;color:#fff;background:#ff4f95;border-radius:14px;padding:2px 10px;box-shadow:0 3px 0 #c2407a}
+.bub3{padding:10px 22px;border-radius:26px;background:#fff;border:3px solid #ffd0e4;font:800 25px "Baloo 2";color:#7a3a5c;opacity:0;transition:opacity .2s;box-shadow:0 6px 16px rgba(90,30,70,.25)}
+.bub3.on{opacity:1}
+.tag3{padding:6px 18px;border-radius:22px;font:400 28px "Grandstander Black";color:#fff;background:linear-gradient(#ff9cc4,#ff4f95);box-shadow:0 5px 0 #c2407a;-webkit-text-stroke:0}
+.tag3.mint{background:linear-gradient(#7ff0c4,#2fc58e);box-shadow:0 5px 0 #1f9a70}.tag3.sky{background:linear-gradient(#a8dcff,#3d9bff);box-shadow:0 5px 0 #2a7fd0}.tag3.lemon{background:linear-gradient(#ffe68a,#ffb81c);box-shadow:0 5px 0 #b07800}.tag3.grey{background:linear-gradient(#e8e2ee,#a59bb2);box-shadow:0 5px 0 #7a7286}
+#me{position:absolute;left:16px;bottom:18px;display:flex;align-items:center;gap:12px;padding:8px 26px 8px 8px;border-radius:50px}
+#me img{width:84px;height:84px;border-radius:50%;background:#fff4f9}
+#me b{display:block;font:400 30px "Grandstander Black";color:#9b2c5e}
+#me span{display:block;font:800 22px "Baloo 2";color:#7a5a6e}
+#ui.myturn #me{border-color:#7ff0c4;box-shadow:0 0 0 8px rgba(127,240,196,.6),0 8px 0 #1f9a70}
+.callout3{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%);font:400 110px "Grandstander Black";color:#fff27a;-webkit-text-stroke:16px #c2407a;paint-order:stroke fill;white-space:nowrap;animation:callout 1.6s cubic-bezier(.2,1.4,.4,1) forwards}
+@keyframes callout{0%{transform:translate(-50%,-50%) scale(.2) rotate(-10deg);opacity:0}25%{transform:translate(-50%,-50%) scale(1.15) rotate(3deg);opacity:1}40%{transform:translate(-50%,-50%) scale(1)}85%{opacity:1}100%{transform:translate(-50%,-80%) scale(1.05);opacity:0}}
+.float3{position:absolute;font:400 44px "Grandstander Black";color:#ffe27a;-webkit-text-stroke:7px #a86d00;paint-order:stroke fill;white-space:nowrap;transform:translateX(-50%);animation:up 1.2s ease-out forwards}
+.float3.neg{color:#ffd1e6;-webkit-text-stroke-color:#c2407a}
+@keyframes up{to{transform:translate(-50%,-140px);opacity:0}}
+.flycoin{position:absolute;width:56px}
+.confetti{position:absolute;top:-30px;width:16px;height:26px;border-radius:4px}
+#toast{position:absolute;left:50%;top:200px;transform:translateX(-50%);z-index:45;display:none;align-items:center;gap:12px;padding:12px 32px 12px 16px;border-radius:36px;background:#fff;border:4px solid #ffd0e4;color:#7a2a56;font:800 28px "Baloo 2";white-space:nowrap;box-shadow:0 8px 0 rgba(194,64,122,.3)}
+#toast img{width:48px}
+#modal{position:absolute;inset:0;z-index:50;display:none;align-items:center;justify-content:center;background:rgba(50,20,50,.5);backdrop-filter:blur(4px)}
+#modal.on{display:flex}
+.mpanel{position:relative;padding:54px 46px 40px;border-radius:56px;background:linear-gradient(#fff,#fff4f9);border:6px solid #ffd0e4;box-shadow:0 14px 0 #f2a9c8,0 30px 60px rgba(60,10,40,.4);text-align:center;animation:pop .35s cubic-bezier(.2,1.5,.4,1) both;max-height:96%;overflow:auto}
+@keyframes pop{from{opacity:0;scale:.6}}
+.mpanel h2{margin:0 0 16px;font:400 56px "Grandstander Black";color:#c2407a}
+.mpanel .micon{width:120px;margin-top:-20px}
+.mbody{font:800 28px "Baloo 2";color:#5a4a5e;line-height:1.4;text-align:left}
+.mbody p{margin:8px 0}.mbody b{color:#c2407a}.mbody ul{margin:6px 0;padding-left:30px}
+.mrow{display:flex;justify-content:center;gap:24px;margin-top:26px}
+.rlist .rrow{display:flex;align-items:center;gap:18px;padding:12px 22px;border-radius:28px;background:#fff;box-shadow:0 5px 0 #f0d1df;margin:12px 0;position:relative}
+.rlist .rrow.me{background:linear-gradient(#fff8d6,#ffeaa6);box-shadow:0 5px 0 #f0c860}
+.rlist .rav{width:76px;height:76px;border-radius:50%;background:#fff4f9}
+.rlist .rwho{flex:1;min-width:0}.rlist .rwho b{display:block;font:400 32px "Grandstander Black";color:#9b2c5e}.rlist .rwho small{display:block;font:800 22px "Baloo 2";color:#8a6a80}
+.rlist .ramt{font:400 36px "Grandstander Black";color:#2fae7a}.rlist .ramt.neg{color:#d24a6a}
+.rlist .rtag{position:absolute;left:-12px;top:-14px;font:400 20px "Grandstander Black";color:#fff;background:#ff4f95;border-radius:14px;padding:2px 12px;box-shadow:0 3px 0 #c2407a}
+#loading{position:absolute;inset:0;z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;background:radial-gradient(circle at 50% 40%,#fff0f7,#ffd1e6 45%,#d9c8ff);transition:opacity .4s}
+#loading.out{opacity:0;pointer-events:none}
+#loading img{width:220px;border-radius:50px;box-shadow:0 14px 30px rgba(120,40,90,.3);animation:b .8s ease-in-out infinite alternate}
+@keyframes b{to{transform:translateY(-20px) rotate(4deg)}}
+#loading b{font:400 52px "Grandstander Black";color:#fff;-webkit-text-stroke:9px #c2407a;paint-order:stroke fill}
+#lbar{width:700px;height:40px;border-radius:20px;background:#fff;border:4px solid #ffd0e4;overflow:hidden}
+#lbar i{display:block;height:100%;width:0;background:repeating-linear-gradient(-45deg,#ff5c9a 0 18px,#ff8fc0 18px 36px);transition:width .2s}
+</style>
+</head>
+<body>
+<canvas id="scene"></canvas>
+<div id="ui">
+  <div id="labels"></div>
+  <div id="gameui"></div>
+  <div id="top">
+    <div id="back" title="Quay lại"><img src="assets/ui-jelly-pzuh/buttons-pastel/pink/icon_back_pink.png"></div>
+    <div id="where" class="glass"><span id="gname">Heo Con Club</span><small id="gsub"></small></div>
+    <div class="sp"></div>
+    <div class="pill glass"><img src="assets/emoji-fluent-3d/game/coin.png"><span id="coinTxt">0</span></div>
+    <div class="rbtn" id="rulesBtn" title="Luật chơi"><img src="assets/ui-jelly-pzuh/buttons-pastel/yellow/icon_question_yellow.png"></div>
+    <div class="rbtn" id="sndBtn" title="Âm thanh"><img id="sndImg" src="assets/ui-jelly-pzuh/buttons-pastel/mint/icon_sound_mint.png"></div>
+  </div>
+  <div id="me" class="glass"><img id="meAv"><div><b id="meName"></b><span id="meNote">Bạn</span></div></div>
+  <div id="fx"></div>
+  <div id="toast"><img src="assets/emoji-fluent-3d/game/party_popper.png"><span></span></div>
+  <div id="modal"></div>
+  <div id="loading"><img id="lic" src="assets/emoji-fluent-3d/game/game_die.png"><b id="ltxt">Đang dọn bàn…</b><div id="lbar"><i></i></div></div>
+</div>
+<script src="js/vendor/three.min.js"></script>
+<script src="js/vendor/GLTFLoader.js"></script>
+<script src="js/vendor/SkeletonUtils.js"></script>
+<script src="js/hc3d.js"></script>
+<script src="js/hc-core.js"></script>
+<script src="js/table3d.js"></script>
+<script>
+'use strict';
+const Q = new URLSearchParams(location.search), KEY = (Q.get('game') || 'bau-cua').replace(/[^a-z0-9-]/g, '');
+const $ = s => document.querySelector(s);
+let uiS = 1, UW = 1920, UH = 1080, ctx = null;
+function fit() {
+  uiS = HC.uiScale(1600); UW = innerWidth / uiS; UH = innerHeight / uiS;
+  const ui = $('#ui'); ui.style.width = UW + 'px'; ui.style.height = UH + 'px'; ui.style.transform = `scale(${uiS})`;
+  if (ctx) ctx.resize(innerWidth, innerHeight, uiS, UW, UH);
+}
+addEventListener('resize', fit); fit();
+if (Q.has('shot')) document.head.appendChild(Object.assign(document.createElement('style'), { textContent: '.mpanel,.callout3{animation:none!important}' }));
+const sndIcon = () => $('#sndImg').src = HC.A(HC.settings.sfx ? 'ui-jelly-pzuh/buttons-pastel/mint/icon_sound_mint.png' : 'ui-jelly-pzuh/buttons-pastel/pink/icon_sound_pink.png');
+$('#sndBtn').onclick = () => { HC.settings.sfx = HC.settings.music = !HC.settings.sfx; HC.saveSettings(); sndIcon(); if (!HC.settings.music) HC.stopMusic(); };
+$('#back').onclick = () => { HC.goto(HC.from() === 'town' ? `index.html?look=${KEY}` : 'lobby.html?sel=' + KEY, HC.from() === 'town' ? 'Đang về thị trấn…' : 'Đang mở bản đồ…'); };
+$('#meAv').src = HC.A(HC.store.get('av', 'avatars-dicebear/fun-emoji/png/bong.png')); $('#meName').textContent = HC.store.get('name', 'Bạn Heo Con');
+$('#lic').src = HC.A(`games/lobby-icons/${KEY}.png`);
+(async () => {
+  HC.arrive(); sndIcon();
+  try {
+    await Promise.race([Promise.all(['400 100px "Grandstander Black"', '400 40px "Grandstander Black"', '800 30px "Baloo 2"'].map(f => document.fonts.load(f))), new Promise(r => setTimeout(r, 2500))]);
+    await T3.loadScript(`js/games3d/${KEY}.js`);
+    const def = T3.modules[KEY]; if (!def) throw new Error('Chưa có game ' + KEY);
+    document.title = def.title + ' · Heo Con Club'; $('#gname').textContent = def.title; $('#gsub').textContent = def.sub || '';
+    if (!HC3D.ok) throw new Error('Máy chưa bật WebGL nên không chạy được game 3D.');
+    ctx = new T3.Ctx(def, { canvas: $('#scene'), ui: $('#ui'), gameui: $('#gameui'), labels: $('#labels'), fx: $('#fx'), toast: $('#toast'), modal: $('#modal'), coinEl: $('#coinTxt') });
+    window.ctx = ctx;
+    await ctx.init(p => { $('#lbar i').style.width = Math.round(p * 100) + '%'; });
+    fit(); ctx.ui.refreshCoins(); await ctx.texReady();
+    $('#rulesBtn').onclick = () => ctx.ui.modal({ title: 'Luật ' + def.title, html: def.rules || '', width: 1100, icon: `games/lobby-icons/${KEY}.png` });
+    $('#loading').classList.add('out'); setTimeout(() => $('#loading').classList.add('hide'), 450);
+    if (Q.has('shot')) setInterval(() => ctx.tick(), 33);   // screenshots run headless, where requestAnimationFrame barely runs
+    if (Q.has('selftest')) {
+      setInterval(() => ctx.tick(), 33);   // headless browsers barely run requestAnimationFrame
+      const out = { errors: [] }; addEventListener('error', e => out.errors.push(e.message)); addEventListener('unhandledrejection', e => out.errors.push(String(e.reason && e.reason.message || e.reason)));
+      try { Object.assign(out, await def.selftest(ctx)); } catch (e) { out.errors.push(e.message); }
+      document.body.dataset.selftest = JSON.stringify(out); return;
+    }
+    def.start(ctx).catch(e => { console.error(e); ctx.ui.toast('Lỗi: ' + e.message); });
+  } catch (e) { console.error(e); $('#ltxt').textContent = e.message; }
+})();
+</script>
+</body>
+</html>
