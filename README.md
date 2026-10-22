@@ -4,6 +4,8 @@ Asset miễn phí, phong cách kẹo pastel, cho một cổng game kiểu "chặ
 Tiến Lên, Phỏm, Mậu Binh, Xì Dách, Poker, Bài Cào, Sâm Lốc, Liêng, Bầu Cua, Xóc Đĩa, Tài Xỉu, Cờ Tướng, Cá Ngựa, Cờ Caro, Bài Màu, Lô Tô, Bắn Cá và **Máy Đẩy Xu**.
 Khoảng 13.700 file, 387 MB, trong đó có 88 model 3D thật chạy ngay trong trình duyệt.
 
+**Chơi online:** https://dorisle-uxui.github.io/heo-con-club/ (GitHub Pages, lần đầu tải hơi lâu).
+
 **Bắt đầu từ `index.html`** (mở bằng double-click): màn loading → đăng nhập / đăng ký → thị trấn 3D có đường phố, cây cối, xe chạy, người đi dạo. Mỗi game là một cửa tiệm trên phố.
 
 ## Mở xem nhanh
@@ -16,7 +18,7 @@ Khoảng 13.700 file, 387 MB, trong đó có 88 model 3D thật chạy ngay tron
 | `play3d.html?game=<key>` | **16 game 3D chơi thật**: Phỏm, Mậu Binh, Xì Dách, Poker, Bài Cào, Sâm Lốc, Liêng, Bầu Cua, Xóc Đĩa, Tài Xỉu, Cờ Tướng, Cá Ngựa, Cờ Caro, Bài Màu, Lô Tô, Bắn Cá. Mỗi game có luật đầy đủ (nút **?**) và bot. |
 | `lobby.html` | **Bản đồ menu**: ảnh chụp thị trấn từ trên cao, mỗi cửa tiệm là một ghim. Lọc theo loại game, bấm ghim để xem thông tin rồi **CHƠI NGAY** hoặc **Tới tiệm**. |
 | `lobby-classic.html` | Sảnh 2D cũ (linh vật 3D, quà ngày, lì xì, bản chơi thử ngắn), giữ lại để tham khảo. |
-| `screenshots/` | 40 ảnh: thị trấn 3D, đăng nhập, loading, bản đồ menu, hộp thư, Máy Đẩy Xu, từng game, Tiến Lên. |
+| `screenshots/` | 31 ảnh: thị trấn 3D, đăng nhập, loading, bản đồ menu, hộp thư, Máy Đẩy Xu, từng game, Tiến Lên. |
 | `assets/manifest.json` | Chỉ mục đường dẫn mọi thứ, dùng để load trong code. |
 | `CREDITS.md` | License từng bộ. **Đọc trước khi phát hành.** |
 | `tools/` | Script Python đã dùng để vẽ UI, asset game, icon (cần Pillow + numpy). Sửa màu rồi chạy lại, ví dụ `python3 tools/gen_ui.py assets`. Có thêm `pack3d.js` và `render3d.html` cho model 3D. |
@@ -175,9 +177,11 @@ Hoạt ảnh có sẵn cho nhân vật `adv_*`: Idle_A, Idle_B, Interact, Use_It
 
 ## Đăng lên web
 
-- Bản đang chạy: https://claude.ai/artifact/FAodJHnT2r5wuiSpanFxSd (Artifact riêng tư, chia sẻ bằng nút **Share** trên trang).
+- GitHub: https://github.com/DorisLe-UXUI/heo-con-club, GitHub Pages phát thẳng nhánh `main` (file `.nojekyll` tắt Jekyll). Mỗi lần `git push` là trang tự cập nhật sau vài phút.
+- Bản Artifact (riêng tư): https://claude.ai/artifact/FAodJHnT2r5wuiSpanFxSd.
 - `bash tools/deploy/build.sh dist` dựng thư mục `dist/` gọn để đăng: chỉ chứa các file game thật sự dùng (~418 file, 84 MB thay vì cả bộ 387 MB), gom ~200 ảnh nhỏ vào `assets/pack.js`, đổi tên file có dấu cách hoặc ngoặc. Trang mở đầu `launch.html` chuyển vào `home.html` (bản sao của `index.html`).
-- Có thể đưa nguyên `dist/` lên bất kỳ host tĩnh nào (GitHub Pages, Netlify, itch.io dạng HTML5).
+- Có thể đưa nguyên `dist/` lên bất kỳ host tĩnh nào (Netlify, itch.io dạng HTML5).
+- Công cụ kiểm tra: `bash tools/selftest.sh bai-cao poker …` (selftest game 3D), `bash tools/shot.sh <trang> <tham số> <ảnh.png>` (chụp nhanh), `node tools/cdp_shot.mjs "tien-len.html?room=1&pose=turn" ảnh.png 1920,1080 --title=POSED` (chụp thời gian thật).
 
 ## Cấu trúc `assets/` (rút gọn)
 
