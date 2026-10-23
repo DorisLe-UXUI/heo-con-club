@@ -8,7 +8,7 @@ from PIL import Image
 
 A = Path(sys.argv[1] if len(sys.argv) > 1 else 'assets')
 GAMES = ['tien-len', 'phom', 'mau-binh', 'xi-dach', 'poker', 'bai-cao', 'sam-loc', 'lieng', 'bau-cua', 'xoc-dia', 'tai-xiu',
-         'co-tuong', 'co-ca-ngua', 'co-caro', 'bai-mau', 'lo-to', 'ban-ca', 'day-xu']
+         'co-tuong', 'co-ca-ngua', 'co-caro', 'bai-mau', 'lo-to', 'ban-ca', 'day-xu', 'gap-thu', 'xuc-ve']
 items = {f'icon_{g}': (f'games/lobby-icons/{g}.png', 256, 'smooth') for g in GAMES}
 items.update({
     'icon_shop': ('emoji-fluent-3d/game/shopping_bags.png', 256, 'smooth'), 'icon_rank': ('emoji-fluent-3d/game/trophy.png', 256, 'smooth'),

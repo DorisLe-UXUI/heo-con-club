@@ -49,11 +49,13 @@
     return lo / (s.length - 1);
   }
 
-  /** Bot decision. o: {hand, legal (from C.legal), pot, nOpp, ante, unit, pers:{loose, aggr, bluff}}. Returns {type, to?}. */
+  /** How much a bot misreads its hand, by strength level 0 (dễ) … 3 (siêu khó); no level = the original ±5%. */
+  const NOISE = [.36, .18, .1, .05];
+  /** Bot decision. o: {hand, legal (from C.legal), pot, nOpp, ante, unit, pers:{loose, aggr, bluff}, level}. Returns {type, to?}. */
   function botDecide(o, rng = Math.random) {
     const L = o.legal, pers = o.pers || { loose: .5, aggr: .5, bluff: .07 };
     const pct = percentile(o.hand);
-    const win = Math.pow(pct, Math.max(1, o.nOpp) * 0.85) + (rng() - .5) * .1 + (pers.loose - .5) * .12;
+    const win = Math.pow(pct, Math.max(1, o.nOpp) * 0.85) + (rng() - .5) * (o.level == null ? .1 : NOISE[Math.max(0, Math.min(3, o.level))]) + (pers.loose - .5) * .12;
     const odds = L.toCall / Math.max(1, o.pot + L.toCall);
     const unit = o.unit || 1000;
     const raiseTo = f => C.roundTo(L.currentBet + Math.max(o.ante || unit, f * (o.pot + L.toCall)), unit, L.raise.min, L.raise.max);
@@ -75,5 +77,5 @@
     const sc = hands.map(h => (h ? evaluate(h).score : -1));
     return C.award(st.players, C.pots(st.players), (i, j) => sc[i] - sc[j], order);
   }
-  return { FACE, CLS, pts, cardKey, biggest, evaluate, compare, percentile, botDecide, PERSONAS, showdown, RAISE_CAP: 3 };
+  return { FACE, CLS, pts, cardKey, biggest, evaluate, compare, percentile, botDecide, PERSONAS, NOISE, showdown, RAISE_CAP: 3 };
 });

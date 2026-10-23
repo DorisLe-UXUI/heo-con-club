@@ -92,5 +92,19 @@ t('smart bot beats random movers', () => {
   assert.ok(smart / N > .4, 'smart won ' + smart + '/' + N);
 });
 
+t('easy bots (room tier Tập Sự) play legal moves and lose to full-strength bots', () => {
+  let hard = 0; const N = 400;
+  for (let g = 0; g < N; g++) {
+    const st = R.newState(); let pl = 0, done = -1;
+    for (let i = 0; i < 40000 && done < 0; i++) {
+      const roll = 1 + Math.floor(rnd() * 6), ms = R.legalMoves(st, pl, roll);
+      if (ms.length) { const m = R.chooseMove(st, pl, roll, ms, rnd, pl === 0 ? 3 : 0); assert.ok(ms.includes(m)); R.apply(st, pl, m); }
+      done = R.winner(st); pl = R.nextPlayer(pl, roll);
+    }
+    if (done === 0) hard++;
+  }
+  assert.ok(hard / N > .3, 'full-strength bot won ' + hard + '/' + N + ' against three easy bots');
+});
+
 console.log(pass + ' passed, ' + fail + ' failed');
 if (fail) process.exit(1);

@@ -65,7 +65,10 @@
       this.BOTS = BOTS; this.THEMES = THEMES;
       this.ui = new UI(this);
       this.texCache = {};
+      this.room = null; this.mode = null;          // chosen in the lobby (js/t3-lobby.js); null = legacy stakes (selftest, shot, demo)
       this.rand = Math.random;
+      this.key = (this.Q.get('game') || '').replace(/[^a-z0-9-]/g, ''); this.roundBet = 0;
+      if (window.HC) HC.giveCoins = n => { this.coins = this.coins + n; };     // level-up / quest rewards land in this wallet (js/hc-progress.js)
     }
     // ------------------------------------------------------------ boot
     async init(onProgress = () => {}) {
@@ -323,6 +326,25 @@
     }
     // ------------------------------------------------------------ bots & seats
     /** Seats around the table. Seat 0 is the player (camera side, no 3D body). Returns [{i, name, key, avatar, pos, angle, ch, label}]. */
+    /** A bot's bankroll: scaled to the room's tier (ctx.room.bank), or the old 0.2M–3.2M without a room. */
+    botBank() {
+      const r = this.room;
+      if (!r || !r.bank) return Math.round((2 + Math.random() * 30)) * 100000;
+      const v = r.bank[0] + Math.random() * (r.bank[1] - r.bank[0]), u = v >= 1e7 ? 1e6 : v >= 1e6 ? 1e5 : 1e4;
+      return Math.max(u, Math.round(v / u) * u);
+    }
+    /** A bot's bet: one of the room's stakes, or one of `fallback` without a room. */
+    botStake(fallback) { const s = this.room && this.room.stakes && this.room.stakes.length ? this.room.stakes : fallback; return s[Math.floor(Math.random() * s.length)]; }
+    /** Largest stake the room allows (or `fallback`). */
+    maxStake(fallback) { return this.room && this.room.stakes && this.room.stakes.length ? Math.max(...this.room.stakes) : fallback; }
+    /** Bot strength 0 (dễ) … 3 (siêu khó) from the room, or `fallback` without a room. */
+    aiLevel(fallback = 1) { return this.room ? Math.max(0, Math.min(3, this.room.ai | 0)) : fallback; }
+    /** Top up a broke bot: below `legacyMin` (or 10 × the room's top stake) it gets `legacyAdd` (or a fresh tier bankroll). */
+    topUp(seat, legacyMin, legacyAdd, mult = 10) {
+      const min = this.room ? this.maxStake(legacyMin) * mult : legacyMin;
+      if (seat.me || seat.coins >= min) return false;
+      seat.setCoins(seat.coins + (this.room ? Math.max(this.botBank(), min) : legacyAdd)); return true;
+    }
     async seats(n, opts = {}) {
       const R = opts.r || 8.4, bots = this.shuffle(BOTS.slice()), out = [];
       const angles = opts.angles || (n === 2 ? [90, 270] : n === 3 ? [90, 210, 330] : n === 4 ? [90, 180, 270, 0] : n === 5 ? [90, 162, 216, 324, 18] : Array.from({ length: n }, (_, i) => 90 + i * 360 / n));
@@ -331,7 +353,7 @@
         const s = { i, angle: a, pos, me: i === 0, coins: 0 };
         if (i === 0) { Object.assign(s, { name: (window.HC && HC.store.get('name', 'Bạn')) || 'Bạn', avatar: (window.HC && HC.store.get('av', 'avatars-dicebear/fun-emoji/png/bong.png')) }); }
         else {
-          const b = bots[(i - 1) % bots.length]; Object.assign(s, { name: b.name, key: b.key, avatar: `3d/renders/avatars/${b.key}.png`, coins: Math.round((2 + Math.random() * 30)) * 100000 });
+          const b = bots[(i - 1) % bots.length]; Object.assign(s, { name: b.name, key: b.key, avatar: `3d/renders/avatars/${b.key}.png`, coins: this.botBank() });
           const ch = await H.character(this.st, b.key, { anim: 'Idle_A', scale: b.key.startsWith('mini') ? 2.1 : 1.45 });
           ch.root.position.set(Math.cos(a) * (R + 1.2), -1.25, Math.sin(a) * (R + 1.2)); ch.root.rotation.y = Math.atan2(-Math.cos(a), -Math.sin(a));
           ch.root.traverse(m => { if (m.isMesh) m.castShadow = true; });
@@ -396,9 +418,21 @@
     get coins() { return HC.store.get('coins', 1250000); }
     set coins(v) { HC.store.set('coins', Math.max(0, Math.round(v))); this.ui.refreshCoins(); }
     /** Take a bet. Returns false (and tells the player) if there is not enough. */
-    spend(n) { if (this.coins < n) { this.ui.toast('Không đủ xu rồi 😅', 'emoji-fluent-3d/reactions/grinning_face_with_sweat.png'); this.sfx('error', .4); return false; } this.coins = this.coins - n; return true; }
+    spend(n) { if (this.coins < n) { this.ui.toast('Không đủ xu rồi 😅', 'emoji-fluent-3d/reactions/grinning_face_with_sweat.png'); this.sfx('error', .4); this.offerRescue(); return false; } this.coins = this.coins - n; this.roundBet += n; this.track('bet', { amount: n }); return true; }
     /** Give the player coins with a flying-coin effect from a 3D point (or the screen centre). */
-    win(n, from) { if (n <= 0) return; this.coins = this.coins + n; this.ui.flyCoins(from ? this.toUI(from) : { x: this.UW / 2, y: this.UH / 2 }, Math.min(16, 4 + Math.round(Math.log10(n)))); this.ui.float('+' + HC.short(n), from); this.sfx('coin', .35); }
+    /** Hand back a stake that was never played (cleared bets): like win() but it is not a win and it undoes the bet for progress. */
+    refund(n, from) { if (n <= 0) return; this.roundBet = Math.max(0, this.roundBet - n); this.track('bet', { amount: -n }); this._refunding = true; try { this.win(n, from); } finally { this._refunding = false; } }
+    win(n, from) { if (n <= 0) return; this.coins = this.coins + n; if (!this._refunding) this.track('win', { amount: n }); this.ui.flyCoins(from ? this.toUI(from) : { x: this.UW / 2, y: this.UH / 2 }, Math.min(16, 4 + Math.round(Math.log10(n)))); this.ui.float('+' + HC.short(n), from); this.sfx('coin', .35); }
+    /** Report progress (quests, XP, achievements) to js/hc-progress.js. type: round | bet | win | catch | combo. */
+    track(type, data = {}) { try { if (window.HC && HC.prog && !this.TEST) HC.prog.track(type, Object.assign({ game: this.key }, data)); } catch (e) { console.warn(e); } }
+    /** Out of coins: offer the daily help (200K, 3 times a day). */
+    offerRescue() {
+      const P = window.HC && HC.prog; if (!P || this.TEST || this.SHOT || this._rescueOpen) return;
+      const st = P.rescueState(this.coins); if (!st.can) return;
+      this._rescueOpen = true;
+      this.ui.modal({ title: 'Hết xu rồi!', width: 760, body: this.ui.h('p', { html: `Quỹ cứu trợ Heo Con tặng bạn <b>${HC.fmt(st.amount)} xu</b> để chơi tiếp. Hôm nay còn ${st.left} lần.`, style: 'font:800 30px "Baloo 2";color:#6a4a5e;text-align:center;margin:10px 0' }),
+        buttons: [{ label: 'Để sau', cls: 'grey', onClick: () => { this._rescueOpen = false; } }, { label: 'Nhận ' + HC.short(st.amount) + ' xu', cls: 'pink', onClick: () => { this._rescueOpen = false; if (P.rescue(this.coins)) { this.ui.flyCoins({ x: this.UW / 2, y: this.UH / 2 }, 12); this.sfx('coin', .5); } } }] });
+    }
     sfx(name, vol = .5) { if (this.SHOT || this.TEST || !HC.settings.sfx || !SFX[name]) return; const now = performance.now(); this._snd = this._snd || {}; if (now - (this._snd[name] || 0) < 40) return; this._snd[name] = now; try { const a = new Audio(HC.A(SFX[name])); a.volume = vol; a.play().catch(() => {}); } catch (e) {} }
     music(key) { if (MUSIC[key]) HC.music(MUSIC[key], .25); }
   }
@@ -422,12 +456,31 @@
       return { el: bar, btn: id => map[id], set: (id, o) => { const b = map[id]; if (!b) return; if ('disabled' in o) b.classList.toggle('off', !!o.disabled); if ('hidden' in o) b.style.display = o.hidden ? 'none' : ''; if ('label' in o) b.querySelector('span').textContent = o.label; } };
     }
     clearActions() { if (this._bar) { this._bar.remove(); this._bar = null; } }
-    /** Chip value selector (left side). values in coins. */
+    /** Chip value selector (left side). values in coins. At a lobby room (ctx.room) only the room's stakes are offered:
+     *  `start` still points into `values`; when that value is not allowed the last chip picked here (or the smallest) is used. */
     chipPicker(values, onChange, start = 0) {
       if (this._chips) this._chips.remove();
+      const room = this.ctx.room;
+      if (room && room.stakes && room.stakes.length) {
+        const want = values[start], allowed = room.stakes.slice().sort((a, b) => a - b);
+        values = allowed;
+        start = allowed.indexOf(want) >= 0 ? allowed.indexOf(want) : Math.max(0, allowed.indexOf(this._lastChip));
+      }
+      start = Math.max(0, Math.min(values.length - 1, start));
       const box = this._chips = this.h('div', { class: 'chippick glass' }, this.root); let cur = values[start];
-      values.forEach((v, i) => { const c = this.img('', 'chipimg' + (i === start ? ' on' : ''), box); c.src = HC.A(`games/card-shared/chips/chip_${this.ctx.chipKey(v)}.png`); c.title = HC.fmt(v); c.onclick = () => { cur = v; [...box.children].forEach(x => x.classList.toggle('on', x === c)); this.ctx.sfx('chip', .3); onChange && onChange(v); }; });
-      return { get value() { return cur; }, el: box };
+      const pickV = v => { cur = v; this._lastChip = v; };
+      values.forEach((v, i) => { const c = this.img('', 'chipimg' + (i === start ? ' on' : ''), box); c.src = HC.A(`games/card-shared/chips/chip_${this.ctx.chipKey(v)}.png`); c.title = HC.fmt(v); c.onclick = () => { pickV(v); [...box.children].forEach(x => x.classList.toggle('on', x === c)); this.ctx.sfx('chip', .3); onChange && onChange(v); }; });
+      return { get value() { return cur; }, el: box, values };
+    }
+    /** Betting clock (bottom centre, above the action bar): counts `sec` seconds down, ticks in the last 5, then calls onEnd. Returns {stop(), left}. */
+    countdown(sec, onEnd, label = 'Đặt cược') {
+      if (this._cd) this._cd.stop();
+      const el = this.h('div', { class: 'cdown glass' }, this.root); let left = Math.max(1, Math.round(sec)), h = null;
+      const draw = () => { el.innerHTML = `<img src="${HC.A('emoji-fluent-3d/game/stopwatch.png')}"><span>${label}</span><b>${left}</b>`; el.classList.toggle('warn', left <= 5); };
+      const cd = this._cd = { get left() { return left; }, el, stop: () => { clearInterval(h); el.remove(); if (this._cd === cd) this._cd = null; } };
+      draw();
+      h = setInterval(() => { left--; if (left <= 0) { cd.stop(); onEnd && onEnd(); return; } draw(); if (left <= 5) this.ctx.sfx('tick', .35); }, 1000);
+      return cd;
     }
     status(text) { if (!this._st) this._st = this.h('div', { class: 'gstatus' }, this.root); this._st.innerHTML = text; this._st.style.display = text ? '' : 'none'; }
     toast(msg, icon = 'emoji-fluent-3d/game/party_popper.png') { const t = this.ctx.el.toast; t.querySelector('img').src = HC.A(icon); t.querySelector('span').textContent = msg; t.style.display = 'flex'; clearTimeout(t._h); t._h = setTimeout(() => t.style.display = 'none', 2300); }
@@ -458,6 +511,7 @@
     closeModal() { const m = this.ctx.el.modal; m.classList.remove('on'); m.innerHTML = ''; }
     /** End-of-round table. rows: [{name, avatar, detail, amount, me, tag}] */
     results(title, rows, { again = 'Ván mới', onAgain } = {}) {
+      const mine = rows.find(r => r.me); if (mine) { this.ctx.track('round', { net: +mine.amount || 0, bet: this.ctx.roundBet }); this.ctx.roundBet = 0; }
       const body = this.h('div', { class: 'rlist' });
       rows.forEach(r => { const it = this.h('div', { class: 'rrow' + (r.me ? ' me' : '') }, body); if (r.tag) this.h('div', { class: 'rtag', text: r.tag }, it); this.img(r.avatar, 'rav', it); const w = this.h('div', { class: 'rwho' }, it); this.h('b', { text: r.name }, w); this.h('small', { html: r.detail || '' }, w); this.h('div', { class: 'ramt' + (r.amount < 0 ? ' neg' : ''), text: r.amount == null ? '' : (r.amount > 0 ? '+' : r.amount < 0 ? '−' : '') + HC.fmt(Math.abs(r.amount)) }, it); });
       return this.modal({ title, body, width: 1000, buttons: [{ label: again, cls: 'pink', onClick: onAgain }] });

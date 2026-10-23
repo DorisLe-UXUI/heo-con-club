@@ -47,7 +47,7 @@ img{-webkit-user-drag:none}
 .bubble.me::after{border-top-color:#fff7d6}
 
 /* ---------------- loading */
-#loading{position:absolute;inset:0;z-index:50;overflow:hidden;background:#f6d9f3 url(assets/ui-premium-generated/lobby-backgrounds/bg_loading.jpg?v=2026102301) center/cover;transition:opacity .6s ease}
+#loading{position:absolute;inset:0;z-index:50;overflow:hidden;background:#f6d9f3 url(assets/ui-premium-generated/lobby-backgrounds/bg_loading.jpg?v=202610231911) center/cover;transition:opacity .6s ease}
 #loading.out{opacity:0;pointer-events:none}
 @keyframes spin{to{transform:rotate(360deg)}}
 .logoimg{position:absolute;left:50%;filter:drop-shadow(0 14px 18px rgba(120,30,80,.3));animation:logoBob 2.4s ease-in-out infinite alternate}
@@ -68,7 +68,7 @@ img{-webkit-user-drag:none}
 #lcred{position:absolute;left:24px;bottom:14px;font:800 16px "Baloo 2";color:rgba(110,60,110,.65)}
 
 /* ---------------- auth */
-#auth{position:absolute;inset:0;z-index:40;background:#f6d9f3 url(assets/ui-premium-generated/lobby-backgrounds/bg_login.jpg?v=2026102301) center/cover;transition:opacity .5s}
+#auth{position:absolute;inset:0;z-index:40;background:#f6d9f3 url(assets/ui-premium-generated/lobby-backgrounds/bg_login.jpg?v=202610231911) center/cover;transition:opacity .5s}
 #auth::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 50% 50%,rgba(255,240,248,.32) 0,rgba(255,240,248,.12) 45%,rgba(70,20,70,.22) 100%);pointer-events:none}
 #auth.out{opacity:0;pointer-events:none}
 #brand{position:absolute;left:284px;top:0;width:700px;height:1080px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px}
@@ -120,7 +120,10 @@ img{-webkit-user-drag:none}
 .lbl{font:800 24px "Baloo 2";color:#a06d88;margin:16px 6px -8px}
 #panel.reg{padding-top:112px;padding-bottom:30px}
 #panel.reg .field{margin:12px 0}#panel.reg .field input{height:74px}
-#panel.reg .or,#panel.reg #btnGuest,#panel.reg .note{display:none}
+#panel.reg .or,#panel.reg #btnGuest,#panel.reg #btnGoogle,#panel.reg .note{display:none}
+.big.google{background:#fff;color:#3c4043;font:800 34px "Baloo 2";height:88px;border:3px solid #dadce0;box-shadow:0 7px 0 #c9ccd1,0 12px 20px rgba(60,64,67,.18);text-shadow:none;margin-top:18px}
+.big.google svg{flex:none}
+.big.google+.note{margin-top:10px}
 #panel.reg .back{display:block}
 #panel .back{display:none;margin-top:12px;text-align:center;font:800 24px "Baloo 2";color:#c2407a;text-decoration:underline;cursor:pointer}
 
@@ -130,7 +133,7 @@ img{-webkit-user-drag:none}
 #hud.enter #prof{animation:slideL .6s cubic-bezier(.2,1.3,.4,1) both}
 #hud.enter #topR,#hud.enter #money{animation:slideT .6s .1s cubic-bezier(.2,1.3,.4,1) both}
 #hud.enter #dock{animation:slideB .7s .2s cubic-bezier(.2,1.3,.4,1) both}
-#hud.enter #mini,#hud.enter #playnow,#hud.enter #emoteBtn,#hud.enter #evcard,#hud.enter #qcard{animation:pop .6s .35s cubic-bezier(.2,1.5,.4,1) both}
+#hud.enter #mini,#hud.enter #playnow,#hud.enter #emoteBtn,#hud.enter #evcard,#hud.enter #qcard,#hud.enter #sideBtns{animation:pop .6s .35s cubic-bezier(.2,1.5,.4,1) both}
 @keyframes slideL{from{transform:translateX(-500px)}}@keyframes slideT{from{transform:translateY(-200px)}}@keyframes slideB{from{transform:translateY(300px)}}@keyframes pop{from{transform:scale(0)}}
 .card{background:var(--glass);border:4px solid #fff;border-radius:40px;box-shadow:0 8px 0 rgba(194,64,122,.28),0 14px 28px rgba(60,10,50,.22)}
 #prof{position:absolute;left:16px;top:14px;width:540px;height:132px;cursor:pointer;border-radius:70px 40px 40px 70px}
@@ -272,6 +275,58 @@ img{-webkit-user-drag:none}
 .confetti{position:absolute;top:-30px;width:16px;height:26px;border-radius:4px}
 .plustxt{position:absolute;font:400 46px "Grandstander Black";color:#ffe27a;-webkit-text-stroke:8px #a86d00;paint-order:stroke fill;animation:up 1s ease-out forwards}
 @keyframes up{to{transform:translateY(-120px);opacity:0}}
+/* ---------------- progression (js/hc-progress.js) */
+#sideBtns{position:absolute;right:16px;top:640px;display:flex;flex-direction:column;gap:12px}
+.sb{position:relative;width:120px;padding:8px 0 10px;border-radius:28px;background:var(--glass);border:4px solid #fff;box-shadow:0 6px 0 rgba(194,64,122,.25),0 10px 20px rgba(60,10,50,.18);text-align:center;cursor:pointer;transition:transform .12s}
+.sb:hover{transform:translateY(-4px)}.sb img{width:64px;display:block;margin:0 auto}.sb b{display:block;font:400 20px "Grandstander Black";color:#9b2c5e}
+.sb .dot{position:absolute;right:-6px;top:-6px;min-width:30px;height:30px;padding:0 6px;border-radius:15px;background:#ff3d6e;border:3px solid #fff;color:#fff;font:800 17px "Baloo 2";display:flex;align-items:center;justify-content:center;animation:bang 1s infinite}
+.qtop{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:0 6px 6px;font:800 24px "Baloo 2";color:#8a5a78}
+.qrow{display:flex;align-items:center;gap:18px;padding:14px 20px;border-radius:26px;background:#fff;box-shadow:0 5px 0 #f0d1df;margin:12px 0}
+.qrow.done{background:linear-gradient(#fffdf0,#fff6cf);box-shadow:0 5px 0 #f1d27a}.qrow.got{opacity:.6}
+.qrow>img{width:70px;flex:none}.qrow .who{flex:1;min-width:0}
+.qrow .who b{display:block;font:400 28px "Grandstander Black";color:#5a2342;line-height:1.15}
+.qrow .meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;font:800 19px "Baloo 2";color:#8a6a80}
+.qchip{padding:1px 12px;border-radius:12px;color:#fff;font:800 17px "Baloo 2"}.qchip.d0{background:#2fc58e}.qchip.d1{background:#ffb300}.qchip.d2{background:#ff5c7a}
+.rw{display:inline-flex;align-items:center;gap:4px;color:#a86d00}.rw img{width:24px}
+.qbar{height:16px;border-radius:8px;background:#f6e3ec;overflow:hidden;margin-top:8px}.qbar i{display:block;height:100%;border-radius:8px;background:linear-gradient(90deg,#ff8fc0,#ffb35c)}
+.qbtns{display:flex;flex-direction:column;gap:8px;flex:none;width:170px}
+.qbtns .big{margin:0;height:62px;font-size:24px;min-width:0;padding:0 14px}
+.chest{display:flex;align-items:center;gap:18px;padding:14px 20px;border-radius:26px;background:linear-gradient(#efe6ff,#ffe6f2);border:3px dashed #c9a8ff;margin-top:16px;font:800 22px "Baloo 2";color:#5f3fc9}
+.chest img{width:76px}.chest .t{flex:1}
+.achgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.ach{display:flex;gap:14px;align-items:center;padding:14px 16px;border-radius:24px;background:#fff;box-shadow:0 5px 0 #f0d1df}
+.ach img{width:62px}.ach .who{flex:1;min-width:0}.ach b{display:block;font:400 24px "Grandstander Black";color:#5a2342}
+.ach small{display:block;font:800 18px "Baloo 2";color:#8a6a80}
+.pips{display:flex;gap:5px;margin-top:5px}.pips i{width:22px;height:22px;border-radius:50%;background:#efe3ea;border:2px solid #fff;box-shadow:0 0 0 1px #e8cfdc}
+.pips i.p1{background:#d9925a}.pips i.p2{background:#c9d2de}.pips i.p3{background:#ffcc33}.pips i.p4{background:#7fd8ff}
+.ach .big{margin:0;height:56px;font-size:22px;min-width:120px;padding:0 12px}
+.album{display:grid;grid-template-columns:repeat(7,1fr);gap:10px}
+.fsh{position:relative;aspect-ratio:1;border-radius:20px;background:#eaf6ff;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 -4px 0 rgba(31,111,192,.12)}
+.fsh img{width:78%;height:78%;object-fit:contain}.fsh.no img{filter:brightness(0) opacity(.18)}
+.fsh span{position:absolute;right:6px;bottom:4px;font:800 16px "Baloo 2";color:#1f6fc0}.fsh.boss{background:#fff1d6}
+.track{display:flex;gap:12px;overflow-x:auto;padding:10px 4px 16px;scroll-snap-type:x proximity}
+.tier{flex:none;width:150px;scroll-snap-align:start;border-radius:24px;background:#fff;box-shadow:0 5px 0 #e3d6f7;padding:10px 8px 12px;text-align:center;position:relative}
+.tier .n{font:400 20px "Grandstander Black";color:#a07bff}.tier img{width:64px;height:64px;object-fit:contain;margin:6px auto}
+.tier .r{font:800 18px "Baloo 2";color:#5a2342;min-height:46px;line-height:1.2}
+.tier.lock{opacity:.55;filter:grayscale(.4)}.tier.ready{background:linear-gradient(#fffbe6,#fff0b8);box-shadow:0 5px 0 #f1c84a,0 0 0 4px #ffe27a}
+.tier.got::after{content:"✓";position:absolute;right:10px;top:6px;font:400 30px "Grandstander Black";color:#2fc58e}
+.tier .big{margin:6px 0 0;height:46px;font-size:19px;min-width:0;padding:0 10px}
+.spts{display:flex;align-items:center;gap:16px;font:800 24px "Baloo 2";color:#5f3fc9;margin:0 6px 4px}.spts .qbar{flex:1;height:22px;margin:0}
+.wheelbox{position:relative;width:560px;height:560px;margin:0 auto}
+.wheel{position:absolute;inset:0;border-radius:50%;border:12px solid #fff;box-shadow:0 10px 0 #c2407a,0 20px 40px rgba(90,20,60,.3);transition:transform 4.2s cubic-bezier(.12,.75,.2,1)}
+.wheel .lab{position:absolute;left:50%;top:50%;width:0;height:0}
+.wheel .lab div{position:absolute;left:-60px;top:-246px;width:120px;text-align:center;font:400 26px/1.1 "Grandstander Black";color:#fff;-webkit-text-stroke:5px rgba(90,20,60,.45);paint-order:stroke fill}
+.wheel .lab img{width:46px;display:block;margin:4px auto 0}
+.wpin{position:absolute;left:50%;top:-30px;margin-left:-28px;width:0;height:0;border:28px solid transparent;border-top:56px solid #ff3d6e;filter:drop-shadow(0 4px 2px rgba(0,0,0,.25));z-index:2}
+.whub{position:absolute;left:50%;top:50%;width:120px;height:120px;margin:-60px 0 0 -60px;border-radius:50%;background:radial-gradient(#fff,#ffe3ef);border:8px solid #fff;box-shadow:0 6px 0 #c2407a;display:flex;align-items:center;justify-content:center;z-index:2}
+.whub img{width:80px}
+.piggy{display:flex;gap:40px;align-items:center}.piggy>img{width:300px;flex:none;animation:hcb 1.4s ease-in-out infinite alternate}
+.piggy h3{margin:0;font:400 64px "Grandstander Black";color:#c2407a}.piggy p{margin:10px 0;font:800 26px "Baloo 2";color:#6a4a5e;line-height:1.35}
+.pstats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0 4px}
+.pstats div{background:#fff;border-radius:18px;padding:8px 6px;text-align:center;box-shadow:0 4px 0 #f0d1df}.pstats b{display:block;font:400 26px "Grandstander Black";color:#9b2c5e}.pstats small{font:800 16px "Baloo 2";color:#8a6a80}
+.lvbox{display:flex;align-items:center;gap:18px;margin:6px 0 4px}.lvbox .lvn{font:400 46px "Grandstander Black";color:#c2407a}.lvbox .who{flex:1}.lvbox small{font:800 18px "Baloo 2";color:#8a6a80}
+.pickgrid .lk{position:relative;display:inline-block}.pickgrid .lk img{filter:grayscale(1) opacity(.45);cursor:not-allowed}
+.pickgrid .lk span{position:absolute;left:0;right:0;bottom:-2px;text-align:center;font:800 15px "Baloo 2";color:#fff;background:#9b2c5e;border-radius:10px}
 </style>
 </head>
 <body>
@@ -287,63 +342,66 @@ img{-webkit-user-drag:none}
       <div class="lv"><i id="meLvBar" style="width:60%"></i><b id="meLv">Lv 1</b></div>
     </div>
     <div id="money">
-      <div class="pill"><img class="ic" src="assets/emoji-fluent-3d/game/coin.png"><span class="coinTxt" id="coinTxt">0</span><img class="plus btn" data-open="shop" src="assets/ui-jelly-pzuh/buttons-pastel/mint/icon_plus_mint.png"></div>
-      <div class="pill gem"><img class="ic" src="assets/emoji-fluent-3d/game/gem_stone.png"><span id="gemTxt">2.480</span><img class="plus btn" data-open="shop" src="assets/ui-jelly-pzuh/buttons-pastel/mint/icon_plus_mint.png"></div>
+      <div class="pill"><img class="ic" src="assets/emoji-fluent-3d/game/coin.png?v=202610231911"><span class="coinTxt" id="coinTxt">0</span><img class="plus btn" data-open="shop" src="assets/ui-jelly-pzuh/buttons-pastel/mint/icon_plus_mint.png?v=202610231911"></div>
+      <div class="pill gem"><img class="ic" src="assets/emoji-fluent-3d/game/gem_stone.png?v=202610231911"><span id="gemTxt">2.480</span><img class="plus btn" data-open="shop" src="assets/ui-jelly-pzuh/buttons-pastel/mint/icon_plus_mint.png?v=202610231911"></div>
     </div>
-    <div id="ticker"><img src="assets/emoji-fluent-3d/game/loudspeaker.png"><span id="tickTxt"></span></div>
+    <div id="ticker"><img src="assets/emoji-fluent-3d/game/loudspeaker.png?v=202610231911"><span id="tickTxt"></span></div>
     <div id="topR">
-      <div class="rbtn btn" data-open="mail" title="Hộp thư"><img src="assets/ui-jelly-pzuh/buttons-pastel/purple/icon_mail_purple.png"><div class="dot" id="mailDot">2</div></div>
-      <div class="rbtn btn" id="mapBtn" title="Bản đồ"><img src="assets/ui-jelly-pzuh/buttons-pastel/mint/icon_home_mint.png"></div>
-      <div class="rbtn btn" data-open="games" title="Danh sách game"><img src="assets/ui-jelly-pzuh/buttons-pastel/yellow/icon_grid_yellow.png"></div>
-      <div class="rbtn btn" data-open="settings" title="Cài đặt"><img src="assets/ui-jelly-pzuh/buttons-pastel/pink/icon_settings_pink.png"></div>
+      <div class="rbtn btn" data-open="mail" title="Hộp thư"><img src="assets/ui-jelly-pzuh/buttons-pastel/purple/icon_mail_purple.png?v=202610231911"><div class="dot" id="mailDot">2</div></div>
+      <div class="rbtn btn" id="mapBtn" title="Bản đồ"><img src="assets/ui-jelly-pzuh/buttons-pastel/mint/icon_home_mint.png?v=202610231911"></div>
+      <div class="rbtn btn" data-open="games" title="Danh sách game"><img src="assets/ui-jelly-pzuh/buttons-pastel/yellow/icon_grid_yellow.png?v=202610231911"></div>
+      <div class="rbtn btn" data-open="settings" title="Cài đặt"><img src="assets/ui-jelly-pzuh/buttons-pastel/pink/icon_settings_pink.png?v=202610231911"></div>
     </div>
-    <div id="evcard" data-open="event"><img src="assets/emoji-fluent-3d/game/party_popper.png"><b>Lễ hội Heo Con</b><span id="evTime">Còn 6 ngày 12 giờ</span></div>
-    <div id="qcard" class="card" data-open="event"><div class="h"><img src="assets/emoji-fluent-3d/game/scroll.png">Nhiệm vụ</div><div id="qbody"></div></div>
+    <div id="evcard" data-open="season"><img src="assets/emoji-fluent-3d/game/party_popper.png?v=202610231911"><b>Lễ hội Heo Con</b><span id="evTime">Còn 6 ngày 12 giờ</span></div>
+    <div id="qcard" class="card" data-open="event"><div class="h"><img src="assets/emoji-fluent-3d/game/scroll.png?v=202610231911">Nhiệm vụ ngày</div><div id="qbody"></div></div>
+    <div id="sideBtns"><div class="sb" data-open="wheel"><img src="assets/emoji-fluent-3d/game/bullseye.png?v=202610231911"><b>Vòng quay</b><i class="dot hide" id="wheelDot">1</i></div><div class="sb" data-open="piggy"><img src="assets/emoji-fluent-3d/animals/pig.png?v=202610231911"><b>Heo đất</b><i class="dot hide" id="piggyDot">!</i></div></div>
     <div id="mini"><canvas id="miniCv" width="280" height="280"></canvas><div class="n">B</div><div class="cap">Thị trấn Heo Con</div></div>
     <div id="dock">
-      <div class="dk" data-open="daily" style="--d:#c2407a"><div class="sq" style="background:linear-gradient(#ffc6dd,#ff7eb3)"><img src="assets/emoji-fluent-3d/game/wrapped_gift.png"></div><b>Quà ngày</b><div class="dot hide" id="dailyDot">!</div></div>
-      <div class="dk" data-open="event" style="--d:#5f3fc9"><div class="sq" style="background:linear-gradient(#e2d6ff,#a98bff)"><img src="assets/emoji-fluent-3d/game/scroll.png"></div><b>Nhiệm vụ</b><div class="dot hide" id="questDot">!</div></div>
-      <div class="dk main" data-open="games" style="--d:#b07800"><div class="sq" style="background:linear-gradient(#fff2b0,#ffc93c)"><img src="assets/emoji-fluent-3d/game/joystick.png"></div><b>Chọn game</b></div>
-      <div class="dk" data-open="shop" style="--d:#1f9a70"><div class="sq" style="background:linear-gradient(#c9f6e6,#4fd9a6)"><img src="assets/emoji-fluent-3d/game/shopping_bags.png"></div><b>Cửa hàng</b></div>
-      <div class="dk" data-open="rank" style="--d:#2a7fd0"><div class="sq" style="background:linear-gradient(#d3ecff,#6fbfff)"><img src="assets/emoji-fluent-3d/game/trophy.png"></div><b>Xếp hạng</b></div>
+      <div class="dk" data-open="daily" style="--d:#c2407a"><div class="sq" style="background:linear-gradient(#ffc6dd,#ff7eb3)"><img src="assets/emoji-fluent-3d/game/wrapped_gift.png?v=202610231911"></div><b>Quà ngày</b><div class="dot hide" id="dailyDot">!</div></div>
+      <div class="dk" data-open="event" style="--d:#5f3fc9"><div class="sq" style="background:linear-gradient(#e2d6ff,#a98bff)"><img src="assets/emoji-fluent-3d/game/scroll.png?v=202610231911"></div><b>Nhiệm vụ</b><div class="dot hide" id="questDot">!</div></div>
+      <div class="dk main" data-open="games" style="--d:#b07800"><div class="sq" style="background:linear-gradient(#fff2b0,#ffc93c)"><img src="assets/emoji-fluent-3d/game/joystick.png?v=202610231911"></div><b>Chọn game</b></div>
+      <div class="dk" data-open="shop" style="--d:#1f9a70"><div class="sq" style="background:linear-gradient(#c9f6e6,#4fd9a6)"><img src="assets/emoji-fluent-3d/game/shopping_bags.png?v=202610231911"></div><b>Cửa hàng</b></div>
+      <div class="dk" data-open="rank" style="--d:#2a7fd0"><div class="sq" style="background:linear-gradient(#d3ecff,#6fbfff)"><img src="assets/emoji-fluent-3d/game/trophy.png?v=202610231911"></div><b>Xếp hạng</b></div>
     </div>
-    <div id="emoteBtn" title="Biểu cảm"><img src="assets/emoji-fluent-3d/reactions/grinning_squinting_face.png"></div>
+    <div id="emoteBtn" title="Biểu cảm"><img src="assets/emoji-fluent-3d/reactions/grinning_squinting_face.png?v=202610231911"></div>
     <div id="emotes"></div>
-    <div class="big rainbow" id="playnow"><img src="assets/3d/renders/icons/bgb_d6_red.png">CHƠI NGAY</div>
+    <div class="big rainbow" id="playnow"><img src="assets/3d/renders/icons/bgb_d6_red.png?v=202610231911">CHƠI NGAY</div>
     <div id="near"><img id="nearImg"><b id="nearTxt"></b><kbd>E</kbd></div>
   </div>
 
   <div id="auth" class="hide"><div class="frame">
     <div id="brand">
-      <img class="lg" src="assets/ui-premium-generated/logo_heo_con_club.png?v=2026102301" alt="Heo Con Club">
+      <img class="lg" src="assets/ui-premium-generated/logo_heo_con_club.png?v=202610231911" alt="Heo Con Club">
       <div class="tag">Game bài & game dân gian siêu dễ thương</div>
       <div class="feats">
-        <div><img src="assets/emoji-fluent-3d/game/joystick.png">18 trò chơi</div>
-        <div><img src="assets/emoji-fluent-3d/game/wrapped_gift.png">Quà mỗi ngày</div>
-        <div><img src="assets/emoji-fluent-3d/game/locked.png">Lưu trên máy</div>
+        <div><img src="assets/emoji-fluent-3d/game/joystick.png?v=202610231911">20 trò chơi</div>
+        <div><img src="assets/emoji-fluent-3d/game/wrapped_gift.png?v=202610231911">Quà mỗi ngày</div>
+        <div><img src="assets/emoji-fluent-3d/game/locked.png?v=202610231911">Lưu trên máy</div>
       </div>
     </div>
     <div id="pwrap"><div id="panel">
       <div id="atabs"><div data-t="login" class="on">Đăng nhập</div><div data-t="reg">Đăng ký</div></div>
       <form id="flogin" autocomplete="on" onsubmit="return false">
-        <div class="field"><img class="ic" src="assets/emoji-fluent-3d/reactions/smiling_face_with_halo.png"><input id="lu" name="username" autocomplete="username" placeholder="Tên đăng nhập" maxlength="16" autocapitalize="off" spellcheck="false"></div>
-        <div class="field"><img class="ic" src="assets/emoji-fluent-3d/game/key.png"><input id="lp" name="password" type="password" autocomplete="current-password" placeholder="Mật khẩu" maxlength="64"><div class="eye" data-for="lp">🙈</div></div>
+        <div class="field"><img class="ic" src="assets/emoji-fluent-3d/reactions/smiling_face_with_halo.png?v=202610231911"><input id="lu" name="username" autocomplete="username" placeholder="Tên đăng nhập" maxlength="16" autocapitalize="off" spellcheck="false"></div>
+        <div class="field"><img class="ic" src="assets/emoji-fluent-3d/game/key.png?v=202610231911"><input id="lp" name="password" type="password" autocomplete="current-password" placeholder="Mật khẩu" maxlength="64"><div class="eye" data-for="lp">🙈</div></div>
         <div class="row2"><div class="tog on" id="remember"><i></i>Ghi nhớ</div><a id="forgot">Quên mật khẩu?</a></div>
         <div class="big pink" id="btnLogin">ĐĂNG NHẬP</div>
       </form>
       <form id="freg" class="hide" autocomplete="on" onsubmit="return false">
-        <div class="field"><img class="ic" src="assets/emoji-fluent-3d/reactions/smiling_face_with_halo.png"><input id="ru" name="username" autocomplete="username" placeholder="Tên đăng nhập (a-z, 0-9)" maxlength="16" autocapitalize="off" spellcheck="false"><div class="hint" id="ruHint"></div></div>
-        <div class="field"><img class="ic" src="assets/emoji-fluent-3d/game/crown.png"><input id="rn" placeholder="Tên trong game" maxlength="14"><div class="hint" id="rnHint" style="color:#c9a2b6">0/14</div></div>
-        <div class="field"><img class="ic" src="assets/emoji-fluent-3d/game/key.png"><input id="rp" type="password" autocomplete="new-password" placeholder="Mật khẩu (ít nhất 6 ký tự)" maxlength="64"><div class="eye" data-for="rp">🙈</div></div>
+        <div class="field"><img class="ic" src="assets/emoji-fluent-3d/reactions/smiling_face_with_halo.png?v=202610231911"><input id="ru" name="username" autocomplete="username" placeholder="Tên đăng nhập (a-z, 0-9)" maxlength="16" autocapitalize="off" spellcheck="false"><div class="hint" id="ruHint"></div></div>
+        <div class="field"><img class="ic" src="assets/emoji-fluent-3d/game/crown.png?v=202610231911"><input id="rn" placeholder="Tên trong game" maxlength="14"><div class="hint" id="rnHint" style="color:#c9a2b6">0/14</div></div>
+        <div class="field"><img class="ic" src="assets/emoji-fluent-3d/game/key.png?v=202610231911"><input id="rp" type="password" autocomplete="new-password" placeholder="Mật khẩu (ít nhất 6 ký tự)" maxlength="64"><div class="eye" data-for="rp">🙈</div></div>
         <div id="strength"><i></i></div>
-        <div class="field"><img class="ic" src="assets/emoji-fluent-3d/game/locked.png"><input id="rp2" type="password" autocomplete="new-password" placeholder="Nhập lại mật khẩu" maxlength="64"><div class="hint" id="rp2Hint"></div></div>
+        <div class="field"><img class="ic" src="assets/emoji-fluent-3d/game/locked.png?v=202610231911"><input id="rp2" type="password" autocomplete="new-password" placeholder="Nhập lại mật khẩu" maxlength="64"><div class="hint" id="rp2Hint"></div></div>
         <div class="lbl">Chọn linh vật 3D</div>
         <div id="mpick"></div>
         <div class="big pink" id="btnReg">TẠO TÀI KHOẢN</div>
       </form>
       <div id="aerr"></div>
       <div class="or">hoặc</div>
-      <div class="big mint" id="btnGuest"><img src="assets/emoji-fluent-3d/hands/waving_hand.png" style="width:52px">Chơi ngay không cần tài khoản</div>
+      <div class="big google hide" id="btnGoogle"><svg viewBox="0 0 48 48" width="44" height="44" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>Đăng nhập bằng Google</div>
+      <div class="note hide" id="onlineNote"></div>
+      <div class="big mint" id="btnGuest"><img src="assets/emoji-fluent-3d/hands/waving_hand.png?v=202610231911" style="width:52px">Chơi ngay không cần tài khoản</div>
       <div class="note">Tài khoản lưu ngay trên máy này, không gửi đi đâu.</div>
       <div class="back" id="toLoginTab">Đã có tài khoản? Đăng nhập</div></div>
     </div>
@@ -351,9 +409,9 @@ img{-webkit-user-drag:none}
 
   <div id="loading">
     <div class="frame">
-      <img class="logoimg" src="assets/ui-premium-generated/logo_heo_con_club.png?v=2026102301" alt="Heo Con Club">
+      <img class="logoimg" src="assets/ui-premium-generated/logo_heo_con_club.png?v=202610231911" alt="Heo Con Club">
       <div id="lbox">
-        <div id="lbar"><div id="lfill"></div><img id="lpig" src="assets/emoji-fluent-3d/animals/pig.png" style="left:4px"></div>
+        <div id="lbar"><div id="lfill"></div><img id="lpig" src="assets/emoji-fluent-3d/animals/pig.png?v=202610231911" style="left:4px"></div>
         <div id="lrow"><div id="ltext">Đang mở cửa thị trấn…</div><div id="lpct">0%</div></div>
       </div>
     </div>
@@ -365,15 +423,15 @@ img{-webkit-user-drag:none}
   <div id="tut" class="hide"><div class="box">
     <h2>Cách chơi trong thị trấn</h2>
     <div class="steps">
-      <div class="st"><img src="assets/emoji-fluent-3d/hands/waving_hand.png"><b>Chạm để đi</b><span>Chạm xuống đường hoặc vỉa hè, nhân vật sẽ chạy tới đó.</span></div>
-      <div class="st"><img src="assets/emoji-fluent-3d/game/house.png"><b>Chạm cửa hàng</b><span>Mỗi cửa hàng là một game. Chạm vào để đi tới cửa và vào chơi.</span></div>
-      <div class="st"><img src="assets/emoji-fluent-3d/game/joystick.png"><b>Xoay & phóng to</b><span>Kéo để xoay camera. Cuộn chuột hoặc chụm 2 ngón để phóng to.</span></div>
+      <div class="st"><img src="assets/emoji-fluent-3d/hands/waving_hand.png?v=202610231911"><b>Chạm để đi</b><span>Chạm xuống đường hoặc vỉa hè, nhân vật sẽ chạy tới đó.</span></div>
+      <div class="st"><img src="assets/emoji-fluent-3d/game/house.png?v=202610231911"><b>Chạm cửa hàng</b><span>Mỗi cửa hàng là một game. Chạm vào để đi tới cửa và vào chơi.</span></div>
+      <div class="st"><img src="assets/emoji-fluent-3d/game/joystick.png?v=202610231911"><b>Xoay & phóng to</b><span>Kéo để xoay camera. Cuộn chuột hoặc chụm 2 ngón để phóng to.</span></div>
     </div>
     <div class="big pink" id="tutOk">HIỂU RỒI!</div>
   </div></div>
 
   <div id="modal"></div>
-  <div id="toast"><img id="toastImg" src="assets/emoji-fluent-3d/game/party_popper.png"><span id="toastTxt"></span></div>
+  <div id="toast"><img id="toastImg" src="assets/emoji-fluent-3d/game/party_popper.png?v=202610231911"><span id="toastTxt"></span></div>
   <div id="fx"></div>
 </div>
 
@@ -382,6 +440,9 @@ img{-webkit-user-drag:none}
 <script src="js/vendor/SkeletonUtils.js"></script>
 <script src="js/hc3d.js"></script>
 <script src="js/hc-core.js"></script>
+<script src="js/hc-progress.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/hc-online.js"></script>
 <script src="js/town3d.js"></script>
 <script>
 'use strict';
@@ -432,7 +493,7 @@ function loadMe() {
   Object.assign(me, {
     user: HC.auth.user(), guest,
     name: store.get('name', 'Bạn Heo Con'), av: store.get('av', 'avatars-dicebear/fun-emoji/png/bong.png'), fr: store.get('fr', 'gold'),
-    coins: store.get('coins', 1250000), gems: store.get('gems', 2480), vip: store.get('vip', guest ? 5 : 1), lv: store.get('lv', guest ? 27 : 1), xp: store.get('xp', 40),
+    coins: store.get('coins', 1250000), gems: store.get('gems', 2480), vip: Math.max(store.get('vip', guest ? 5 : 1), HC.prog.vip()), lv: HC.prog.level(), xp: HC.prog.xpPct(),
     mascot: store.get('mascot', 0) % MASCOTS.length,
   });
 }
@@ -442,7 +503,10 @@ function refreshMe() {
   $('#meLv').textContent = 'Lv ' + me.lv; $('#meLvBar').style.width = Math.max(8, me.xp) + '%';
   $('#coinTxt').textContent = fmt(me.coins); $('#gemTxt').textContent = fmt(me.gems);
   $('#dailyDot').classList.toggle('hide', !dailyAvailable());
-  $('#questDot').classList.toggle('hide', !questsClaimable());
+  const nq = HC.prog.claimableCount(); $('#questDot').textContent = nq || '!'; $('#questDot').classList.toggle('hide', !nq);
+  const w = HC.prog.wheel(); $('#wheelDot').textContent = w.spins; $('#wheelDot').classList.toggle('hide', !w.spins);
+  $('#piggyDot').classList.toggle('hide', !HC.prog.piggy().can);
+  $('#evTime').textContent = 'Còn ' + leftText(HC.prog.season().left);
   renderQuestCard();
   const mails = mailList().filter(m => !m.read).length; $('#mailDot').textContent = mails; $('#mailDot').classList.toggle('hide', !mails);
 }
@@ -452,7 +516,12 @@ function setCoins(v) {
   const step = t => { const k = Math.min(1, (t - t0) / 700); e.textContent = fmt(from + (me.coins - from) * (1 - Math.pow(1 - k, 3))); if (k < 1) requestAnimationFrame(step); };
   requestAnimationFrame(step);
 }
-function addXp(n) { me.xp += n; while (me.xp >= 100) { me.xp -= 100; me.lv++; toast(`Lên cấp ${me.lv}! 🎉`); confetti(60); } store.set('xp', me.xp); store.set('lv', me.lv); refreshMe(); }
+function addXp(n) { HC.prog.addXp(n); loadMe(); refreshMe(); }
+/** Rewards paid by js/hc-progress.js (quests, level-ups, wheel, piggy, festival) land here so the HUD stays in sync. */
+HC.giveCoins = n => { setCoins(me.coins + n); if (n > 0) { flyCoins(Math.min(16, 5 + Math.round(Math.log10(n)))); sfx('gold'); } };
+HC.giveGems = n => { me.gems += n; store.set('gems', me.gems); $('#gemTxt').textContent = fmt(me.gems); };
+HC.prog.on(type => { if (type === 'level') { confetti(70); sfx('win', .5); } if (['level', 'reward', 'quest', 'ach', 'vip', 'tier'].includes(type)) { loadMe(); refreshMe(); } });
+function leftText(ms) { const h = Math.floor(ms / 36e5), d = Math.floor(h / 24); return d ? `${d} ngày ${h % 24} giờ` : h ? `${h} giờ ${Math.floor(ms / 6e4) % 60} phút` : `${Math.max(1, Math.floor(ms / 6e4))} phút`; }
 
 // ------------------------------------------------------------------ fx
 function toast(msg, icon = 'emoji-fluent-3d/game/party_popper.png') { const t = $('#toast'); $('#toastTxt').textContent = msg; $('#toastImg').src = A(icon); t.style.display = 'flex'; t.animate([{ opacity: 0, transform: 'translate(-50%,-20px)' }, { opacity: 1, transform: 'translate(-50%,0)' }], { duration: 250 }); clearTimeout(t._h); t._h = setTimeout(() => t.style.display = 'none', 2400); }
@@ -528,6 +597,11 @@ $('#btnReg').onclick = () => busy($('#btnReg'), async () => {
   sfx('win'); confetti(120); enterTown();
 });
 $('#btnGuest').onclick = () => { sfx('accept'); HC.auth.guest(); enterTown(); };
+// ------------------------------------------------------------------ Google sign-in (js/hc-online.js, Firebase)
+if (HC.online && HC.online.available) $('#btnGoogle').classList.remove('hide');
+else if (HC.online && HC.online.configured) { const n = $('#onlineNote'); n.innerHTML = `Chơi online, đăng nhập Google tại bản web: <b>${HC.online.webUrl.replace('https://', '')}</b>`; n.classList.remove('hide'); }
+const onlineErr = e => { const c = (e && e.code) || ''; return c === 'auth/popup-closed-by-user' || c === 'auth/cancelled-popup-request' ? 'Bạn đã đóng cửa sổ đăng nhập Google.' : c === 'auth/popup-blocked' ? 'Trình duyệt chặn cửa sổ đăng nhập, cho phép popup rồi thử lại nha.' : c === 'auth/unauthorized-domain' ? 'Trang này chưa được cho phép trong Firebase (xem docs/ONLINE_SETUP.md).' : c === 'auth/network-request-failed' ? 'Mất mạng rồi, thử lại sau nhé.' : (e && e.message) || 'Không đăng nhập được, thử lại nhé.'; };
+$('#btnGoogle').onclick = () => busy($('#btnGoogle'), async () => { try { await HC.online.signIn(); sfx('accept'); enterTown(); } catch (e) { console.warn(e); authErr(onlineErr(e)); } });
 [['#lu', '#lp'], ['#lp', '#btnLogin'], ['#ru', '#rn'], ['#rn', '#rp'], ['#rp', '#rp2'], ['#rp2', '#btnReg']].forEach(([a, b]) => $(a).addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); const t = $(b); t.tagName === 'INPUT' ? t.focus() : t.click(); } }));
 $('#ru').addEventListener('input', () => {
   const v = $('#ru').value = $('#ru').value.toLowerCase().replace(/\s/g, ''), h = $('#ruHint');
@@ -547,7 +621,7 @@ $('#rp2').addEventListener('input', () => { const a = $('#rp').value, b = $('#rp
 // ------------------------------------------------------------------ town
 let town = null;
 async function enterTown() {
-  loadMe();
+  HC.prog.reload(); loadMe();
   $('#auth').classList.add('out'); setTimeout(() => $('#auth').classList.add('hide'), 500);
   await town.setPlayer(MASCOTS[me.mascot].key, me.name);
   town.setMode('play');
@@ -558,11 +632,18 @@ async function enterTown() {
   if (Q.get('look')) town.goToBuilding(Q.get('look'), true, true);
   if (Q.get('yaw')) town.camYaw = +Q.get('yaw'); if (Q.get('dist')) town.camDist = +Q.get('dist'); if (Q.get('pitch')) town.camPitch = +Q.get('pitch');
   if (Q.get('open')) { setTimeout(() => openModal(Q.get('open')), SHOT ? 0 : 900); if (!SHOT) return; }
+  if (SHOT && Q.get('demoprog')) {        // screenshots: some progress to show (fresh headless profile)
+    HC.prog.silent = true; const G = ['tien-len', 'poker', 'bau-cua', 'phom', 'xoc-dia', 'co-caro'], F = ['ca_vang', 'ca_hong', 'ca_he', 'ca_xanh', 'tom', 'ca_noc', 'cua', 'sua', 'rua', 'ca_heo', 'cus_kraken', 'cus_ca_kiem', 'cus_nang_tien_ca', 'cus_long_vuong'];
+    for (let i = 0; i < 60; i++) { HC.prog.track('bet', { game: G[i % 6], amount: 50000 }); HC.prog.track('round', { game: G[i % 6], net: i % 3 ? 40000 : -30000, bet: 50000 }); }
+    F.forEach((id, i) => HC.prog.track('catch', { game: 'ban-ca', id, tier: id.startsWith('cus_') ? 'boss' : 'small', mult: 2 }));
+    HC.prog.track('combo', { game: 'tien-len', kind: 'chat_heo' }); HC.prog.silent = false; loadMe(); refreshMe();
+  }
   if (SHOT || Q.get('selftest')) { if (Q.get('tut')) showTutorial(); if (Q.get('modal')) openModal(Q.get('modal'), Q.get('arg')); return; }
   if (Q.get('tut') || !store.get('tut', false)) setTimeout(showTutorial, 1600);
   setTimeout(() => {
     if (!$('#tut').classList.contains('hide')) return;
     if (store.get('welcome', false)) { store.set('welcome', false); openModal('welcome'); }
+    else if (HC.prog.rescueState(me.coins).can) openModal('rescue');
     else if (dailyAvailable()) openModal('daily');
     else toast(`Chào mừng ${me.name} quay lại thị trấn! 👋`);
   }, 2600);
@@ -604,7 +685,7 @@ const gameIcon = b => b.action ? { shop: 'emoji-fluent-3d/game/shopping_bags.png
 function openBuilding(b) {
   questVisit(b.key);
   if (b.action === 'hall') return HC.goto('lobby.html?from=town', 'Đang mở bản đồ…');
-  if (b.action) return openModal(b.action);
+  if (b.action) return openModal(b.action === 'event' ? 'season' : b.action);
   openModal('enter', b.key);
 }
 function playGame(key) {
@@ -625,36 +706,28 @@ const today = () => new Date().toISOString().slice(0, 10);
 function dailyState() { return store.get('daily', { last: '', day: 0 }); }
 function dailyAvailable() { return dailyState().last !== today(); }
 const DAILY = [50000, 80000, 120000, 160000, 220000, 300000, 600000];
-const QUESTS = [
-  { id: 'walk', name: 'Dạo phố 300 mét', goal: 300, coins: 50000, ic: 'emoji-fluent-3d/game/round_pushpin.png' },
-  { id: 'greet', name: 'Chào hỏi 3 người bạn', goal: 3, coins: 60000, ic: 'emoji-fluent-3d/hands/waving_hand.png' },
-  { id: 'visit', name: 'Ghé thăm 5 cửa hàng', goal: 5, coins: 100000, ic: 'emoji-fluent-3d/game/house.png' },
-  { id: 'emote', name: 'Thả 3 biểu cảm', goal: 3, coins: 30000, ic: 'emoji-fluent-3d/reactions/partying_face.png' },
-  { id: 'daily', name: 'Nhận quà ngày', goal: 1, coins: 40000, ic: 'emoji-fluent-3d/game/wrapped_gift.png' },
-];
-function qs() { return store.get('quests', { walk: 0, greet: [], visit: [], emote: 0, daily: 0, claimed: [] }); }
-function qprog(q, s = qs()) { const v = s[q.id]; return Math.min(q.goal, Array.isArray(v) ? v.length : Math.floor(v)); }
-function questsClaimable() { const s = qs(); return QUESTS.some(q => qprog(q, s) >= q.goal && !s.claimed.includes(q.id)); }
-function questBump(id, val) { const s = qs(); if (Array.isArray(s[id])) { if (!s[id].includes(val)) s[id].push(val); } else s[id] = (s[id] || 0) + (val || 1); store.set('quests', s); $('#questDot').classList.toggle('hide', !questsClaimable()); renderQuestCard(); }
+const questBump = (type, v) => { HC.prog.track(type, v); refreshMe(); };   // town events: walk, greet, visit, emote, daily
 let qcardKey = '';
 function renderQuestCard() {
-  const s = qs(), q = QUESTS.find(q => !s.claimed.includes(q.id) && qprog(q, s) >= q.goal) || QUESTS.find(q => !s.claimed.includes(q.id));
   const b = $('#qbody'); if (!b) return;
-  if (!q) { if (qcardKey !== 'done') { qcardKey = 'done'; b.innerHTML = '<div class="q">Xong hết nhiệm vụ rồi! 🎉<small>Mai có nhiệm vụ mới nha</small></div>'; } return; }
-  const pr = qprog(q, s), done = pr >= q.goal, key = q.id + ':' + Math.floor(pr) + ':' + done;
+  const day = HC.prog.daily(), qs = day.q, left = qs.filter(q => !q.claimed);
+  const q = qs.find(q => !q.claimed && q.n >= q.goal) || qs.find(q => !q.claimed);
+  const key = q ? q.id + ':' + q.n + ':' + (q.n >= q.goal) + ':' + left.length : 'done:' + day.chest;
   if (key === qcardKey) return; qcardKey = key;
-  b.innerHTML = `<div class="q">${q.name}<small>${q.id === 'walk' ? Math.floor(pr) + ' / ' + q.goal + ' m' : pr + ' / ' + q.goal} · thưởng ${HC.short(q.coins)} xu</small></div><div class="bar"><i style="width:${pr / q.goal * 100}%"></i></div>${done ? '<div class="claim">Nhận thưởng!</div>' : ''}`;
+  if (!q) { b.innerHTML = day.chest ? '<div class="q">Xong cả 3 nhiệm vụ! 🎉<small>Mai có nhiệm vụ mới</small></div>' : '<div class="q">Xong cả 3 nhiệm vụ!<small>Mở rương ngày để nhận quà</small></div><div class="claim">Mở rương!</div>'; return; }
+  const done = q.n >= q.goal, num = v => v >= 1e4 ? HC.short(v) : fmt(v);
+  b.innerHTML = `<div class="q">${HC.prog.questName(q)}<small>${num(q.n)} / ${num(q.goal)} · ${3 - left.length}/3 xong · thưởng ${HC.short(q.coins)} xu</small></div><div class="bar"><i style="width:${q.n / q.goal * 100}%"></i></div>${done ? '<div class="claim">Nhận thưởng!</div>' : ''}`;
 }
-const questVisit = key => questBump('visit', key);
+const questVisit = key => questBump('visit', { key });
 let walkAcc = 0, lastP = null;
 function trackWalk() {
   if (!town.player) return; const p = town.player.ch.root.position;
   if (lastP) { const d = Math.hypot(p.x - lastP.x, p.z - lastP.z); if (d < 2) walkAcc += d; }
   lastP = { x: p.x, z: p.z };
-  if (walkAcc > 5) { questBump('walk', walkAcc); walkAcc = 0; }
+  if (walkAcc > 5) { questBump('walk', { m: walkAcc }); walkAcc = 0; }
 }
 const MAIL_TEXT = {
-  1: { from: 'Heo Con Club', title: 'Chào mừng bạn đến thị trấn!', body: 'Thị trấn có 18 game, cứ đi dạo và ghé cửa hàng bất kỳ nhé. Quà gặp mặt nè!' },
+  1: { from: 'Heo Con Club', title: 'Chào mừng bạn đến thị trấn!', body: 'Thị trấn có 20 game, cứ đi dạo và ghé cửa hàng bất kỳ nhé. Quà gặp mặt nè!' },
   2: { from: 'Ban tổ chức', title: 'Lễ hội Heo Con đã mở', body: 'Làm nhiệm vụ trong thị trấn để nhận xu và lên cấp.' },
 };
 /** Saved mail keeps only id/coins/read; the wording always comes from MAIL_TEXT so text fixes reach old saves. */
@@ -675,6 +748,160 @@ function panel(title, color = '', ribbon = 'pink', w = 1100) {
   return { p, inner: el('div', { class: 'inner' }, p) };
 }
 function bigBtn(parent, label, cls, fn) { const b = el('div', { class: 'big ' + cls, html: label }, parent); b.onclick = () => { sfx('click'); fn(); }; return b; }
+// ------------------------------------------------------------------ progression screens (js/hc-progress.js)
+const PROG_IC = { coins: 'emoji-fluent-3d/game/coin.png', gems: 'emoji-fluent-3d/game/gem_stone.png', spins: 'emoji-fluent-3d/game/bullseye.png', pts: 'emoji-fluent-3d/game/party_popper.png', xp: 'emoji-fluent-3d/symbols/glowing_star.png', title: 'emoji-fluent-3d/game/crown.png' };
+function rewardBits(r, parent) {
+  const m = el('span', { class: 'meta' }, parent);
+  if (r.coins) el('span', { class: 'rw', html: `<img src="${A(PROG_IC.coins)}">${HC.short(r.coins)}` }, m);
+  if (r.gems) el('span', { class: 'rw', html: `<img src="${A(PROG_IC.gems)}">${r.gems}`, style: 'color:#1f6fc0' }, m);
+  if (r.pts) el('span', { class: 'rw', html: `<img src="${A(PROG_IC.pts)}">${r.pts} điểm`, style: 'color:#5f3fc9' }, m);
+  if (r.xp) el('span', { class: 'rw', html: `<img src="${A(PROG_IC.xp)}">${r.xp} KN`, style: 'color:#c2407a' }, m);
+  if (r.spins) el('span', { class: 'rw', html: `<img src="${A(PROG_IC.spins)}">${r.spins} lượt quay`, style: 'color:#c2407a' }, m);
+  if (r.title) el('span', { class: 'rw', html: `<img src="${A(PROG_IC.title)}">${r.title}`, style: 'color:#9b2c5e' }, m);
+  return m;
+}
+function gotReward(r) { if (!r) return; sfx('gold'); confetti(r.gems || r.spins ? 50 : 24); }
+function questModal(tab) {
+  const { p, inner } = panel('Nhiệm vụ', 'lavender', 'lavender', 1200);
+  const tabs = el('div', { class: 'gtabs' }, inner), body = el('div', {}, inner);
+  const T = [['day', 'Hằng ngày'], ['week', 'Hằng tuần'], ['ach', 'Thành tựu'], ['album', 'Bộ sưu tập']];
+  const draw = t => {
+    tab = t; body.innerHTML = ''; $$('div', tabs).forEach(d => d.classList.toggle('on', d.dataset.t === t));
+    if (t === 'day' || t === 'week') {
+      const weekly = t === 'week', box = weekly ? HC.prog.weekly() : HC.prog.daily(), now = new Date();
+      const reset = weekly ? (new Date(now.getFullYear(), now.getMonth(), now.getDate() + ((8 - now.getDay()) % 7 || 7)) - now) : (new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1) - now);
+      const top = el('div', { class: 'qtop' }, body); el('span', { text: weekly ? 'Nhiệm vụ lớn, thưởng lớn. Làm dần trong tuần.' : 'Ba nhiệm vụ mỗi ngày: dễ, vừa, khó.' }, top); el('span', { text: 'Làm mới sau ' + leftText(reset) }, top);
+      box.q.forEach((q, i) => {
+        const done = q.n >= q.goal, num = v => v >= 1e4 ? HC.short(v) : fmt(v);
+        const row = el('div', { class: 'qrow' + (q.claimed ? ' got' : done ? ' done' : '') }, body); img(HC.prog.questIcon(q), '', row);
+        const who = el('div', { class: 'who' }, row); el('b', { text: HC.prog.questName(q) }, who);
+        const meta = rewardBits(q, who); meta.prepend(el('span', { class: 'qchip d' + q.d, text: HC.prog.DIFF_NAME[q.d] }));
+        el('span', { text: `${num(q.n)} / ${num(q.goal)}`, style: 'margin-left:auto;color:#5a2342' }, meta);
+        el('i', { style: `width:${Math.min(100, q.n / q.goal * 100)}%` }, el('div', { class: 'qbar' }, who));
+        const bs = el('div', { class: 'qbtns' }, row);
+        if (q.claimed) el('div', { class: 'big grey small', text: 'Đã nhận' }, bs);
+        else if (done) bigBtn(bs, 'Nhận', 'pink small', () => { gotReward(HC.prog.claimQuest(weekly, i)); draw(t); });
+        else {
+          el('div', { class: 'big sky small', text: 'Đang làm', style: 'opacity:.8' }, bs);
+          if (!weekly && box.rr < 1) bigBtn(bs, '🔄 Đổi', 'lemon small', () => { if (HC.prog.reroll(i)) { sfx('pop'); toast('Đã đổi nhiệm vụ (mỗi ngày 1 lần)', 'emoji-fluent-3d/game/scroll.png'); } draw(t); });
+        }
+      });
+      const ready = HC.prog.chestReady(weekly), ch = el('div', { class: 'chest' }, body); img('emoji-fluent-3d/game/wrapped_gift.png', '', ch);
+      const tx = el('div', { class: 't' }, ch); el('div', { text: weekly ? 'Rương tuần: xong cả 4 nhiệm vụ' : 'Rương ngày: xong cả 3 nhiệm vụ' }, tx);
+      rewardBits(weekly ? { gems: 120, coins: 500000, spins: 3, pts: 150 } : { gems: 20, spins: 1, pts: 40 }, tx);
+      if (box.chest) el('div', { class: 'big grey small', text: 'Đã mở', style: 'margin:0;min-width:170px' }, ch);
+      else if (ready) bigBtn(ch, 'Mở rương', 'pink small', () => { gotReward(HC.prog.claimChest(weekly)); draw(t); }).style.cssText = 'margin:0;min-width:170px';
+      else el('div', { class: 'big grey small', text: `${box.q.filter(q => q.claimed).length}/${box.q.length}`, style: 'margin:0;min-width:170px' }, ch);
+    } else if (t === 'ach') {
+      const g = el('div', { class: 'achgrid' }, body);
+      for (const a of HC.prog.achievements()) {
+        const c = el('div', { class: 'ach' }, g); img(a.ic, '', c);
+        const who = el('div', { class: 'who' }, c); el('b', { text: a.name }, who);
+        const v = a.money ? HC.short(a.value) : fmt(a.value), nx = a.money ? HC.short(a.next) : fmt(a.next);
+        el('small', { text: a.got >= 4 ? `${v} ${a.unit} · đã đạt Kim cương` : `${v} / ${nx} ${a.unit}` }, who);
+        const pips = el('div', { class: 'pips' }, who); for (let k = 0; k < 4; k++) el('i', { class: k < a.got ? 'p' + (k + 1) : '' }, pips);
+        if (a.claimable) bigBtn(c, 'Nhận', 'pink small', () => { gotReward(HC.prog.claimAch(a.id)); draw(t); });
+      }
+    } else albumTab(body);
+  };
+  T.forEach(([k, l]) => { const d = el('div', { text: l }, tabs); d.dataset.t = k; d.onclick = () => { sfx('click'); draw(k); }; });
+  draw(tab);
+}
+async function albumTab(body) {
+  el('div', { class: 'qtop', html: '<span>Bắt cá ở Bắn Cá để lấp đầy bộ sưu tập. Đủ 42 loài là thành tựu Kim cương.</span>' }, body);
+  const grid = el('div', { class: 'album' }, body);
+  try {
+    if (!(window.Rules && Rules['ban-ca'])) await loadScript('js/games3d/rules/ban-ca.js');
+    if (!window.HC_CUSTOM_FISH) await loadScript('assets/3d/js/tex_custom-fish.js');
+  } catch (e) { el('div', { class: 'note', text: 'Chưa tải được danh sách cá.' }, body); return; }
+  const R = Rules['ban-ca']; if (!R.customAdded) { R.customAdded = R.addFish(window.HC_CUSTOM_FISH || []).length || true; const L = window.HC_CUSTOM_LOOKS || {}; for (const id in L) if (R.BY_ID[id]) Object.assign(R.BY_ID[id], { look: L[id], custom: true }); }
+  const got = HC.prog.album(), TEX = window.HC_TEX || {};
+  const pic = f => f.custom && TEX[f.look] ? TEX[f.look] : f.look.startsWith('proc:') ? A('emoji-fluent-3d/sea/tropical_fish.png') : A('emoji-fluent-3d/sea/' + f.look.slice(4) + '.png');
+  const list = R.FISH.slice().sort((a, b) => a.mult - b.mult);
+  el('span', { text: `Đã có ${list.filter(f => got[f.id]).length} / ${list.length} loài`, style: 'font-weight:800' }, body.querySelector('.qtop'));
+  for (const f of list) {
+    const c = el('div', { class: 'fsh' + (got[f.id] ? '' : ' no') + (f.tier === 'boss' ? ' boss' : ''), title: got[f.id] ? `${f.name} ×${f.mult}` : '???' }, grid);
+    el('img', { src: pic(f), alt: '' }, c); if (got[f.id]) el('span', { text: '×' + got[f.id] }, c);
+  }
+}
+function seasonModal() {
+  const S = HC.prog.season(), { p, inner } = panel('Lễ hội Heo Con', 'lavender', 'lavender', 1400);
+  const top = el('div', { class: 'qtop' }, inner); el('span', { text: `Mùa ${S.no} · còn ${leftText(S.left)}` }, top); el('span', { text: `Mốc ${S.tier} / ${S.tiers}` }, top);
+  const pts = el('div', { class: 'spts' }, inner); img('emoji-fluent-3d/game/party_popper.png', 'width:48px', pts);
+  const cur = S.pts - S.tier * S.step; el('span', { text: S.tier >= S.tiers ? 'Đã xong cả 30 mốc!' : `${cur} / ${S.step} điểm tới mốc ${S.tier + 1}` }, pts);
+  el('i', { style: `width:${S.tier >= S.tiers ? 100 : cur / S.step * 100}%` }, el('div', { class: 'qbar' }, pts));
+  const tr = el('div', { class: 'track' }, inner);
+  const icon = r => r.title ? PROG_IC.title : r.gems ? PROG_IC.gems : r.spins ? PROG_IC.spins : PROG_IC.coins;
+  const text = r => [r.coins && HC.short(r.coins) + ' xu', r.gems && r.gems + ' 💎', r.spins && r.spins + ' lượt quay', r.title && '“' + r.title + '”'].filter(Boolean).join(' · ');
+  let first = null;
+  S.rewards.forEach((r, k) => {
+    const i = k + 1, got = S.claimed.includes(i), ready = !got && i <= S.tier;
+    const c = el('div', { class: 'tier' + (got ? ' got' : ready ? ' ready' : i > S.tier ? ' lock' : '') }, tr);
+    el('div', { class: 'n', text: 'Mốc ' + i }, c); img(icon(r), '', c); el('div', { class: 'r', text: text(r) }, c);
+    if (ready) { bigBtn(c, 'Nhận', 'pink small', () => { gotReward(HC.prog.claimTier(i)); seasonModal(); }); first = first || c; }
+  });
+  requestAnimationFrame(() => { const t = first || tr.children[Math.max(0, S.tier - 1)]; if (t) tr.scrollLeft = t.offsetLeft - 20; });
+  el('div', { class: 'note', html: 'Kiếm điểm Lễ hội: mỗi ván chơi <b>+4</b>, nhiệm vụ ngày <b>+20 đến +60</b>, nhiệm vụ tuần <b>+60 đến +180</b>, hạ trùm Bắn Cá <b>+15</b>, rương ngày <b>+40</b>.' }, inner);
+  const bs = el('div', { class: 'mbtns' }, p);
+  const ready = S.rewards.map((_, k) => k + 1).filter(i => i <= S.tier && !S.claimed.includes(i));
+  if (ready.length > 1) bigBtn(bs, `Nhận tất cả (${ready.length})`, 'pink', () => { let any; ready.forEach(i => { any = HC.prog.claimTier(i) || any; }); gotReward(any); seasonModal(); });
+  bigBtn(bs, 'Làm nhiệm vụ', 'lemon', () => questModal('day'));
+}
+function wheelModal() {
+  const st = HC.prog.wheel(), { p, inner } = panel('Vòng quay may mắn', 'lemon', 'lemon', 900);
+  const n = st.slices.length, cols = ['#ff8fc0', '#ffc93c', '#7cc4ff', '#7fe0b2', '#b79bff', '#ff9e6b', '#5fd0ff', '#ffd54a'];
+  const box = el('div', { class: 'wheelbox' }, inner); el('div', { class: 'wpin' }, box);
+  const wheel = el('div', { class: 'wheel', style: `background:conic-gradient(${st.slices.map((_, i) => `${cols[i]} ${i * 360 / n}deg ${(i + 1) * 360 / n}deg`).join(',')})` }, box);
+  st.slices.forEach((sl, i) => {
+    const lab = el('div', { class: 'lab', style: `transform:rotate(${(i + .5) * 360 / n}deg)` }, wheel), d = el('div', {}, lab);
+    d.innerHTML = (sl.coins ? HC.short(sl.coins) : sl.gems ? sl.gems + ' 💎' : sl.pts ? sl.pts + ' điểm' : '+1 lượt') + `<img src="${A(sl.coins ? PROG_IC.coins : sl.gems ? PROG_IC.gems : sl.pts ? PROG_IC.pts : PROG_IC.spins)}">`;
+  });
+  const hub = el('div', { class: 'whub' }, box); img('emoji-fluent-3d/animals/pig_face.png', '', hub);
+  el('div', { class: 'note', html: `Mỗi ngày 1 lượt miễn phí. Thêm lượt từ rương nhiệm vụ và Lễ hội. Đang có <b>${st.spins}</b> lượt.`, style: 'font-size:24px' }, inner);
+  const bs = el('div', { class: 'mbtns' }, p); let turning = false, angle = 0;
+  const btn = bigBtn(bs, st.spins ? 'QUAY!' : 'Hết lượt hôm nay', st.spins ? 'rainbow' : 'grey', () => {
+    if (turning || !HC.prog.wheel().spins) return; turning = true;
+    HC.prog.silent = true; const res = HC.prog.spin(); HC.prog.silent = false; if (!res) { turning = false; return; }
+    sfx('spin', .5); angle += 360 * 6 + (360 - (res.index + .5) * 360 / n) - (angle % 360);
+    wheel.style.transform = `rotate(${angle}deg)`;
+    setTimeout(() => { turning = false; const pz = res.prize; toast(pz.coins ? `Trúng ${fmt(pz.coins)} xu!` : pz.gems ? `Trúng ${pz.gems} kim cương!` : pz.pts ? `Trúng ${pz.pts} điểm Lễ hội!` : 'Thêm 1 lượt quay!', 'emoji-fluent-3d/game/party_popper.png'); gotReward(pz); refreshMe(); const left = HC.prog.wheel().spins; btn.innerHTML = left ? `QUAY TIẾP (${left})` : 'Hết lượt hôm nay'; btn.className = 'big ' + (left ? 'rainbow' : 'grey'); }, SHOT ? 10 : 4300);
+  });
+}
+function piggyModal() {
+  const st = HC.prog.piggy(), { p, inner } = panel('Heo đất', '', 'pink', 1100);
+  const box = el('div', { class: 'piggy' }, inner); img('emoji-fluent-3d/animals/pig.png', '', box);
+  const tx = el('div', {}, box); el('h3', { text: fmt(st.amt) + ' xu' }, tx);
+  el('i', { style: `width:${Math.min(100, st.amt / st.max * 100)}%` }, el('div', { class: 'qbar', style: 'height:24px' }, tx));
+  el('p', { html: `Mỗi lần bạn đặt cược, <b>2%</b> rơi vào heo đất (đầy ở ${HC.short(st.max)}). Khi heo có từ <b>${HC.short(st.min)} xu</b>, mỗi ngày được đập một lần${HC.prog.level() < st.needLv ? ` (cần cấp ${st.needLv})` : ''}.` }, tx);
+  const bs = el('div', { class: 'mbtns' }, p);
+  if (st.can) bigBtn(bs, `🔨 ĐẬP HEO · ${HC.short(st.amt)}`, 'pink', () => { gotReward(HC.prog.breakPiggy()); confetti(90); closeModal(); refreshMe(); });
+  else bigBtn(bs, st.broke ? 'Mai đập tiếp nha' : HC.prog.level() < st.needLv ? `Cần cấp ${st.needLv}` : `Cần ${HC.short(st.min)} xu`, 'grey', closeModal);
+}
+function rescueModal() {
+  const st = HC.prog.rescueState(me.coins), { p, inner } = panel('Quỹ cứu trợ', 'mint', 'mint', 900);
+  el('p', { html: st.can ? `Hết xu rồi à? Heo Con tặng bạn <b>${fmt(st.amount)} xu</b> để chơi tiếp. Hôm nay còn ${st.left} lần.` : `Quỹ cứu trợ dành cho lúc bạn còn dưới ${HC.short(st.below)} xu (3 lần mỗi ngày).`, style: 'font:800 30px "Baloo 2";color:#4a5e55;text-align:center;margin:10px 0' }, inner);
+  const bs = el('div', { class: 'mbtns' }, p);
+  if (st.can) bigBtn(bs, `Nhận ${HC.short(st.amount)} xu`, 'pink', () => { HC.prog.rescue(me.coins); closeModal(); refreshMe(); });
+  else bigBtn(bs, 'Đóng', 'grey', closeModal);
+}
+async function rankOnline(inner, tab) {
+  const tabs = el('div', { class: 'gtabs' }, inner), list = el('div', { class: 'list' }, inner);
+  [['coins', 'Giàu nhất'], ['lv', 'Cấp cao nhất'], ['won', 'Thắng nhiều nhất'], ['online', 'Đang online'], ['town', 'Thị trấn']].forEach(([k, l]) => { const d = el('div', { text: l, class: k === tab ? 'on' : '' }, tabs); d.onclick = () => { sfx('click'); openModal('rank', k); }; });
+  el('div', { class: 'note', text: 'Đang tải người chơi thật…' }, list);
+  try {
+    const rows = tab === 'online' ? await HC.online.onlineNow(40) : await HC.online.top(tab, 40);
+    list.innerHTML = '';
+    if (!rows.length) el('div', { class: 'note', text: tab === 'online' ? 'Chưa có ai online lúc này.' : 'Chưa có người chơi nào, bạn là người đầu tiên!' }, list);
+    rows.forEach((r, i) => {
+      const it = el('div', { class: 'it' + (r.me ? ' me' : '') }, list), rk = el('div', { class: 'rk' }, it);
+      if (i < 3 && tab !== 'online') img(`emoji-fluent-3d/game/${['1st', '2nd', '3rd'][i]}_place_medal.png`, '', rk); else rk.textContent = tab === 'online' ? '●' : i + 1;
+      img(r.av || 'avatars-dicebear/fun-emoji/png/bong.png', '', it, 'pic');
+      const w = el('div', { class: 'who' }, it); el('b', { text: (r.name || 'Heo Con') + (r.me ? ' (bạn)' : '') }, w); el('small', { text: `Lv ${r.lv || 1} · VIP ${r.vip || 1}` }, w);
+      el('div', { class: 'amt', text: tab === 'lv' ? 'Lv ' + (r.lv || 1) : tab === 'won' ? HC.short(r.won || 0) : tab === 'online' ? (Date.now() - r.seen < 9e4 ? 'vừa xong' : Math.round((Date.now() - r.seen) / 6e4) + ' phút') : fmt(r.coins || 0) }, it);
+    });
+    if (!HC.online.user()) el('div', { class: 'note', text: 'Đăng nhập Google để có tên trên bảng xếp hạng.' }, inner);
+  } catch (e) { list.innerHTML = ''; el('div', { class: 'note', text: 'Không tải được bảng xếp hạng: ' + (e.message || e) }, list); }
+}
 function openModal(kind, arg) {
   const B = HCTown.BUILDINGS, CAT = HCTown.CAT;
   if (kind === 'enter') {
@@ -715,20 +942,11 @@ function openModal(kind, arg) {
     else bigBtn(bs, 'Mai quay lại nhé!', 'grey', closeModal);
     return;
   }
-  if (kind === 'event') {
-    const { p, inner } = panel('Lễ hội Heo Con', 'lavender', 'lavender', 1100);
-    const s = qs(), list = el('div', { class: 'list' }, inner);
-    for (const q of QUESTS) {
-      const pr = qprog(q, s), done = pr >= q.goal, got = s.claimed.includes(q.id);
-      const it = el('div', { class: 'it' }, list); img(q.ic, 'width:76px', it);
-      const who = el('div', { class: 'who' }, it); el('b', { text: q.name }, who); el('small', { text: `${q.id === 'walk' ? Math.floor(pr) + ' / ' + q.goal + ' m' : pr + ' / ' + q.goal} · thưởng ${fmt(q.coins)} xu` }, who);
-      const bar = el('div', { class: 'bar' }, who); el('i', { style: `width:${pr / q.goal * 100}%` }, bar);
-      if (got) el('div', { class: 'big grey small', text: 'Đã nhận', style: 'min-width:170px' }, it);
-      else if (done) { const b = el('div', { class: 'big pink small', text: 'Nhận', style: 'min-width:170px' }, it); b.onclick = () => { const s2 = qs(); s2.claimed.push(q.id); store.set('quests', s2); reward(q.coins, 'Hoàn thành: ' + q.name); addXp(25); openModal('event'); }; }
-      else el('div', { class: 'big sky small', text: 'Đang làm', style: 'min-width:170px;opacity:.75' }, it);
-    }
-    return;
-  }
+  if (kind === 'event') return questModal(arg || 'day');
+  if (kind === 'season') return seasonModal();
+  if (kind === 'wheel') return wheelModal();
+  if (kind === 'piggy') return piggyModal();
+  if (kind === 'rescue') return rescueModal();
   if (kind === 'shop') {
     const { p, inner } = panel('Cửa hàng', 'mint', 'mint', 1250);
     const tabs = el('div', { class: 'gtabs' }, inner), body = el('div', {}, inner);
@@ -759,6 +977,7 @@ function openModal(kind, arg) {
   }
   if (kind === 'rank') {
     const { p, inner } = panel('Bảng xếp hạng', 'sky', 'sky', 1000);
+    if (HC.online && HC.online.available && arg !== 'town') return rankOnline(inner, arg || 'coins');
     const rows = HCTown.NPCS.map((n, i) => ({ name: n.name, av: portrait(n.key), coins: [98500000, 64200000, 41800000, 30500000, 22100000, 15600000, 9800000, 6400000, 3100000][i], lv: n.lv }));
     rows.push({ name: me.name, av: me.av, coins: me.coins, lv: me.lv, me: true }); rows.sort((a, b) => b.coins - a.coins);
     const list = el('div', { class: 'list' }, inner);
@@ -778,6 +997,14 @@ function openModal(kind, arg) {
   }
   if (kind === 'profile') {
     const { p, inner } = panel('Hồ sơ', '', 'pink', 1200);
+    const lv = el('div', { class: 'lvbox' }, inner); el('div', { class: 'lvn', text: 'Lv ' + HC.prog.level() }, lv);
+    const lw = el('div', { class: 'who' }, lv); el('b', { text: HC.prog.title(), style: 'font:400 28px "Grandstander Black";color:#9b2c5e' }, lw);
+    el('i', { style: `width:${HC.prog.xpPct()}%` }, el('div', { class: 'qbar' }, lw));
+    const vipNow = Math.max(me.vip, HC.prog.vip()), st = HC.prog.stats();
+    el('small', { text: `${fmt(HC.prog.xp())} / ${fmt(HC.prog.need())} kinh nghiệm · VIP ${vipNow}${vipNow < 8 ? ` · cược thêm ${HC.short(Math.max(0, HC.prog.vipNext() - st.bet))} xu để lên VIP ${vipNow + 1}` : ''}` }, lw);
+    img(`ui-premium-generated/badges/vip_${Math.min(8, vipNow)}.png`, 'width:84px;flex:none', lv);
+    const ps = el('div', { class: 'pstats' }, inner);
+    [[fmt(st.rounds), 'ván đã chơi'], [fmt(st.wins), 'ván thắng'], [fmt(st.bestStreak), 'thắng liền nhiều nhất'], [HC.short(st.bestWin), 'thắng lớn nhất']].forEach(([v, l]) => { const d = el('div', {}, ps); el('b', { text: v }, d); el('small', { text: l }, d); });
     el('div', { class: 'lbl', text: 'Tên trong game' }, inner);
     const nin = el('input', { class: 'namein', maxlength: 14, value: me.name }, inner);
     el('div', { class: 'lbl', text: 'Linh vật 3D đi dạo thị trấn' }, inner);
@@ -785,8 +1012,12 @@ function openModal(kind, arg) {
     MASCOTS.forEach((m, i) => { const im = img(portrait(m.key), '', mg, i === me.mascot ? 'on' : ''); im.title = m.name; im.onclick = async () => { me.mascot = i; store.set('mascot', i); $$('img', mg).forEach((x, j) => x.classList.toggle('on', j === i)); sfx('pop'); await town.setPlayer(m.key, me.name); town.emote(); }; });
     el('div', { class: 'lbl', text: 'Ảnh đại diện' }, inner);
     const ag = el('div', { class: 'pickgrid', style: 'margin-top:16px' }, inner);
-    const avs = [...MASCOTS.map(m => portrait(m.key)), ...['bong', 'heo', 'meo', 'kem', 'mochi', 'xoai', 'gau', 'tho'].map(s => `avatars-dicebear/fun-emoji/png/${s}.png`)];
-    avs.forEach(a => { const im = img(a, '', ag, a === me.av ? 'on' : ''); im.onclick = () => { me.av = a; store.set('av', a); $$('img', ag).forEach(x => x.classList.toggle('on', x === im)); refreshMe(); sfx('pop'); }; });
+    const EXTRA = ['banh', 'bi', 'bin', 'bo', 'bon', 'com', 'cun', 'dau', 'mit', 'miu', 'na', 'su', 'sua', 'teo', 'ti'];   // unlocked one per 2 levels from level 2
+    const avs = [...MASCOTS.map(m => [portrait(m.key), 1]), ...['bong', 'heo', 'meo', 'kem', 'mochi', 'xoai', 'gau', 'tho'].map(s => [`avatars-dicebear/fun-emoji/png/${s}.png`, 1]), ...EXTRA.map((s, i) => [`avatars-dicebear/fun-emoji/png/${s}.png`, 2 + i * 2])];
+    avs.forEach(([a, need]) => {
+      if (HC.prog.level() < need) { const w = el('div', { class: 'lk', title: 'Mở ở cấp ' + need }, ag); img(a, '', w); el('span', { text: 'Cấp ' + need }, w); return; }
+      const im = img(a, '', ag, a === me.av ? 'on' : ''); im.onclick = () => { me.av = a; store.set('av', a); $$('img', ag).forEach(x => x.classList.toggle('on', x === im)); refreshMe(); sfx('pop'); };
+    });
     el('div', { class: 'note', text: me.guest ? 'Bạn đang chơi tài khoản khách. Đăng ký để lưu riêng tiến trình.' : `Tài khoản: ${me.user}` }, inner);
     const bs = el('div', { class: 'mbtns' }, p);
     bigBtn(bs, 'LƯU', 'pink', () => { me.name = (nin.value.trim() || me.name).slice(0, 14); store.set('name', me.name); refreshMe(); if (town.player) { town.player.name = me.name; town.playerLabel.querySelector('b').textContent = me.name; } closeModal(); toast('Đã lưu hồ sơ ✨'); });
@@ -801,9 +1032,9 @@ function openModal(kind, arg) {
     [['cao', 'Đẹp'], ['vua', 'Vừa'], ['thap', 'Nhẹ']].forEach(([k, l]) => { const s = el('span', { text: l, class: (S.gfx || 'cao') === k ? 'on' : '' }, seg); s.onclick = () => { S.gfx = k; HC.saveSettings(); $$('span', seg).forEach(x => x.classList.toggle('on', x === s)); town.resizePixelRatio(pixelRatio()); town.st.renderer.shadowMap.enabled = k !== 'thap'; town.st.scene.traverse(o => { if (o.material) o.material.needsUpdate = true; }); }; });
     const z = el('div', { class: 'srow' }, inner); el('span', { text: '🔍 Cỡ giao diện' }, z); const zs = el('div', { class: 'seg' }, z);
     [['nho', 'Nhỏ'], ['vua', 'Vừa'], ['lon', 'Lớn']].forEach(([k, l]) => { const s = el('span', { text: l, class: (S.ui || 'vua') === k ? 'on' : '' }, zs); s.onclick = () => { S.ui = k; HC.saveSettings(); $$('span', zs).forEach(x => x.classList.toggle('on', x === s)); fit(); }; });
-    const acc = el('div', { class: 'srow' }, inner); el('span', { text: me.guest ? '👤 Đang chơi: Khách' : `👤 Tài khoản: ${me.user}` }, acc);
+    const acc = el('div', { class: 'srow' }, inner); const gu = HC.online && HC.online.user(); el('span', { text: me.guest ? '👤 Đang chơi: Khách' : gu ? `🌐 Google: ${gu.name} · lưu trên mây` : `👤 Tài khoản: ${me.user}` }, acc);
     const bs = el('div', { class: 'mbtns' }, p);
-    bigBtn(bs, 'Đăng xuất', 'grey', () => { HC.auth.logout(); HC.goto('index.html', 'Hẹn gặp lại nha!'); });
+    bigBtn(bs, 'Đăng xuất', 'grey', async () => { if (HC.online && HC.online.isGoogle()) await HC.online.signOut().catch(() => {}); HC.auth.logout(); HC.goto('index.html', 'Hẹn gặp lại nha!'); });
     bigBtn(bs, 'Xong', 'pink', closeModal);
     return;
   }
@@ -850,7 +1081,7 @@ async function boot() {
   town.uiScale = uiS;
   town.on('enter', b => { $('#near').classList.remove('on'); openBuilding(b); });
   town.on('near', b => showNear(b));
-  town.on('npc', n => { questBump('greet', n.name); town.say(n, pick(['Chào bạn! 👋', 'Hi hi 😆', 'Đi chơi không? 🃏'])); openModal('npc', n); });
+  town.on('npc', n => { questBump('greet', { name: n.name }); town.say(n, pick(['Chào bạn! 👋', 'Hi hi 😆', 'Đi chơi không? 🃏'])); openModal('npc', n); });
   town.on('walk', () => sfx('tick', .25));
   await town.init(p => setLoad(.08 + p * .9));
   bindMinimap();
@@ -863,6 +1094,7 @@ async function boot() {
   if (want === 'aerial') return;   // just the town from the sky (for screenshots)
   if (want === 'maprender') { const m = town.renderMap(innerWidth, innerHeight); $('#ui').style.display = 'none'; document.body.dataset.map = JSON.stringify(m); return; }
   if (want === 'auth' || (!HC.auth.signedIn() && want !== 'town')) showAuth();
+  else if (HC.online && HC.online.isGoogle()) { setLoad(.97); await HC.online.resume(); enterTown(); }      // pick up a newer cloud save first
   else { if (!HC.auth.signedIn()) HC.auth.guest(); enterTown(); }
 }
 if (Q.get('selftest')) loadScript('js/town-selftest.js');

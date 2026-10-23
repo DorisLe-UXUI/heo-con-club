@@ -17,6 +17,11 @@
       <li>Hết ván: người về nhất ăn của mỗi nhà <b>1 lá</b> cho mỗi lá còn trên tay; <b>cóng</b> (chưa đánh lá nào) trả <b>15</b>; mỗi heo còn trên tay (<b>thối heo</b>) trả thêm <b>5</b>.</li>
       <li><b>Tới trắng</b> ngay khi chia: tứ quý heo, 5 đôi, 3 sám, sảnh rồng 10 lá. Ăn 20 lá mỗi nhà.</li></ul>
       <p>Mức cược là giá của 1 lá. Ván đầu ai giữ lá nhỏ nhất đi trước (chỉ lúc này mới xét chất, 3♠ nhỏ nhất), các ván sau người thắng đi trước.</p>`,
+    modes: [
+      { id: '4-nguoi', name: '4 người', desc: 'Bàn đủ 4 người, mỗi người 10 lá.', rules: '4 người, mỗi người 10 lá, 12 lá còn lại không dùng.' },
+      { id: 'solo', name: 'Solo 2 người', desc: 'Đấu tay đôi với một bot ngồi đối diện: mỗi người 10 lá, 32 lá còn lại úp không dùng.',
+        rules: 'chỉ 2 người ngồi đối diện, mỗi người 10 lá, 32 lá còn lại không dùng. Luật đánh, báo sâm (ăn / đền 20 lá), thối heo, cóng y như bàn 4 người, chỉ khác là thắng thua với đúng một đối thủ.' },
+    ],
     async start(ctx) {
       const R = window.Rules['sam-loc'];
       const ut = ctx.Q.has('uitest') ? uiDriver(ctx, +ctx.Q.get('uitest') || 2, ({ by, click, memo }) => {
@@ -52,6 +57,11 @@
     ctx.music('cards');
     const seats = await ctx.seats(4, { angles: [90, 0, 270, 180] });    // counter-clockwise: you → right → top → left
     fixSeats(ctx, seats);
+    const present = ctx.mode && ctx.mode.id === 'solo' ? [0, 2] : [0, 1, 2, 3];
+    for (const p of [1, 3]) if (!present.includes(p)) {   // Solo: the side seats stay empty
+      const s = seats[p]; if (s.ch) s.ch.root.visible = false; if (s.label) s.label.remove(); if (s._bub) s._bub.remove();
+      Object.assign(s, { label: null, _bub: null, turn() {}, say() {}, anim() {}, setCoins() {} });
+    }
     fitCamera(ctx, T3.modules['sam-loc'].cam);
     const glowTex = T3.canvasTex(128, 128, (x, w, h) => { const g = x.createRadialGradient(w / 2, h / 2, 4, w / 2, h / 2, w / 2); g.addColorStop(0, 'rgba(255,255,255,.95)'); g.addColorStop(.55, 'rgba(255,250,190,.55)'); g.addColorStop(1, 'rgba(255,250,190,0)'); x.fillStyle = g; x.fillRect(0, 0, w, h); });
     const cardGlowTex = T3.canvasTex(160, 220, (x, w, h) => { x.shadowColor = '#ffe066'; x.shadowBlur = 26; x.fillStyle = '#ffd84d'; T3.rr(x, 24, 24, w - 48, h - 48, 18); x.fill(); x.fill(); });
@@ -64,7 +74,7 @@
     const stackOf = (pos, n, key) => { const g = new T.Group(); g.position.copy(pos); for (let i = 0; i < n; i++) { const c = ctx.card(null, { back: key }); c.rotation.z = Math.PI; c.position.y = .02 + i * .022; c.rotation.y = (Math.random() - .5) * .12; g.add(c); } ctx.add(g); return g; };
     const deckStack = stackOf(deckPos, 10, 'c_back'); const usedStack = stackOf(usedPos, 6, 'c_back'); usedStack.visible = false;
     const stakeEl = ctx.ui.h('div', { class: 'glass', style: 'position:absolute;right:16px;top:132px;padding:10px 24px;font:400 26px "Grandstander Black";color:#1f9a70;display:none' }, ctx.ui.root);
-    S = { seats, spot, cardGlowTex, deckPos, usedPos, deckStack, usedStack, stakeEl, nextStarter: null, hand: [[], [], [], []], tags: [], pile: [], countTags: [] };
+    S = { seats, present, spot, cardGlowTex, deckPos, usedPos, deckStack, usedStack, stakeEl, nextStarter: null, hand: [[], [], [], []], tags: [], pile: [], countTags: [] };
   }
 
   /** Seat tags: the far seat's name tag and bubble would sit under the top HUD bar, so they go beside the character;
@@ -109,7 +119,7 @@
   function layoutMe(ctx, ms = 260) { return ctx.layoutHand(S.hand[0], { ...HAND, ms }); }
   function setCount(p) { const t = S.countTags[p]; if (!t) return; const n = S.hand[p].length, passed = S.passed && S.passed[p]; t.el.innerHTML = `<div class="tag3 ${passed ? 'grey' : n <= 2 ? 'lemon' : 'sky'}" style="font-size:24px;padding:4px 14px">${passed ? 'Bỏ lượt · ' : ''}${n} lá</div>`; }
   function setTurn(p) {
-    S.seats.forEach((s, i) => s.turn(i === p));
+    S.seats.forEach((s, i) => { if (S.present.includes(i)) s.turn(i === p); });
     const sp = S.spot;
     if (p == null || p < 0) { sp.visible = false; return; }
     sp.visible = true;
@@ -135,7 +145,7 @@
     const stake = await chooseStake(ctx, auto || demo);
     S.stakeEl.style.display = ''; S.stakeEl.innerHTML = `Cược <span style="color:#a86d00">${HC.short(stake)}</span> / lá`;
     // ---- deal
-    const g = new RR.Game({ starter: S.nextStarter, seed: demo && !S.demoDone ? T3.modules['sam-loc'].demoSeed : undefined });
+    const g = new RR.Game({ starter: S.nextStarter, seed: demo && !S.demoDone ? T3.modules['sam-loc'].demoSeed : undefined, seats: S.present, level: ctx.room ? ctx.aiLevel(1) : undefined });
     S.demoDone = true;
     g.deal(test && ctx.Q.get('force') ? forced(RR, ctx.Q.get('force')) : undefined);
     S.g = g; S.passed = [false, false, false, false];
@@ -210,10 +220,10 @@
     const T = ctx.THREE;
     ctx.ui.status('Đang chia bài…'); ctx.sfx('shuffle', .4);
     // count tags
-    for (let p = 1; p < 4; p++) { const s = S.seats[p]; S.countTags[p] = ctx.label(() => s.spot(0, 1.75).setY(1.05), ''); }
+    for (const p of S.present) { if (!p) continue; const s = S.seats[p]; S.countTags[p] = ctx.label(() => s.spot(0, 1.75).setY(1.05), ''); }
     const from = S.deckPos;
     for (let k = 0; k < 10; k++) {
-      for (let p = 0; p < 4; p++) {
+      for (const p of S.present) {
         const id = g.hands[p][k], m = mk(ctx, id);
         m.position.set(from.x, .3, from.z); m.rotation.set(0, 0, Math.PI); ctx.add(m);
         S.hand[p].push(m);
@@ -370,6 +380,7 @@
     S.countTags.forEach(t => t && (t.el.innerHTML = ''));
     const coins0 = ctx.coins, delta = r.units[0] * stake;
     S.seats.forEach((s, p) => {
+      if (!S.present.includes(p)) return;
       const u = r.units[p], amt = u * stake;
       const pos = p === 0 ? new T.Vector3(-5.9, 1.2, 4.6) : s.spot(0, 1.9).setY(.9);
       S.tags.push(ctx.label(pos, `<div class="tag3 ${u > 0 ? 'mint' : u < 0 ? 'grey' : 'sky'}">${u > 0 ? '+' : u < 0 ? '−' : ''}${HC.short(Math.abs(amt))}</div>`));
@@ -383,8 +394,8 @@
     S.nextStarter = r.winner;
     const kindTxt = { normal: 'Về nhất', sam: 'Báo sâm thành công', sam_fail: 'Bị chặn sâm', instant: 'Tới trắng' }[r.kind];
     const unitsTxt = u => (u > 0 ? `ăn ${u} lá` : u < 0 ? `trả ${-u} lá` : 'hoà');
-    const rows = S.seats.map((s, p) => {
-      const left = g.hands[p].length, heo = g.hands[p].filter(id => RR.rankOf(id) === RR.HEO).length;
+    const rows = S.seats.filter((s, p) => S.present.includes(p)).map(s => {
+      const p = S.seats.indexOf(s), left = g.hands[p].length, heo = g.hands[p].filter(id => RR.rankOf(id) === RR.HEO).length;
       let detail;
       if (r.kind === 'normal') detail = p === r.winner ? 'Về nhất' : [`còn ${left} lá`, r.played[p] === 0 ? 'cóng' : '', heo ? `thối ${heo} heo` : ''].filter(Boolean).join(' · ');
       else detail = r.notes[p].join(' · ') || (p === r.winner ? kindTxt : '');

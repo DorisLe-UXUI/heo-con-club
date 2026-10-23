@@ -26,5 +26,21 @@
   }
   /** Simple strategy for bots and the dealer. */
   function shouldHit(hand, isDealer) { const k = kind(hand); if (k.cls >= 2 || k.cls === 0) return false; const t = k.total; if (hand.length >= 5) return false; return t < (isDealer ? 16 : 16) || (t === 16 && Math.random() < .35) || (t === 17 && hand.length === 4 && Math.random() < .3); }
-  return { total, kind, settle, shouldHit, pts };
+  /** Chế độ "Làm cái": you hold the bank. hands[i] staked bets[i] against the dealer's hand →
+   *  { mult[] (player view, as settle), net[] (coins each player wins, <0 = pays the bank), dealerNet } — the table is zero-sum. */
+  function settleBank(hands, bets, dealer) {
+    const mult = hands.map(h => settle(h, dealer)), net = mult.map((m, i) => Math.round(bets[i] * m));
+    return { mult, net, dealerNet: -net.reduce((a, b) => a + b, 0) };
+  }
+  /** The most one hand can win from the bank is 2× its stake (Xì Bàng, Ngũ Linh). Shrink bets (to the largest allowed
+   *  stake in `levels`, else drop them) until the bank can pay every player at once. */
+  function capBets(bets, bank, levels) {
+    const out = bets.slice(), lv = levels.slice().sort((a, b) => a - b);
+    for (let guard = 0; guard < 99 && out.reduce((a, b) => a + b * 2, 0) > bank; guard++) {
+      const i = out.indexOf(Math.max(...out)), lower = lv.filter(v => v < out[i]);
+      out[i] = lower.length ? lower[lower.length - 1] : 0;
+    }
+    return out;
+  }
+  return { total, kind, settle, settleBank, capBets, shouldHit, pts };
 });

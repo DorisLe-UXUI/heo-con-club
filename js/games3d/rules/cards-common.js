@@ -22,15 +22,16 @@
   /** Small seeded RNG (mulberry32) for reproducible tests. */
   function seeded(seed) { let a = seed >>> 0; return () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
 
-  // ================================================================ no-limit betting engine
-  // A hand: st = table(stacks, {minRaise, raiseCap, unit}). Each player: {i, stack, bet (this street), total (this hand),
+  // ================================================================ betting engine (no-limit, or pot-limit with {potLimit: true})
+  // A hand: st = table(stacks, {minRaise, raiseCap, unit, potLimit}). Pot-limit: a raise may go at most to
+  // currentBet + (everything in the pot + the amount the raiser must call first) — the classic "pot raise". Each player: {i, stack, bet (this street), total (this hand),
   // folded, allIn, out, actedAt}. actedAt = the bet level the player last acted at (null = has not acted this street).
   // Only a full raise (≥ the last raise size) re-opens raising for players who already acted ("fullLevel").
   function table(stacks, o = {}) {
     return {
       players: stacks.map((s, i) => ({ i, stack: s, bet: 0, total: 0, folded: false, allIn: false, out: !(s > 0), actedAt: null })),
       currentBet: 0, minRaise: o.minRaise || 1, bigBlind: o.minRaise || 1, fullLevel: 0, raises: 0,
-      raiseCap: o.raiseCap == null ? Infinity : o.raiseCap, unit: o.unit || 1,
+      raiseCap: o.raiseCap == null ? Infinity : o.raiseCap, unit: o.unit || 1, potLimit: !!o.potLimit,
     };
   }
   const inHand = p => !p.folded && !p.out;
@@ -49,6 +50,13 @@
     if (o.minRaise) st.minRaise = st.bigBlind = o.minRaise; else st.minRaise = st.bigBlind;
   }
   function toCall(st, i) { const p = st.players[i]; return Math.max(0, Math.min(st.currentBet - p.bet, p.stack)); }
+  /** Highest "raise to" level for player i: the whole stack, or the pot raise under pot-limit. */
+  function maxRaiseTo(st, i) {
+    const p = st.players[i], all = p.bet + p.stack;
+    if (!st.potLimit) return all;
+    const owe = Math.max(0, st.currentBet - p.bet), pot = st.players.reduce((a, q) => a + q.total, 0);
+    return Math.min(all, st.currentBet + pot + owe);
+  }
   function canRaise(st, i) {
     const p = st.players[i];
     if (!canAct(p) || st.raises >= st.raiseCap) return false;
@@ -60,7 +68,7 @@
   function legal(st, i) {
     const p = st.players[i], tc = toCall(st, i);
     const L = { fold: true, check: tc === 0, call: tc, raise: null, allIn: p.stack, toCall: tc, bet: p.bet, stack: p.stack, currentBet: st.currentBet };
-    if (canRaise(st, i)) { const max = p.bet + p.stack; L.raise = { min: Math.min(max, st.currentBet + Math.max(st.minRaise, st.unit)), max }; }
+    if (canRaise(st, i)) { const max = maxRaiseTo(st, i); L.raise = { min: Math.min(max, st.currentBet + Math.max(st.minRaise, st.unit)), max }; }
     return L;
   }
   /** Apply an action {type:'fold'|'check'|'call'|'raise'|'allin', to}. Raise amounts are clamped into the legal range.
@@ -77,7 +85,7 @@
     if (type === 'check' || (type === 'call' && tc === 0)) { p.actedAt = st.currentBet; return { type: 'check', put: 0 }; }
     if (type === 'call') { const put = take(p, tc); p.bet += put; p.actedAt = st.currentBet; return { type, put, to: p.bet, allIn: p.allIn }; }
     // raise
-    const max = p.bet + p.stack, min = Math.min(max, st.currentBet + Math.max(st.minRaise, st.unit));
+    const max = maxRaiseTo(st, i), min = Math.min(max, st.currentBet + Math.max(st.minRaise, st.unit));
     let to = a.type === 'allin' ? max : Math.round(a.to || 0);
     to = Math.max(min, Math.min(max, to));
     const put = take(p, to - p.bet); p.bet += put;
@@ -146,6 +154,6 @@
   const roundTo = (x, unit, min, max) => Math.max(min, Math.min(max, Math.round(x / unit) * unit));
 
   return { SUITS, RANKS, SUIT_RANK, SUIT_SYM, hi, rankLabel, card, parse, name, shuffle, deck, seeded,
-    table, ante, blind, street, toCall, canRaise, legal, act, streetDone, nextActor, needsAction, bettingClosed, liveCount, potTotal, chipsInPlay, inHand, canAct,
+    table, ante, blind, street, toCall, maxRaiseTo, canRaise, legal, act, streetDone, nextActor, needsAction, bettingClosed, liveCount, potTotal, chipsInPlay, inHand, canAct,
     pots, award, roundTo };
 });

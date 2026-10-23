@@ -127,13 +127,13 @@ beats('9♦ 10♣ K♣', '9♥ 10♠ Q♥', 'equal 9 điểm with same biggest-c
 }
 
 // ================================================================ simulations
-function simulate(hands, seed, mode) {
+function simulate(hands, seed, mode, o = {}) {
   const rng = C.seeded(seed); let stacks = [400000, 250000, 120000, 60000, 30000], showdowns = 0, folds = 0, sidePots = 0, maxActs = 0;
   const pers = R.PERSONAS;
   for (let t = 0; t < hands; t++) {
     stacks = stacks.map(s => (s < 5000 ? 50000 + Math.floor(rng() * 400) * 1000 : s));   // rebuy
     const ante = [1000, 5000, 10000][t % 3];
-    const st = C.table(stacks, { minRaise: ante, raiseCap: R.RAISE_CAP, unit: 1000 });
+    const st = C.table(stacks, { minRaise: ante, raiseCap: R.RAISE_CAP, unit: 1000, potLimit: !!o.potLimit });
     const chips0 = C.chipsInPlay(st);
     const deck = C.deck(rng), cards = stacks.map(() => [deck.pop(), deck.pop(), deck.pop()]);
     st.players.forEach((p, i) => C.ante(st, i, ante));
@@ -143,7 +143,7 @@ function simulate(hands, seed, mode) {
       const Lg = C.legal(st, i);
       let a;
       if (mode === 'random') { const x = rng(); a = x < .2 ? { type: 'fold' } : x < .6 ? { type: 'call' } : x < .9 && Lg.raise ? { type: 'raise', to: Lg.raise.min + Math.floor(rng() * (Lg.raise.max - Lg.raise.min)) } : { type: 'allin' }; }
-      else a = R.botDecide({ hand: cards[i], legal: Lg, pot: C.potTotal(st), nOpp: C.liveCount(st) - 1, ante, unit: 1000, pers: pers[i % 4] }, rng);
+      else a = R.botDecide({ hand: cards[i], legal: Lg, pot: C.potTotal(st), nOpp: C.liveCount(st) - 1, ante, unit: 1000, pers: pers[i % 4], level: o.levels ? o.levels[i] : undefined }, rng);
       if (a.type === 'check' && Lg.toCall > 0) throw new Error('bot checked facing a bet');
       if (a.type === 'raise' && !Lg.raise) throw new Error('bot raised without the right to');
       const before = st.players[i].stack;
@@ -151,6 +151,7 @@ function simulate(hands, seed, mode) {
       if (before - st.players[i].stack !== res.put) throw new Error('put mismatch');
       if (C.chipsInPlay(st) !== chips0) throw new Error('chips not conserved mid-round');
       if (st.raises > R.RAISE_CAP) throw new Error('raise cap broken');
+      if (o.potLimit && res.type === 'raise' && res.to > Lg.raise.max) throw new Error('raise above the pot in pot-limit');
       i = C.nextActor(st, i);
       if (++acts > 60) throw new Error('betting round does not end');
     }
@@ -178,6 +179,27 @@ function simulate(hands, seed, mode) {
   const b = simulate(4000, 77, 'random');
   ok(b.sidePots > 10, `random actions: 4000 hands, ${b.sidePots} hands with side pots`);
   ok(a.maxActs <= 20 && b.maxActs <= 25, 'betting rounds stay short with the raise cap');
+}
+// ---- chế độ "Tố tối đa bằng hũ" (pot-limit): each raise goes at most to the size of the pot
+{
+  const st = C.table([1e6, 1e6, 1e6, 1e6, 1e6], { minRaise: 5000, raiseCap: R.RAISE_CAP, unit: 1000, potLimit: true });
+  st.players.forEach((p, i) => C.ante(st, i, 5000)); C.street(st);
+  eq(C.legal(st, 1).raise, { min: 5000, max: 25000 }, 'pot-limit: first raise at most the 25K of antes');
+  C.act(st, 1, { type: 'allin' });
+  ok(st.players[1].bet === 25000 && !st.players[1].allIn, 'pot-limit: TẤT TAY becomes a pot-size raise');
+  eq(C.legal(st, 2).raise.max, 100000, 'pot-limit re-raise: call 25K + pot 50K → raise to 100K');
+  const free = C.table([1e6, 1e6, 1e6, 1e6, 1e6], { minRaise: 5000, raiseCap: R.RAISE_CAP, unit: 1000 });
+  free.players.forEach((p, i) => C.ante(free, i, 5000)); C.street(free);
+  eq(C.legal(free, 1).raise.max, 995000, 'tố tự do: the whole stack');
+  const c = simulate(3000, 909, 'bots', { potLimit: true }), d = simulate(3000, 910, 'random', { potLimit: true });
+  ok(c.showdowns > 200 && d.showdowns > 200, `pot-limit: 6000 hands, chips conserved, no raise above the pot (${c.showdowns + d.showdowns} showdowns)`);
+}
+// ---- bot strength (room tiers)
+{
+  const lv = simulate(1500, 31, 'bots', { levels: [0, 1, 2, 3, 3] });
+  ok(lv.showdowns + lv.folds === 1500, 'bots at levels 0–3 play 1500 legal hands');
+  const rng = C.seeded(8), plays = level => { let n = 0; for (let i = 0; i < 400; i++) { const a = R.botDecide({ hand: h('2♣ 7♦ 9♠'), legal: { toCall: 60000, stack: 5e5, currentBet: 60000, bet: 0, raise: { min: 65000, max: 5e5 }, check: false }, pot: 45000, nOpp: 3, ante: 5000, unit: 1000, level }, rng); if (a.type !== 'fold') n++; } return n; };
+  ok(plays(0) > plays(3), `easy bots call a big bet with 8 điểm more often than hard bots (${plays(0)} vs ${plays(3)} of 400)`);
 }
 
 console.log(`${pass} passed, ${fail} failed`);

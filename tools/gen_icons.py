@@ -1,4 +1,4 @@
-"""Lobby game icons (512x512) for 18 games, composed from the kit.
+"""Lobby game icons (512x512) for 20 games, composed from the kit.
 Usage: python3 -E gen_icons.py <assets_dir> [only-key ...]
 """
 import sys, random, zlib
@@ -148,6 +148,53 @@ def day_xu(im):
 
 
 make('day-xu', 'Đẩy Xu', 'lemon', day_xu, 'NEW')
+
+
+def gap_thu(im):
+    """Claw machine: a claw closing on a teddy bear, more plushies around."""
+    put(im, emoji('animals/dog_face.png', 104, 12), 118, 300)
+    put(im, emoji('animals/rabbit_face.png', 100, -12), 398, 300)
+    put(im, emoji('game/teddy_bear.png', 210), 256, 262)
+    d = ImageDraw.Draw(im)
+    d.line((256, 18, 256, 108), fill=(140, 120, 160, 255), width=12)
+    d.line((256, 18, 256, 108), fill=(230, 226, 240, 255), width=6)
+    for sx in (-1, 1):   # two prongs hugging the bear's head
+        pts = [(256 + sx * 22, 130), (256 + sx * 74, 186), (256 + sx * 58, 236)]
+        d.line(pts, fill=(120, 100, 140, 255), width=22, joint='curve')
+        d.line(pts, fill=(244, 242, 250, 255), width=13, joint='curve')
+        d.ellipse((256 + sx * 58 - 13, 236 - 13, 256 + sx * 58 + 13, 236 + 13), fill=(255, 201, 60, 255), outline=(168, 109, 0, 255), width=4)
+    d.ellipse((256 - 44, 96, 256 + 44, 156), fill=(255, 211, 77, 255), outline=(168, 109, 0, 255), width=6)
+    d.ellipse((256 - 24, 104, 256 + 4, 122), fill=(255, 246, 200, 255))
+    for x, y, s in [(110, 120, 46), (408, 96, 38), (420, 200, 30)]:
+        put(im, emoji('symbols/sparkles.png', s), x, y)
+
+
+def ticket_roll(im, cx, cy, r, top, ring, ink, label, gold=False):
+    lay = new(512, 512)
+    d = ImageDraw.Draw(lay)
+    d.ellipse((cx - r, cy - r + 14, cx + r, cy + r + 14), fill=rgb(ring))          # the roll's side, seen a little from above
+    d.ellipse((cx - r, cy - r, cx + r, cy + r), fill=rgb(top), outline=rgb(ring), width=max(6, r // 7))
+    for k in range(int(r * .32), int(r * .86), 9):
+        d.ellipse((cx - k, cy - k, cx + k, cy + k), outline=(255, 255, 255, 150) if not gold else (168, 109, 0, 90), width=2)
+    f = font(CB, int(r * (.62 if len(label) <= 3 else .5)))
+    d.text((cx, cy + 4), label, font=f, fill=rgb(ink), anchor='mm', stroke_width=max(4, r // 12), stroke_fill=(255, 255, 255, 255))
+    sh = Image.new('RGBA', (512, 512), (80, 30, 60, 0)); sh.putalpha(lay.split()[3].point(lambda v: int(v * .28)).filter(ImageFilter.GaussianBlur(6)))
+    sh2 = new(512, 512); sh2.paste(sh, (0, 6))
+    im.alpha_composite(sh2); im.alpha_composite(lay)
+
+
+def xuc_ve(im):
+    """Ticket-roll scoop machine: printed rolls 20K / 10K and the golden 500K."""
+    put(im, emoji('game/admission_tickets.png', 120, -16), 120, 112)
+    ticket_roll(im, 148, 262, 74, '#d6f3ff', '#3d9bff', '#1f6fc0', '20K')
+    ticket_roll(im, 388, 276, 68, '#ffd6e8', '#ff6fa8', '#c2407a', '10K')
+    ticket_roll(im, 268, 196, 104, '#fff3b0', '#ffb300', '#a86d00', '500K', gold=True)
+    for x, y, s in [(410, 100, 44), (180, 360, 34)]:
+        put(im, emoji('game/coin.png', s), x, y)
+
+
+make('gap-thu', 'Gắp Thú', 'pink', gap_thu, 'NEW')
+make('xuc-ve', 'Xúc Vé', 'lemon', xuc_ve, 'NEW')
 # grid preview
 keys = list(ICONS)
 cols = 6

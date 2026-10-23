@@ -131,6 +131,52 @@ t('thousands of bot deals: valid arrangements, cards conserved, units conserved 
     passed++;
   }
 });
+// ---------------------------------------------------------------- chế độ "Có thưởng chi"
+t('thưởng chi: chi 3 sám cô ăn 3', () => {
+  const a = P('Ah Kh 9h 7h 3h', '4c 5c 6s 7d 8c', '5s 5h 5d'), b = P('Ks Kc Kd 2c 2h', 'Qs Qd Js Jd 2s', 'As Ad 4h');
+  assert.deepStrictEqual(R.settle([a, b]).valid, [true, true]);
+  assert.deepStrictEqual(R.settle([a, b]).units, [1, -1], 'normal mode: −1 +1 +1');
+  const s = R.settle([a, b], { bonus: true });
+  assert.deepStrictEqual(s.pairs[0].val, [-1, 1, 3], 'chi 1 lost to cù lũ (no bonus in chi 1), chi 2 won, chi 3 sám cô +3');
+  assert.deepStrictEqual(s.units, [3, -3]);
+});
+t('thưởng chi: chi 1 tứ quý ăn 4, chi 2 cù lũ ăn 2, sập 3 chi nhân đôi', () => {
+  const tq = P('7s 7h 7d 7c 2h', '8s 8h 8d 3c 3h', 'Ks Kh 2d'), low = P('As Ad Qd 4s 4d', 'Js Jd 6c 9d 9c', 'Qs Jh 3d');
+  assert.deepStrictEqual(R.settle([tq, low]).valid, [true, true]);
+  assert.deepStrictEqual(R.settle([tq, low], { bonus: true }).pairs[0].val, [4, 2, 1]);
+  assert.deepStrictEqual(R.settle([tq, low], { bonus: true }).units, [14, -14], 'sập 3 chi: (4 + 2 + 1) × 2');
+  assert.deepStrictEqual(R.settle([tq, low]).units, [6, -6], 'the same hands in the normal mode');
+});
+t('thưởng chi: thùng phá sảnh chi 1 ăn 5, chi 2 ăn 10', () => {
+  const tps = P('Ac Kc Qc Jc 10c', '5h 6h 7h 8h 9h', '2s 2d 4c'), other = P('6s 7c 8d 9c 10s', 'As Ah Ad 3s 4d', '3h 3d Qs');
+  assert.deepStrictEqual(R.settle([tps, other]).valid, [true, true]);
+  const s = R.settle([tps, other], { bonus: true });
+  assert.deepStrictEqual(s.pairs[0].val, [5, 10, -1]);
+  assert.deepStrictEqual(s.units, [14, -14]);
+  assert.deepStrictEqual(R.settle([tps, other]).units, [1, -1]);
+});
+t('thưởng chi: specials and binh lủng are unchanged, every deal is zero-sum', () => {
+  const lung = P('5s 6h 7c 8c 9h', '7s 7h 7d 2c 2h', 'Ks Kh 2d'), ok = P('As Ad Qd 4s 4c', 'Js Jd 6c 9d 9c', 'Qs Jh 3d');
+  assert.deepStrictEqual(R.settle([lung, ok], { bonus: true }).units, [-6, 6]);
+  const rng = R.mulberry32(77); let bonusPairs = 0;
+  for (let g = 0; g < 250; g++) {
+    const hands = R.deal(rng), players = hands.map(h => { const a = R.botArrange(h, rng); return { chi: a.chi, special: a.special || null }; });
+    const s = R.settle(players, { bonus: true }), n = R.settle(players);
+    if (s.units.reduce((a, b) => a + b, 0) !== 0) throw new Error('bonus not zero-sum');
+    s.pairs.forEach((d, k) => { if (!d.val) { if (d.u !== n.pairs[k].u) throw new Error('special / lủng must not change'); return; } const sum = d.val.reduce((a, b) => a + b, 0); if (d.u !== (d.why === 'sap' ? sum * 2 : sum)) throw new Error('bonus pair math'); if (d.bonus) bonusPairs++; else if (d.u !== n.pairs[k].u) throw new Error('without bonus hands both modes agree'); });
+  }
+  assert.ok(bonusPairs > 40, 'bonus chi happen in random deals: ' + bonusPairs);
+});
+t('bot strength: easy arrangements stay valid and score less than hard ones', () => {
+  const rng = R.mulberry32(99); let easy = 0, hard = 0;
+  for (let g = 0; g < 60; g++) {
+    const hands = R.deal(rng);
+    const a = R.botArrange(hands[0], rng, 0), b = R.botArrange(hands[0], rng, 3);
+    for (const x of [a, b]) { if (!x.special && !R.isValid(x.chi)) throw new Error('lủng'); if (R.sortIds(x.chi.flat()).join() !== R.sortIds(hands[0]).join()) throw new Error('lost cards'); }
+    if (!a.special) { easy += a.value; hard += b.value; }
+  }
+  assert.ok(easy < hard, `easy ${easy.toFixed(2)} < hard ${hard.toFixed(2)}`);
+});
 console.log('stats', JSON.stringify(stats));
 console.log(passed + ' passed, ' + failed + ' failed');
 process.exit(failed ? 1 : 0);

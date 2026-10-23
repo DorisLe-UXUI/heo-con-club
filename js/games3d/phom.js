@@ -21,6 +21,10 @@
       <li>Nhất ăn <b>1 / 2 / 3</b> đơn vị của Nhì / Ba / Bét; người <b>móm</b> trả <b>4</b>.</li>
       <li><b>Ù</b>: vừa ăn hoặc bốc mà 9-10 lá đã thành phỏm thì thắng ngay, ăn <b>5</b> đơn vị mỗi nhà.</li></ul>
       <p>Mức cược là giá của 1 đơn vị. Người thắng ván trước đi đầu ván sau.</p>`,
+    modes: [
+      { id: 'co-gui', name: 'Có gửi bài', desc: 'Hạ phỏm xong được gửi lá lẻ vào phỏm của người khác để giảm điểm.', rules: 'sau khi hạ phỏm, người không móm được gửi lá lẻ vào phỏm của nhà khác (lá gửi không tính điểm).' },
+      { id: 'khong-gui', name: 'Không gửi bài', desc: 'Hạ phỏm xong là tính điểm luôn, không ai được gửi bài — phải tự lo bài lẻ của mình.', rules: 'không có bước gửi bài: hạ phỏm xong tính ngay điểm các lá lẻ còn lại trên tay.' },
+    ],
     async start(ctx) {
       const R = window.Rules['phom'];
       const ut = ctx.Q.has('uitest') ? uiDriver(ctx, +ctx.Q.get('uitest') || 2, ({ by, click, memo }) => {
@@ -173,7 +177,7 @@
     S.stake = stake;
     const useDemo = demo && !S.demoDone; S.demoDone = true;
     const D = T3.modules.phom.demo;
-    const g = new RR.Game({ starter: useDemo ? D.starter : S.nextStarter, seed: useDemo ? D.seed : undefined });
+    const g = new RR.Game({ starter: useDemo ? D.starter : S.nextStarter, seed: useDemo ? D.seed : undefined, send: !(ctx.mode && ctx.mode.id === 'khong-gui'), level: ctx.room ? ctx.aiLevel(1) : undefined });
     g.deal(); S.g = g;
     setInfo(g, stake);
     await dealAnim(ctx, g);

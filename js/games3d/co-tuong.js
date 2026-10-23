@@ -21,7 +21,8 @@
       <li><b>Tốt</b> đi thẳng 1 ô; qua sông rồi được đi ngang, không bao giờ đi lùi.</li>
       <li>Hai Tướng không được nhìn mặt nhau trên một cột trống (lộ mặt tướng). Không được đi nước làm Tướng mình bị chiếu.</li>
       <li>Bị <b>chiếu bí</b> hoặc <b>hết nước đi</b> là thua. Hoà khi lặp lại thế cờ 3 lần, 60 nước liền không ăn quân, hoặc cả hai hết quân tấn công.</li>
-      <li><b>Đi lại</b>: lùi nước của bạn và của bot. <b>Xin hoà</b>: bot chỉ đồng ý khi nó không ở thế thắng. <b>Đầu hàng</b>: thua ván.</li></ul>`,
+      <li><b>Đi lại</b>: lùi nước của bạn và của bot. <b>Xin hoà</b>: bot chỉ đồng ý khi nó không ở thế thắng. <b>Đầu hàng</b>: thua ván.</li>
+      <li>Sức bot theo bàn chọn ở sảnh: <b>Tập Sự</b> nhìn trước 2 nước, <b>Bình Dân</b> 4 nước, <b>Cao Thủ</b> và <b>Đại Gia</b> tính sâu, <b>Hoàng Gia</b> nghĩ lâu và sâu nhất.</li></ul>`,
     async start(ctx) {
       const S = await setup(ctx);
       if (ctx.Q.has('demo')) await game(ctx, S, { stake: 10000, script: demoScript(S) });   // &demo=1: auto-play a few moves
@@ -271,7 +272,8 @@
         // ---- bot turn
         S.bot.turn(true); S.bot.anim('think'); ctx.ui.status(`<b>${S.bot.name}</b> đang suy nghĩ…`);
         await ctx.wait(fast ? 120 : 380);
-        const r = R.search(g.pos, { timeMs: fast ? 150 : 600, maxDepth: fast ? 3 : 9, maxNodes: fast ? 25000 : 700000, seen: g.seen() });
+        const lv = ctx.room ? ctx.aiLevel(1) : null, STR = [{ timeMs: 120, maxDepth: 2, maxNodes: 4000 }, { timeMs: 300, maxDepth: 4, maxNodes: 120000 }, { timeMs: 600, maxDepth: 9, maxNodes: 700000 }, { timeMs: 1200, maxDepth: 12, maxNodes: 1600000 }];
+        const r = R.search(g.pos, Object.assign(fast ? { timeMs: 150, maxDepth: 3, maxNodes: 25000 } : lv == null ? { timeMs: 600, maxDepth: 9, maxNodes: 700000 } : STR[lv], { seen: g.seen() }));   // room tier → bot strength
         const info = g.play(r.move);            // throws if the move were illegal
         botMoves++;
         await animateMove(S, r.move, -1); showLast(S, r.move); afterMove(info, -1);

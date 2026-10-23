@@ -284,7 +284,7 @@
         if (!mv) mv = R.chooseMove(st, 0, v, moves);            // switched to auto while choosing
       } else {
         if (!me) { seat.anim('think'); await ctx.wait(260 * S.speed); }
-        mv = me && !S.auto ? moves[0] : R.chooseMove(st, pl, v, moves);
+        mv = me && !S.auto ? moves[0] : R.chooseMove(st, pl, v, moves, Math.random, me || !ctx.room ? undefined : ctx.aiLevel(1));
         if (me) await ctx.wait(220 * S.speed);
       }
       // ---- move

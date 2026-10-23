@@ -89,6 +89,22 @@ eq(R.payout(10000, -1), 0, 'lose: nothing back');
 // ---- bot bets
 { const rng = C.seeded(3); for (let i = 0; i < 2000; i++) { const b = R.botBet(50000 + i * 1000, rng); if (!(b >= 5000 && b <= 100000)) throw new Error('bot bet ' + b); } pass++; }
 ok(typeof R.quip(R.score(h('J♣ Q♣ K♣'))) === 'string', 'quip text');
+// ---- chế độ Xoay cái: the bank also comes to you
+{
+  let d = 1; const seen = []; for (let i = 0; i < 10; i++) { seen.push(d); d = R.nextDealer(d, 5, true); }
+  eq(seen, [1, 2, 3, 4, 0, 1, 2, 3, 4, 0], 'xoay cái: the bank goes round all five seats, you included');
+  d = 1; const bots = []; for (let i = 0; i < 8; i++) { bots.push(d); d = R.nextDealer(d, 5, false); }
+  eq(bots, [1, 2, 3, 4, 1, 2, 3, 4], 'nhà cái bot: the bank only goes round the bots');
+  const hands = [h('J♣ Q♦ K♥'), h('2♣ 3♣ 4♣'), h('9♦ K♣ Q♣'), h('5♥ 5♠ K♠'), h('A♣ A♦ 7♠')];
+  const r = R.settleTable(hands, [0, 10000, 20000, 50000, 5000], 0);
+  eq(r.mult, [0, -1, -1, -1, -1], 'you hold the bank with Ba Tây: every bettor loses');
+  eq(r.dealerNet, 85000, 'the bank collects all stakes');
+  const r2 = R.settleTable([h('2♣ 3♦ 5♠'), h('J♣ Q♣ K♣'), h('9♦ 9♣ A♣'), h('4♥ 4♠ K♠'), h('A♥ 2♦ 7♠')], [0, 10000, 10000, 10000, 10000], 0);
+  eq(r2.mult, [0, 2, 1, 1, -1], 'bank with Bù: Ba Tây ×2, 9 nút and 8 nút win, the other Bù loses on the top card (3♦ > 2♦)');
+  eq(r2.dealerNet, -30000, 'so the bank pays 20K + 10K + 10K and takes 10K');
+  const c = R.capBets([100000, 100000, 50000, 50000], 300000, [10000, 50000, 100000]);
+  ok(c.reduce((a, x) => a + 2 * x, 0) <= 300000 && c.every(x => [0, 10000, 50000, 100000].includes(x)), 'bot bets shrink so your bank can pay a Ba Tây to everyone');
+}
 
 console.log(`${pass} passed, ${fail} failed`);
 if (fail) process.exit(1);

@@ -14,7 +14,7 @@
     rules: `<p>Bạn cầm quân <b>X</b> (hồng) và đi trước, bot cầm quân <b>O</b> (xanh). Hai bên lần lượt đặt quân vào một ô trống.</p>
       <ul><li>Ai có <b>5 quân liền nhau</b> theo hàng ngang, dọc hoặc chéo trước là thắng. 6 quân trở lên cũng thắng, và <b>bị chặn hai đầu vẫn tính thắng</b>.</li>
       <li>Bàn đầy mà chưa ai đủ 5 quân là <b>hoà</b>.</li>
-      <li>Chọn độ khó <b>Dễ / Vừa / Khó</b> và mức cược trước ván. Thắng nhận lại <b>gấp đôi</b> tiền cược, hoà được trả lại cược.</li>
+      <li>Độ khó theo bàn đã chọn ở sảnh: <b>Tập Sự</b> bot Dễ, <b>Bình Dân</b> bot Vừa, từ <b>Cao Thủ</b> bot Khó. Chọn mức cược trước ván. Thắng nhận lại <b>gấp đôi</b> tiền cược, hoà được trả lại cược.</li>
       <li><b>Đi lại</b>: lùi nước của bạn và của bot. <b>Đầu hàng</b>: thua ván.</li></ul>`,
     async start(ctx) {
       const S = await setup(ctx);
@@ -139,12 +139,14 @@
     if (level) { S.level = level; S.drawPanel(); }
     if (fixed != null) { ctx.spend(fixed); return fixed; }
     const picker = ctx.ui.chipPicker(STAKES, null, S.stakeIdx || 1);
-    ctx.ui.status('Chọn độ khó, mức cược rồi bấm <b>VÀO VÁN</b>');
+    const byRoom = !!ctx.room;   // at a lobby room the tier sets the bot: Tập Sự dễ, Bình Dân vừa, Cao Thủ trở lên khó
+    if (byRoom) { S.level = LV[Math.min(2, ctx.aiLevel(1))].id; S.drawPanel(); }
+    ctx.ui.status(byRoom ? `Bot <b>${LV.find(l => l.id === S.level).label}</b> · chọn mức cược rồi bấm <b>VÀO VÁN</b>` : 'Chọn độ khó, mức cược rồi bấm <b>VÀO VÁN</b>');
     const stake = await new Promise(res => {
-      const items = LV.map(l => ({ id: l.id, label: l.label, cls: l.id === S.level ? 'lavender' : 'grey', onClick: () => { S.level = l.id; LV.forEach(o => { a.btn(o.id).className = 'gbtn ' + (o.id === S.level ? 'lavender' : 'grey'); }); S.drawPanel(); } }));
+      const items = (byRoom ? [] : LV).map(l => ({ id: l.id, label: l.label, cls: l.id === S.level ? 'lavender' : 'grey', onClick: () => { S.level = l.id; LV.forEach(o => { a.btn(o.id).className = 'gbtn ' + (o.id === S.level ? 'lavender' : 'grey'); }); S.drawPanel(); } }));
       items.push({ id: 'go', label: 'VÀO VÁN', cls: 'pink', icon: 'emoji-fluent-3d/symbols/cross_mark.png', onClick: () => { if (ctx.spend(picker.value)) { S.stakeIdx = STAKES.indexOf(picker.value); res(picker.value); } } });
       const a = ctx.ui.actions(items);
-      LV.forEach(o => { const b = a.btn(o.id); b.style.minWidth = '130px'; });
+      if (!byRoom) LV.forEach(o => { const b = a.btn(o.id); b.style.minWidth = '130px'; });
     });
     picker.el.remove(); ctx.ui.clearActions();
     return stake;

@@ -182,6 +182,65 @@ t('thousands of bot games finish with valid moves, conserved cards and coins', (
     passed++;
   }
 });
+// ---------------------------------------------------------------- chế độ Solo (2 người đối mặt) + bot strength
+function botGame(opts) {
+  const g = new R.Game(opts); g.deal();
+  for (let steps = 0; !g.over; steps++) {
+    if (steps > 600) throw new Error('solo game did not finish');
+    if (g.phase === 'bao') { const p = g.baoTurn; g.declare(p, g.aiBao(p)); continue; }
+    const p = g.turn, m = g.aiMove(p);
+    if (!g.present(p)) throw new Error('an empty seat got the turn');
+    if (m.action === 'play') { const chk = g.check(p, m.cards); if (!chk.ok) throw new Error('illegal bot play ' + chk.reason); g.play(p, m.cards); }
+    else { if (!g.current) throw new Error('passed while leading'); g.pass(p); }
+  }
+  return g;
+}
+t('solo: two seats face to face, 10 cards each, the other 32 out of play', () => {
+  const g = new R.Game({ seed: 4, seats: [0, 2] }); g.deal();
+  assert.deepStrictEqual(g.hands.map(h => h.length), [10, 0, 10, 0]);
+  assert.strictEqual(new Set(g.dealt).size, 20);
+  assert.ok([0, 2].includes(g.starter), 'the holder of the lowest dealt card leads');
+  if (g.phase === 'bao') assert.deepStrictEqual(g.baoOrder.slice().sort(), [0, 2], 'only the two players are asked to báo sâm');
+});
+t('solo: scripted round — after one pass the round goes straight back to the leader', () => {
+  const g = new R.Game({ seed: 1, starter: 0, seats: [0, 2] });
+  g.deal([ids('3s 4c 5d 9s 9c Js Kc Kd Ah 7h'), [], ids('6s 7c 8d Qh Kh As 2h 10c 10d 4h'), []]);
+  if (g.phase === 'bao') { g.declare(0, false); g.declare(2, false); }
+  assert.strictEqual(g.turn, 0);
+  g.play(0, ids('3s 4c 5d'));
+  assert.strictEqual(g.turn, 2, 'turn skips the empty seats 1 and 3');
+  g.play(2, ids('6s 7c 8d'));
+  assert.strictEqual(g.turn, 0);
+  const ev = g.pass(0);
+  assert.ok(ev.some(e => e.type === 'round_end' && e.winner === 2), 'round won by seat 2');
+  assert.strictEqual(g.turn, 2);
+});
+t('solo: 1500 bot games, coins conserved, the loser pays 1 per card (+5 per heo, cóng 15)', () => {
+  let kinds = {};
+  for (let i = 0; i < 1500; i++) {
+    const g = botGame({ seed: 50000 + i, seats: [0, 2], starter: i % 3 === 0 ? null : [0, 2][i % 2] }), r = g.result;
+    assert.deepStrictEqual([r.units[1], r.units[3]], [0, 0], 'empty seats never pay');
+    assert.strictEqual(r.units[0] + r.units[2], 0);
+    assert.deepStrictEqual(R.Game.expectedUnits(r), r.units, 'payout recomputation, solo game ' + i);
+    if (r.kind === 'normal') { const loser = r.winner === 0 ? 2 : 0, left = r.left[loser], heo = left.filter(id => R.rankOf(id) === R.HEO).length; assert.strictEqual(-r.units[loser], (r.played[loser] ? left.length : 15) + 5 * heo); }
+    kinds[r.kind] = (kinds[r.kind] || 0) + 1;
+  }
+  assert.ok(kinds.normal > 1300, JSON.stringify(kinds));
+});
+t('bot levels: easy and hard bots finish legal games; hard bots beat easy bots', () => {
+  let hardWins = 0, games = 0;
+  for (let i = 0; i < 600; i++) {
+    const g = new R.Game({ seed: 70000 + i, seats: [0, 2], level: 0 }); g.deal();
+    const lv = { 0: 0, 2: 3 };   // seat 0 easy, seat 2 hard (level is per game, so drive the moves by hand)
+    for (let steps = 0; !g.over && steps < 600; steps++) {
+      if (g.phase === 'bao') { const p = g.baoTurn; g.declare(p, g.aiBao(p)); continue; }
+      const p = g.turn; g.level = lv[p]; const m = g.aiMove(p);
+      if (m.action === 'play') { assert.ok(g.check(p, m.cards).ok); g.play(p, m.cards); } else g.pass(p);
+    }
+    assert.ok(g.over); games++; if (g.result.winner === 2) hardWins++;
+  }
+  assert.ok(hardWins / games > .5, `hard bots win ${hardWins} of ${games}`);
+});
 console.log('stats', JSON.stringify(stats), 'avg steps', (stats.turns / stats.games).toFixed(1));
 console.log(passed + ' passed, ' + failed + ' failed');
 process.exit(failed ? 1 : 0);

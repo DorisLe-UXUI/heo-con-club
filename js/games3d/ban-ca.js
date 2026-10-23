@@ -14,9 +14,12 @@
   const LOCK_RADIUS = 70;                       // UI px: how close to a fish (on screen) a press must be to lock onto it
   const BULLET_R = .32;                         // bullet radius for the 3D hit test
   let G = null, R = null;
+  /** Coins per shot at cannon level l (1..5): the lobby room's five-step ladder (e.g. 5K–50K), or the default 1K–50K.
+   *  Prizes are bet × multiplier, so the 95% RTP model is the same in every room. */
+  const betOf = l => { const st = G && G.ctx.room && G.ctx.room.stakes; return st && st.length === 5 ? st[Math.max(1, Math.min(5, l)) - 1] : R.betOf(l); };
 
   T3.register('ban-ca', {
-    title: 'Bắn Cá', sub: 'Nhấn giữ vào cá để khoá mục tiêu · cá to nhiều máu, thưởng lớn · trùm xuất hiện mỗi phút',
+    title: 'Bắn Cá', stakeName: 'Đạn', sub: 'Nhấn giữ vào cá để khoá mục tiêu · cá to nhiều máu, thưởng lớn · trùm xuất hiện mỗi phút',
     table: 'none', theme: 'sky', tex: ['ban-ca', 'custom-fish'], scripts: ['js/games3d/rules/ban-ca.js'],   // custom-fish: your own fish art (tools/apply_custom.py)
     cam: { pos: [0, 22, 13], look: [0, PY, 0] },
     rules: '<p>Đang tải bảng cá…</p>',
@@ -436,7 +439,7 @@
     const me = makeCannon(G.level - 1, .9); own(me.g); me.owner = 0; G.cannons.push(me);
     bots.forEach((b, i) => {
       const lvl = 1 + Math.floor(Math.random() * 4), c = makeCannon(lvl - 1, .72); own(c.g);
-      Object.assign(c, { owner: i + 1, side: ['left', 'top', 'right'][i], name: b.name, avatar: `3d/renders/avatars/${b.key}.png`, coins: Math.round(3 + Math.random() * 25) * 100000, level: lvl, next: 1 + Math.random() * 2, target: null });
+      Object.assign(c, { owner: i + 1, side: ['left', 'top', 'right'][i], name: b.name, avatar: `3d/renders/avatars/${b.key}.png`, coins: ctx.room ? ctx.botBank() : Math.round(3 + Math.random() * 25) * 100000, level: lvl, next: 1 + Math.random() * 2, target: null });
       c.label = ctx.label(() => c.labelPos, `<img src="${HC.A(c.avatar)}"><div><b>${c.name}</b><span class="c">${HC.short(c.coins)}</span></div>`, 'seatlbl bcseat');
       G.cannons.push(c);
     });
@@ -463,7 +466,7 @@
   const onScreen = f => R.inside(f.x, f.z, G.bounds, f.type.r * .6);
   /** Fire one bullet from cannon c: homing at `target` (a fish) or straight toward (x,z). Your shots pay through ctx.spend. */
   function fire(c, target, x, z) {
-    const ctx = G.ctx, mine = c.owner === 0, lvl = mine ? G.level - 1 : c.level - 1, bet = R.betOf(lvl + 1);
+    const ctx = G.ctx, mine = c.owner === 0, lvl = mine ? G.level - 1 : c.level - 1, bet = betOf(lvl + 1);
     if (mine && G.myInFlight >= MAX_MY_BULLETS) return false;
     const b = getFree(G.bullets); if (!b) return false;
     if (mine) { if (!ctx.spend(bet)) { G.firing = false; setAuto(false); return false; } G.spent += bet; G.shots++; G.myInFlight++; }
@@ -507,6 +510,7 @@
         if (p.amount <= 0) continue;
         G.won += p.amount; G.caught++;
         ctx.win(p.amount, pos);
+        ctx.track('catch', { id: f.type.id, tier: f.type.tier, mult: f.type.mult });
         coinBurst(f.x, f.z, owner === 0 ? n : Math.max(3, n >> 1), walletPoint);
         if (f.type.tier === 'boss' && owner === 0) { ctx.ui.callout('ĐẠI THẮNG ×' + f.type.mult + '!', '#a86d00'); ctx.ui.confetti(); ctx.sfx('win', .5); }
         else if (f.type.mult >= 20 && owner === 0) { ctx.ui.callout('TRÚNG LỚN ×' + f.type.mult + '!', '#a86d00'); ctx.sfx('gold', .45); }
@@ -551,7 +555,7 @@
   }
   function setLevel(l) {
     l = Math.max(1, Math.min(5, l)); G.level = l;
-    const bet = R.betOf(l), btn = G.acts.btn('lvl');
+    const bet = betOf(l), btn = G.acts.btn('lvl');
     btn.querySelector('img').src = HC.A('games/ban-ca/' + CANNON_PNG[l - 1] + '.png');
     G.acts.set('lvl', { label: HC.short(bet) + '/phát' });
     G.acts.set('minus', { disabled: l <= 1 }); G.acts.set('plus', { disabled: l >= 5 });
@@ -720,7 +724,7 @@
         let hitF = null;
         for (const g of G.fish) { if (!usable(g) || !onScreen(g)) continue; const rr = g.type.r * 1.05 + BULLET_R; if ((g.x - bl.x) ** 2 + (g.y - bl.y) ** 2 + (g.z - bl.z) ** 2 < rr * rr) { hitF = g; break; } }
         if (hitF) { hit(bl, hitF); continue; }
-        if (bl.life <= 0) { if (bl.owner === 0) { ctx.coins = ctx.coins + bl.bet; G.spent -= bl.bet; G.refunds = (G.refunds || 0) + 1; } else G.cannons[bl.owner].coins += bl.bet; releaseBullet(bl); continue; }
+        if (bl.life <= 0) { if (bl.owner === 0) { ctx.coins = ctx.coins + bl.bet; ctx.track('bet', { amount: -bl.bet }); G.spent -= bl.bet; G.refunds = (G.refunds || 0) + 1; } else G.cannons[bl.owner].coins += bl.bet; releaseBullet(bl); continue; }
       }
       bl.s.position.set(bl.x, bl.y, bl.z); bl.glow.position.copy(bl.s.position);
       bl.s.material.rotation = G.t * 8;

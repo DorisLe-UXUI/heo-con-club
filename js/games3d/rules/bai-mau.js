@@ -198,9 +198,11 @@
     const top = COLORS.filter(c => w[c] === best);
     return top[Math.floor(rng() * top.length)];
   }
-  /** Bot heuristic: returns { id, color } or null when nothing is playable (then draw). */
-  function botMove(st, p, rng = Math.random) {
+  /** Bot heuristic: returns { id, color } or null when nothing is playable (then draw).
+   *  level (room tier) 0 = dễ: plays a random legal card half of the time and picks a random colour; undefined/1+ = heuristic. */
+  function botMove(st, p, rng = Math.random, level) {
     const legal = legalMoves(st, p); if (!legal.length) return null;
+    if (level === 0 && rng() < .5) { const c = legal[Math.floor(rng() * legal.length)]; return { id: c.id, color: isWild(c) ? COLORS[Math.floor(rng() * 4)] : null }; }
     const hand = st.hands[p], nextN = st.hands[next(st, p)].length, cnt = { red: 0, green: 0, blue: 0, yellow: 0 };
     for (const c of hand) if (!isWild(c)) cnt[c.c]++;
     let best = null, bestS = -1e9;

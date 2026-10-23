@@ -154,13 +154,13 @@ const types = list => list.map(e => e.type);
   eq(over && over.results.find(r => r.p === 0).units, 3 + 3 * 2 + 0, 'nhất gets rank pay + cóng extras');
 }
 // mid-game positions built by editing the state directly
-function midGame(handStrs, leader = 0) {
-  const g = new Game({ seed: 3, firstGame: false });
+function midGame(handStrs, leader = 0, opts = {}) {
+  const g = new Game(Object.assign({ seed: 3, firstGame: false }, opts));
   g.deal(); g.drain();
   g.hands = handStrs.map(h => TL.sortIds(cs(h)));
   g.played = [9, 9, 9, 9];
   g.mustInclude3s = false;
-  g.out = [false, false, false, false];
+  g.out = [0, 1, 2, 3].map(p => !g.present(p));
   g.startRound(leader); g.drain();
   return g;
 }
@@ -235,6 +235,139 @@ for (let s = 1; s <= N; s++) {
 }
 console.log(`  ${games} games · avg tricks ${(tricks / games).toFixed(1)} · max steps ${maxSteps} · chặt ${cuts} (chồng ${stacked}) · cóng ${congs} · tới trắng ${instant} · thối ${thoi} · invalid ${invalid}`);
 ok(invalid === 0, 'AI never makes an invalid move');
+
+// ================================================================== variants (chế độ chơi)
+function aiGame(opts, level = 1) {
+  const g = new Game(opts); let ev = g.deal(), steps = 0; const money = [0, 0, 0, 0], seen = { cong: 0, toi: 0, bad: 0, thoi: 0, invalid: 0 };
+  const handle = list => { for (const e of list) { if (e.type === 'pay') { money[e.from] -= e.units; money[e.to] += e.units; } if (e.type === 'cong') seen.cong++; if (e.type === 'toi_trang') seen.toi++; if (e.type === 'finish' && e.bad) seen.bad++; if (e.type === 'thoi') seen.thoi++; if (e.type === 'game_over') g._over = e; } };
+  handle(ev);
+  while (!g.over && steps < 600) {
+    const p = g.turn; if (!g.present(p)) throw new Error('empty seat got the turn');
+    const m = g.aiMove(p, level), out = m.action === 'play' ? g.play(p, m.cards) : g.pass(p);
+    if (out[0] && out[0].type === 'invalid') { seen.invalid++; console.log('  invalid', JSON.stringify(opts), out[0].reason); break; }
+    handle(out); steps++;
+  }
+  return { g, money, seen, over: g._over };
+}
+console.log('— Miền Bắc');
+{
+  const N = { north: true };
+  eq(analyze(cs('7♦ 7♥'), N).type, 'pair', 'Bắc: đôi đỏ');
+  eq(analyze(cs('7♠ 7♥'), N), null, 'Bắc: đôi lệch màu không hợp lệ');
+  eq(analyze(cs('5♦ 6♦ 7♦'), N).type, 'straight', 'Bắc: sảnh đồng chất');
+  eq(analyze(cs('5♦ 6♥ 7♦'), N), null, 'Bắc: sảnh khác chất không hợp lệ');
+  eq(analyze(cs('3♠ 3♣ 4♦ 4♥ 5♠ 5♣'), N), null, 'Bắc: không có đôi thông');
+  const B = (a, b) => canBeat(analyze(cs(a), N), analyze(cs(b), N), N);
+  ok(B('9♥', '8♥').ok, 'Bắc: 9♥ chặn 8♥ (cùng chất)');
+  ok(!B('9♠', '8♥').ok, 'Bắc: 9♠ không chặn được 8♥');
+  ok(!B('8♠', '8♥').ok, 'Bắc: nhỏ hơn thì không chặn');
+  ok(B('2♠', 'A♥').ok, 'Bắc: heo chặn mọi lá rác');
+  ok(B('2♥', '2♠').ok && !B('2♠', '2♥').ok, 'Bắc: heo chặn heo chất nhỏ hơn');
+  ok(B('9♦ 9♥', '7♦ 7♥').ok && !B('9♠ 9♣', '7♦ 7♥').ok, 'Bắc: đôi phải cùng màu');
+  ok(B('8♠ 8♣ 8♥', '5♠ 5♣ 5♥').ok && !B('8♠ 8♦ 8♥', '5♠ 5♣ 5♥').ok, 'Bắc: sám cô phải cùng bộ chất');
+  ok(B('6♣ 7♣ 8♣', '5♣ 6♣ 7♣').ok && !B('6♦ 7♦ 8♦', '5♣ 6♣ 7♣').ok && !B('6♣ 7♣ 8♣ 9♣', '5♣ 6♣ 7♣').ok, 'Bắc: sảnh cùng chất, cùng số lá');
+  let r = B('9♠ 9♣ 9♦ 9♥', '2♥'); ok(r.ok && r.cut, 'Bắc: tứ quý chặt 1 heo');
+  r = B('9♠ 9♣ 9♦ 9♥', '2♦ 2♥'); ok(r.ok && r.cut, 'Bắc: tứ quý chặt đôi heo');
+  r = B('J♠ J♣ J♦ J♥', '9♠ 9♣ 9♦ 9♥'); ok(r.ok && r.cut, 'Bắc: tứ quý lớn chặt tứ quý nhỏ');
+  ok(!B('9♠ 9♣ 9♦ 9♥', 'A♥').ok, 'Bắc: tứ quý không chặt lá thường');
+  eq(instantWin(cs('2♠ 2♣ 2♦ 2♥ 3♠ 4♣ 5♦ 7♥ 8♠ 9♣ 10♦ J♥ Q♠'), false, N), null, 'Bắc: không có tới trắng');
+  eq(thoiOf(cs('3♠ 3♣ 4♦ 4♥ 5♠ 5♣ 2♥'), N).units, 2, 'Bắc: thối chỉ tính heo và tứ quý');
+  ok(TL.combosOf(cs('5♦ 6♦ 7♦ 7♥ 8♦'), N).every(c => c.type !== 'straight' || c.cards.every(id => TL.suitOf(id) === 2)), 'Bắc: gợi ý chỉ có sảnh đồng chất');
+}
+{
+  // về bằng heo: allowed but ranked last ("xử thua chót")
+  const g = midGame(['2♥', '3♣ 9♣', '4♥ 8♥', '6♦ 10♦'], 0, { rules: 'bac' });
+  const v = g.check(0, cs('2♥')); ok(v.ok && v.badFinish, 'Bắc: about to go out with a heo is flagged');
+  const e = g.play(0, cs('2♥'));
+  ok(e.some(x => x.type === 'finish' && x.p === 0 && x.bad), 'Bắc: p0 out with a heo → bad finish');
+  ok(!g.over && g.out[0] && g.finishOrder.length === 0, 'Bắc: the game goes on, nobody is nhất yet');
+}
+{
+  const g = midGame(['2♥', '3♣', '4♥ 8♥', '6♦ 10♦'], 0, { rules: 'bac' });
+  g.play(0, cs('2♥')); g.pass(1); g.pass(2); g.pass(3);         // p0 out (bad) — p1 leads (hưởng sái)
+  eq(g.turn, 1, 'hưởng sái after a bad finish');
+  const e1 = g.play(1, cs('3♣'));                                  // p1 out: nhất
+  ok(e1.some(x => x.type === 'finish' && x.p === 1 && x.rank === 1), 'p1 is nhất');
+  ok(!e1.some(x => x.type === 'cong'), 'Bắc: no cóng');
+}
+{
+  // full ranking with a bad finisher
+  const g = midGame(['2♥', '3♣', '4♥', '6♦ 10♦'], 0, { rules: 'bac' });
+  g.play(0, cs('2♥')); g.pass(1); g.pass(2); g.pass(3);
+  g.play(1, cs('3♣')); g.pass(2); g.pass(3);
+  const e = g.play(2, cs('4♥'));
+  const over = e.find(x => x.type === 'game_over');
+  ok(over, 'game over when one player is left');
+  const R = Object.fromEntries(over.results.map(r => [r.p, r]));
+  eq([R[1].rank, R[2].rank, R[3].rank, R[0].rank], [1, 2, 3, 4], 'Bắc: về heo xếp bét, người còn bài xếp trên');
+  eq(R[0].units, -3, 'Bắc: về heo trả như bét');
+  eq(over.results.reduce((a, r) => a + r.units, 0), 0, 'zero-sum');
+}
+{
+  let n = 0, bad = 0, cong = 0, toi = 0, inv = 0, zero = 0;
+  for (let s = 1; s <= 1500; s++) {
+    const r = aiGame({ seed: s * 104729, rules: 'bac', firstGame: s % 4 === 1, starter: s % 4 }, s % 3);
+    n += r.g.over ? 1 : 0; bad += r.seen.bad; cong += r.seen.cong; toi += r.seen.toi; inv += r.seen.invalid;
+    if (r.money.reduce((a, b) => a + b, 0) === 0 && r.over.results.reduce((a, x) => a + x.units, 0) === 0) zero++;
+    if (r.g.hands.reduce((a, h) => a + h.length, 0) + r.g.played.reduce((a, b) => a + b, 0) !== 52) throw new Error('Bắc: cards not conserved');
+  }
+  eq(n, 1500, 'Bắc: 1500 AI games finish'); eq(inv, 0, 'Bắc: AI never plays an illegal move');
+  eq(cong + toi, 0, 'Bắc: no cóng, no tới trắng'); eq(zero, 1500, 'Bắc: payouts zero-sum');
+  console.log(`  1500 Bắc games · về heo/tứ quý ${bad}`);
+}
+console.log('— Đếm lá / Nhất ăn tất');
+{
+  const g = midGame(['5♦', '3♣ 9♣', '4♥ 8♥ 2♥', '6♦ 10♦ J♠ Q♠'], 0, { scoring: 'count' });
+  const e = g.play(0, cs('5♦')), over = e.find(x => x.type === 'game_over');
+  ok(over && g.over, 'Đếm lá: the game ends when the first player goes out');
+  const R = Object.fromEntries(over.results.map(r => [r.p, r]));
+  eq([R[1].units, R[2].units, R[3].units], [-2, -3 - 2, -4], 'Đếm lá: 1 per card left, thối heo đỏ +2');
+  eq(R[0].units, 11, 'Đếm lá: the winner takes it all');
+  eq([R[0].rank, R[1].rank, R[3].rank, R[2].rank], [1, 2, 3, 4], 'Đếm lá: losers ranked by what they pay');
+}
+{
+  const g = midGame(['5♦', '3♣ 9♣', '4♥ 8♥', '6♦ 10♦'], 0, { scoring: 'count' });
+  g.played = [9, 0, 9, 9];
+  const over = g.play(0, cs('5♦')).find(x => x.type === 'game_over');
+  eq(over.results.find(r => r.p === 1).units, -26, 'Đếm lá: cóng pays 26');
+}
+{
+  const g = midGame(['5♦', '3♣ 9♣', '4♥ 8♥ 2♥ 2♦', '6♦ 10♦ J♠ Q♠'], 0, { scoring: 'all' });
+  g.played = [9, 9, 0, 9];
+  const over = g.play(0, cs('5♦')).find(x => x.type === 'game_over');
+  const R = Object.fromEntries(over.results.map(r => [r.p, r]));
+  eq([R[0].units, R[1].units, R[2].units, R[3].units], [12, -3, -6, -3], 'Nhất ăn tất: flat 3 each, cóng 6, no thối');
+}
+{
+  for (const scoring of ['count', 'all']) {
+    let zero = 0, inv = 0;
+    for (let s = 1; s <= 800; s++) {
+      const r = aiGame({ seed: s * 7907, scoring, firstGame: s % 5 === 1, starter: s % 4 }, s % 3);
+      inv += r.seen.invalid;
+      const res = r.over.results;
+      if (r.over.instant || (res.filter(x => x.rank === 1).length === 1 && res.reduce((a, x) => a + x.units, 0) === 0 && r.money.reduce((a, b) => a + b, 0) === 0)) zero++;
+      if (!r.over.instant && r.g.finishOrder.length !== 1) throw new Error(scoring + ': the game must stop at the first player out');
+    }
+    eq(zero + inv, 800, `${scoring === 'count' ? 'Đếm lá' : 'Nhất ăn tất'}: 800 AI games, zero-sum, one winner`);
+  }
+}
+console.log('— Solo 2 người');
+{
+  const g = new Game({ seed: 5, seats: [0, 2], scoring: 'count' }); g.deal();
+  eq(g.hands.map(h => h.length), [13, 0, 13, 0], 'Solo: 13 cards each, seats 0 and 2');
+  const lo = Math.min(...g.hands.flat());
+  ok(g.hands[g.turn].includes(lo) || g.over, 'Solo first game: the lowest dealt card leads');
+  let n = 0, zero = 0, inv = 0, toi = 0;
+  for (let s = 1; s <= 1500; s++) {
+    const r = aiGame({ seed: s * 6271, seats: [0, 2], scoring: 'count', firstGame: s % 6 === 1, starter: [0, 2][s % 2] }, s % 3);
+    n += r.g.over ? 1 : 0; inv += r.seen.invalid; toi += r.seen.toi;
+    const res = r.over.results;
+    if (res.length === 2 && res.every(x => x.p === 0 || x.p === 2) && res.reduce((a, x) => a + x.units, 0) === 0 && r.money[1] === 0 && r.money[3] === 0) zero++;
+    if (r.g.hands.reduce((a, h) => a + h.length, 0) + r.g.played.reduce((a, b) => a + b, 0) !== 26) throw new Error('Solo: cards not conserved');
+  }
+  eq(n, 1500, 'Solo: 1500 AI games finish'); eq(inv, 0, 'Solo: AI never plays an illegal move'); eq(zero, 1500, 'Solo: only the two players pay, zero-sum');
+  console.log(`  1500 solo games · tới trắng ${toi}`);
+}
 
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

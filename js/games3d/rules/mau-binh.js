@@ -10,6 +10,8 @@
  *    Suits never break ties: equal chi = draw.
  *  - Must have chi 1 ≥ chi 2 ≥ chi 3, otherwise "Binh lủng": loses 6 units to every valid opponent.
  *  - Against each opponent: ±1 unit per chi won/lost; winning all three ("sập 3 chi") pays double: 6 units.
+ *  - Chế độ "Có thưởng chi" (settle(players, { bonus: true })): a chi won with a strong hand is worth more than 1 —
+ *    chi 1 tứ quý 4, thùng phá sảnh 5; chi 2 cù lũ 2, tứ quý 8, thùng phá sảnh 10; chi 3 sám cô 3. Sập 3 chi doubles the sum.
  *  - "Mậu Binh" hands win at once against normal hands: Sảnh rồng (13 different ranks) 12 units;
  *    6 đôi, 3 thùng (5-5-3 of one suit each), 3 sảnh (5-5-3 straights) 6 units. Two special hands:
  *    Sảnh rồng > 6 đôi > 3 thùng > 3 sảnh, the higher one takes its own value, equal kinds draw.
@@ -172,16 +174,23 @@
     const chi = [ids(b.m1), ids(b.m2), ids(b.m3)].map(x => x.sort((p, q) => rankOf(q) - rankOf(p) || suitOf(q) - suitOf(p)));
     return { chi, value: b.v, scores: chi.map(x => evaluate(x).score) };
   }
-  /** Bot arrangement: usually the best, sometimes the 2nd/3rd best. */
-  function botArrange(hand, rng = Math.random) {
+  /** Bot arrangement: usually the best, sometimes the 2nd/3rd best. level (room tier): 0 often settles for a weaker
+   *  arrangement (keep 6, best only 40%), 3 always takes the best; undefined = the original mix. */
+  function botArrange(hand, rng = Math.random, level) {
     const sp = special(hand); if (sp && sp.chi) return { chi: sp.chi, special: sp };
-    const r = rng(), pick = r < .7 ? 0 : r < .9 ? 1 : 2;
+    const r = rng();
+    if (level === 3) return arrange(hand, { keep: 1, pick: 0 });
+    if (level === 0) return arrange(hand, { keep: 6, pick: r < .4 ? 0 : 1 + Math.floor(rng() * 5) });
+    const pick = r < .7 ? 0 : r < .9 ? 1 : 2;
     return arrange(hand, { keep: 3, pick });
   }
 
   // ------------------------------------------------------------------ settlement
-  /** players: [{ chi: [[5],[5],[3]], special: special()|null }] → { units[], pairs[], valid[] } */
-  function settle(players) {
+  /** Worth of chi k (0 = chi 1 … 2 = chi 3) won with a hand of category cat, in "Có thưởng chi" mode. */
+  const BONUS = [{ 7: 4, 8: 5 }, { 6: 2, 7: 8, 8: 10 }, { 3: 3 }];
+  const chiBonus = (k, cat) => BONUS[k][cat] || 1;
+  /** players: [{ chi: [[5],[5],[3]], special: special()|null }], opts: { bonus } → { units[], pairs[], valid[] } */
+  function settle(players, opts = {}) {
     const n = players.length, units = new Array(n).fill(0), pairs = [];
     const info = players.map(p => ({ sp: p.special || null, valid: p.special ? true : isValid(p.chi), sc: p.special ? null : p.chi.map(x => evaluate(x).score) }));
     for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) {
@@ -194,7 +203,12 @@
       } else {
         for (let k = 0; k < 3; k++) d.chi[k] = Math.sign(a.sc[k] - b.sc[k]);
         const w = d.chi.filter(x => x > 0).length, l = d.chi.filter(x => x < 0).length;
-        d.u = w === 3 ? SAP : l === 3 ? -SAP : w - l; d.why = w === 3 || l === 3 ? 'sap' : 'chi';
+        if (opts.bonus) {   // each chi is worth the winner's bonus; sập 3 chi doubles
+          d.val = d.chi.map((x, k) => (x > 0 ? chiBonus(k, catOf(a.sc[k])) : x < 0 ? -chiBonus(k, catOf(b.sc[k])) : 0));
+          const sum = d.val.reduce((x, y) => x + y, 0);
+          d.u = w === 3 || l === 3 ? sum * 2 : sum; d.why = w === 3 || l === 3 ? 'sap' : 'chi';
+          if (d.val.some(v => Math.abs(v) > 1)) d.bonus = true;
+        } else { d.u = w === 3 ? SAP : l === 3 ? -SAP : w - l; d.why = w === 3 || l === 3 ? 'sap' : 'chi'; }
       }
       units[i] += d.u; units[j] -= d.u; pairs.push(d);
     }
@@ -203,5 +217,5 @@
   /** Deal 4 hands of 13. */
   function deal(rng) { const d = shuffled(rng); return [0, 1, 2, 3].map(p => sortIds(d.slice(p * 13, p * 13 + 13))); }
 
-  return { RANKS, SUITS, SUIT_KEYS, CAT, SPECIAL, SAP, LUNG, rankOf, suitOf, key, label, sortIds, mulberry32, shuffled, deal, evaluate, isValid, special, arrange, botArrange, settle, chiValue, catOf, r1Of, setWinTable: t => { WIN = t; } };
+  return { BONUS, chiBonus, RANKS, SUITS, SUIT_KEYS, CAT, SPECIAL, SAP, LUNG, rankOf, suitOf, key, label, sortIds, mulberry32, shuffled, deal, evaluate, isValid, special, arrange, botArrange, settle, chiValue, catOf, r1Of, setWinTable: t => { WIN = t; } };
 });

@@ -29,7 +29,12 @@
       <ul><li><b>CHẴN</b>: 0, 2 hoặc 4 mặt đỏ ngửa · <b>1 ăn 1</b></li><li><b>LẺ</b>: 1 hoặc 3 mặt đỏ ngửa · <b>1 ăn 1</b></li>
       <li><b>4 ĐỎ</b> hoặc <b>4 TRẮNG</b> · <b>1 ăn 12</b></li><li><b>3 ĐỎ 1 TRẮNG</b> hoặc <b>3 TRẮNG 1 ĐỎ</b> · <b>1 ăn 3</b></li></ul>
       <p>Thắng thì được trả lại tiền cược cộng tiền thắng (ví dụ cược 10.000 vào 4 ĐỎ và trúng: nhận 130.000). Ô thua thì mất tiền cược ô đó.</p>
-      <p>Bảng <b>Cầu</b> bên phải ghi kết quả các ván trước: <b>C</b> = Chẵn, <b>L</b> = Lẻ, xếp từ trên xuống, từ trái sang.</p>`,
+      <p>Bảng <b>Cầu</b> bên phải ghi kết quả các ván trước: <b>C</b> = Chẵn, <b>L</b> = Lẻ, xếp từ trên xuống, từ trái sang.</p>
+      <p>Ở bàn chơi, đồng hồ trên cùng đếm ngược thời gian đặt cược; hết giờ nhà cái tự mở bát (kể cả khi bạn chưa đặt).</p>`,
+    modes: [
+      { id: 'thuong', name: 'Thường', desc: 'Mỗi ván có 30 giây đặt cược. Đặt xong có thể bấm MỞ BÁT sớm.', rules: '30 giây đặt cược mỗi ván, hết giờ nhà cái tự mở bát.' },
+      { id: 'nhanh', name: 'Nhanh', desc: 'Chỉ 12 giây đặt cược, hết giờ nhà cái tự mở bát — ván nối ván liên tục.', rules: '12 giây đặt cược mỗi ván, mở bát xong là sang ván mới ngay.' },
+    ],
     async start(ctx) {
       const g = await setup(ctx, false);
       await g.newRound();
@@ -176,6 +181,10 @@
 
     // ---- HUD: chip picker, bead road, actions
     const picker = ctx.ui.chipPicker(CHIPS, null, 2);
+    // betting clock at a lobby table: Thường 30 s, Nhanh 12 s; when it runs out the dealer opens anyway
+    const fast = ctx.mode && ctx.mode.id === 'nhanh', BET_SEC = ctx.room && !test ? (fast ? 12 : 30) : 0;
+    let clock = null;
+    const startClock = () => { if (!BET_SEC) return; clock = ctx.ui.countdown(BET_SEC, () => { clock = null; if (!ctx.SHOT) openAndContinue(null, true); }); };
     const hist = []; for (let i = 0; i < 14; i++) hist.push(R.reds(R.toss(rand)));   // the table has been running for a while
     const road = ctx.ui.h('div', { class: 'xd-road glass' }, ctx.ui.root);
     function drawRoad() {
@@ -228,7 +237,7 @@
       const tot = myTotal(); if (!tot) return;
       for (const id in zones) { zones[id].spots[0].forEach(c => ctx.tween(c, { x: 0, y: 2, z: 7.5, arc: 1 }, 380, 'io').then(() => ctx.remove(c))); zones[id].spots[0] = []; }
       myBets = {}; myOrder = [];
-      ctx.win(tot, new T.Vector3(0, 1, 3));          // stake handed back
+      ctx.refund(tot, new T.Vector3(0, 1, 3));       // stake handed back
       refresh();
     }
     function rebet() { if (phase !== 'betting' || myTotal()) return; for (const [id, a] of lastOrder) if (!placeBet(id, a)) break; }
@@ -236,7 +245,7 @@
       await Promise.all(bots.map(async (b, i) => {
         await ctx.wait(250 + i * 380 + rand() * 900);
         if (phase !== 'betting' || round !== roundNo) return;
-        const plan = R.botPlan(rand, b.style, hist.map(r => (r % 2 ? 'le' : 'chan')), [1000, 5000, 10000, 50000], b.coins);
+        const plan = R.botPlan(rand, b.style, hist.map(r => (r % 2 ? 'le' : 'chan')), ctx.room ? ctx.room.stakes : [1000, 5000, 10000, 50000], b.coins);
         if (plan.length) { const zn = R.zone(plan[0].zone).name; b.say(ctx.pick(TALK[b.style].bet(zn))); if (b.style === 'wild') b.anim('cheer'); }
         for (const bet of plan) {
           if (phase !== 'betting' || round !== roundNo) return;
@@ -265,8 +274,8 @@
       }
       await ctx.tween(rig, { x: 0, z: PZ, rz: 0, rx: 0, y: 0 }, 300, 'bounce');
       ctx.scene.attach(bowl);
-      phase = 'betting'; refresh();
-      bots.forEach(b => { if (b.coins < 60000) { b.setCoins(b.coins + 500000); b.say('Nạp thêm xu chơi tiếp nè 😅'); } });   // bots never go broke
+      phase = 'betting'; refresh(); startClock();
+      bots.forEach(b => { if (ctx.topUp(b, 60000, 500000)) b.say('Nạp thêm xu chơi tiếp nè 😅'); });   // bots never go broke
       botsBet(roundNo);
     }
 
@@ -291,11 +300,12 @@
       await Promise.all(spins);
     }
 
-    async function open(forced) {
-      if (phase !== 'betting' || !myTotal()) return null;
+    async function open(forced, timeUp) {
+      if (phase !== 'betting' || (!myTotal() && !timeUp)) return null;
+      if (clock) { clock.stop(); clock = null; }
       phase = 'opening'; refresh();
       const res = forced ? forced.slice() : R.toss(rand), nRed = R.reds(res), par = R.parity(res);
-      lastOrder = myOrder.slice();
+      if (myOrder.length) lastOrder = myOrder.slice();
       await reveal(res);
       phase = 'result';
       // shout the result
@@ -312,6 +322,7 @@
       }
       const mine = R.settle(myBets, res);
       const result = { coins: res, reds: nRed, parity: par, bets: Object.assign({}, myBets), back: mine.back, net: mine.net, staked: mine.staked };
+      if (mine.staked) { ctx.track('round', { net: mine.net, bet: mine.staked }); if (nRed === 0 || nRed === 4) ctx.track('combo', { kind: 'tu_tu' }); } ctx.roundBet = 0;
       ctx.ui.status(`Ra <b>${R.describe(res)}</b> · ${word} · ${mine.net > 0 ? `bạn lời <b>+${HC.fmt(mine.net)}</b> 🎉` : mine.net < 0 ? (mine.back ? `thu về ${HC.fmt(mine.back)}, lỗ ${HC.fmt(-mine.net)}` : `bạn mất ${HC.fmt(-mine.net)} 🥲`) : 'hoà vốn'}`);
       if (ctx.SHOT && ctx.Q.has('demo')) return result;          // keep the reveal on screen for the screenshot
       await ctx.wait(700);
@@ -348,14 +359,14 @@
       if (mine.net > 0) { setTimeout(() => ctx.ui.callout(big ? 'ĂN ĐẬM!' : 'THẮNG!'), 500); ctx.sfx('win', .5); if (big) ctx.ui.confetti(); }
       else if (mine.net < 0) { ctx.sfx('lose', .3); ctx.ui.toast(`Ra ${R.describe(res)} · ${mine.back ? `thu về ${HC.fmt(mine.back)}` : 'không trúng ô nào'} 🥲`, mine.back ? 'emoji-fluent-3d/game/coin.png' : 'emoji-fluent-3d/reactions/grinning_face_with_sweat.png'); }
       myBets = {}; myOrder = [];
-      await ctx.wait(test ? 150 : 1800);
+      await ctx.wait(test ? 150 : fast ? 900 : 1800);
       return result;
     }
     let busy = false;
-    async function openAndContinue(forced) {
+    async function openAndContinue(forced, timeUp) {
       if (busy || phase !== 'betting') return null;
       busy = true;
-      try { const r = await open(forced); if (r && !(ctx.SHOT && ctx.Q.has('demo'))) await newRound(); return r; }
+      try { const r = await open(forced, timeUp); if (r && !(ctx.SHOT && ctx.Q.has('demo'))) await newRound(); return r; }
       catch (e) { console.error(e); ctx.ui.toast('Lỗi: ' + e.message); }
       finally { busy = false; }
     }

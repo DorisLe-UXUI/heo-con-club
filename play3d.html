@@ -49,6 +49,10 @@ img{-webkit-user-drag:none}
 .chipimg.on{transform:scale(1.22) translateX(8px);filter:drop-shadow(0 0 0 #fff) drop-shadow(0 0 10px #ffe27a)}
 .gstatus{position:absolute;left:16px;bottom:150px;max-width:760px;padding:10px 30px;border-radius:30px;background:rgba(50,22,60,.72);color:#fff;font:800 28px "Baloo 2";white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-shadow:0 6px 16px rgba(0,0,0,.2)}
 .gstatus b{color:#ffe27a}
+.cdown{position:absolute;left:50%;bottom:162px;transform:translateX(-50%);display:flex;align-items:center;gap:10px;padding:6px 26px 6px 10px;border-radius:34px;font:800 26px "Baloo 2";color:#7a3a5c;white-space:nowrap}
+.cdown img{width:46px}.cdown b{font:400 38px "Grandstander Black";color:#1f9a70;min-width:48px;text-align:center}
+.cdown.warn{border-color:#ffd0d0}.cdown.warn b{color:#e0445e;animation:cdp .5s ease-in-out infinite alternate}
+@keyframes cdp{to{transform:scale(1.18)}}
 .lbl3{position:absolute;left:0;top:0;will-change:transform;white-space:nowrap}
 .seatlbl{display:flex;align-items:center;gap:10px;padding:6px 20px 6px 6px;border-radius:40px;background:rgba(255,255,255,.95);border:4px solid #fff;box-shadow:0 6px 0 rgba(194,64,122,.3),0 10px 18px rgba(60,10,50,.2);transition:box-shadow .2s}
 .seatlbl img{width:62px;height:62px;border-radius:50%;background:#fff4f9}
@@ -104,25 +108,29 @@ img{-webkit-user-drag:none}
   <div id="labels"></div>
   <div id="gameui"></div>
   <div id="top">
-    <div id="back" title="Quay lại"><img src="assets/ui-jelly-pzuh/buttons-pastel/pink/icon_back_pink.png"></div>
+    <div id="back" title="Quay lại"><img src="assets/ui-jelly-pzuh/buttons-pastel/pink/icon_back_pink.png?v=202610231911"></div>
     <div id="where" class="glass"><span id="gname">Heo Con Club</span><small id="gsub"></small></div>
     <div class="sp"></div>
-    <div class="pill glass"><img src="assets/emoji-fluent-3d/game/coin.png"><span id="coinTxt">0</span></div>
-    <div class="rbtn" id="rulesBtn" title="Luật chơi"><img src="assets/ui-jelly-pzuh/buttons-pastel/yellow/icon_question_yellow.png"></div>
-    <div class="rbtn" id="sndBtn" title="Âm thanh"><img id="sndImg" src="assets/ui-jelly-pzuh/buttons-pastel/mint/icon_sound_mint.png"></div>
+    <div class="pill glass"><img src="assets/emoji-fluent-3d/game/coin.png?v=202610231911"><span id="coinTxt">0</span></div>
+    <div class="rbtn" id="rulesBtn" title="Luật chơi"><img src="assets/ui-jelly-pzuh/buttons-pastel/yellow/icon_question_yellow.png?v=202610231911"></div>
+    <div class="rbtn" id="sndBtn" title="Âm thanh"><img id="sndImg" src="assets/ui-jelly-pzuh/buttons-pastel/mint/icon_sound_mint.png?v=202610231911"></div>
   </div>
   <div id="me" class="glass"><img id="meAv"><div><b id="meName"></b><span id="meNote">Bạn</span></div></div>
   <div id="fx"></div>
-  <div id="toast"><img src="assets/emoji-fluent-3d/game/party_popper.png"><span></span></div>
+  <div id="toast"><img src="assets/emoji-fluent-3d/game/party_popper.png?v=202610231911"><span></span></div>
   <div id="modal"></div>
-  <div id="loading"><img id="lic" src="assets/emoji-fluent-3d/game/game_die.png"><b id="ltxt">Đang dọn bàn…</b><div id="lbar"><i></i></div></div>
+  <div id="loading"><img id="lic" src="assets/emoji-fluent-3d/game/game_die.png?v=202610231911"><b id="ltxt">Đang dọn bàn…</b><div id="lbar"><i></i></div></div>
 </div>
 <script src="js/vendor/three.min.js"></script>
 <script src="js/vendor/GLTFLoader.js"></script>
 <script src="js/vendor/SkeletonUtils.js"></script>
 <script src="js/hc3d.js"></script>
 <script src="js/hc-core.js"></script>
+<script src="js/hc-progress.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/hc-online.js"></script>
 <script src="js/table3d.js"></script>
+<script src="js/t3-lobby.js"></script>
 <script>
 'use strict';
 const Q = new URLSearchParams(location.search), KEY = (Q.get('game') || 'bau-cua').replace(/[^a-z0-9-]/g, '');
@@ -137,7 +145,16 @@ addEventListener('resize', fit); fit();
 if (Q.has('shot')) document.head.appendChild(Object.assign(document.createElement('style'), { textContent: '.mpanel,.callout3{animation:none!important}' }));
 const sndIcon = () => $('#sndImg').src = HC.A(HC.settings.sfx ? 'ui-jelly-pzuh/buttons-pastel/mint/icon_sound_mint.png' : 'ui-jelly-pzuh/buttons-pastel/pink/icon_sound_pink.png');
 $('#sndBtn').onclick = () => { HC.settings.sfx = HC.settings.music = !HC.settings.sfx; HC.saveSettings(); sndIcon(); if (!HC.settings.music) HC.stopMusic(); };
-$('#back').onclick = () => { HC.goto(HC.from() === 'town' ? `index.html?look=${KEY}` : 'lobby.html?sel=' + KEY, HC.from() === 'town' ? 'Đang về thị trấn…' : 'Đang mở bản đồ…'); };
+// in the lobby "back" returns to the town / map; at a table it goes back to the lobby ("Đổi bàn")
+const LEGACY = ['selftest', 'shot', 'demo', 'uitest'].some(k => Q.has(k)) && !Q.has('lobby');
+let atTable = false;
+const goHome = () => HC.goto(HC.from() === 'town' ? `index.html?look=${KEY}` : 'lobby.html?sel=' + KEY, HC.from() === 'town' ? 'Đang về thị trấn…' : 'Đang mở bản đồ…');
+const toLobby = () => HC.goto(`play3d.html?game=${KEY}`, 'Đang về sảnh chọn bàn…');
+$('#back').onclick = () => {
+  if (!atTable || !ctx) return goHome();
+  ctx.ui.modal({ title: 'Đổi bàn?', width: 860, html: '<p style="text-align:center">Rời bàn này để chọn bàn khác.<br>Ván đang chơi dở sẽ bị huỷ, phỉnh đã đặt trên bàn không được trả lại.</p>',
+    buttons: [{ label: 'Ở lại', cls: 'grey' }, { label: 'Đổi bàn', cls: 'pink', onClick: toLobby }] });
+};
 $('#meAv').src = HC.A(HC.store.get('av', 'avatars-dicebear/fun-emoji/png/bong.png')); $('#meName').textContent = HC.store.get('name', 'Bạn Heo Con');
 $('#lic').src = HC.A(`games/lobby-icons/${KEY}.png`);
 (async () => {
@@ -149,10 +166,34 @@ $('#lic').src = HC.A(`games/lobby-icons/${KEY}.png`);
     document.title = def.title + ' · Heo Con Club'; $('#gname').textContent = def.title; $('#gsub').textContent = def.sub || '';
     if (!HC3D.ok) throw new Error('Máy chưa bật WebGL nên không chạy được game 3D.');
     ctx = new T3.Ctx(def, { canvas: $('#scene'), ui: $('#ui'), gameui: $('#gameui'), labels: $('#labels'), fx: $('#fx'), toast: $('#toast'), modal: $('#modal'), coinEl: $('#coinTxt') });
-    window.ctx = ctx;
-    await ctx.init(p => { $('#lbar i').style.width = Math.round(p * 100) + '%'; });
+    window.ctx = ctx; fit(); ctx.ui.refreshCoins();
+    $('#rulesBtn').onclick = () => ctx.ui.modal({ title: 'Luật ' + def.title, html: T3.rulesHtml(def, ctx.mode), width: 1100, icon: `games/lobby-icons/${KEY}.png` });
+    // the 3D table loads in the background while the player picks a room
+    let ready = false;
+    const initP = ctx.init(p => { $('#lbar i').style.width = Math.round(p * 100) + '%'; }).then(() => { ready = true; });
+    // ---- room + mode: ?room=<id>&mode=<id> skip the lobby; selftest / shot / demo keep the old default stakes (ctx.room = null)
+    const rooms = T3.roomsFor(KEY, def), modes = T3.modesFor(def), last = HC.store.get('lobby_' + KEY, null);
+    const modeOf = id => modes.find(m => m.id === id) || modes[0] || null;
+    let choice = null;
+    if (Q.has('room') || LEGACY) {
+      const r = Q.has('room') ? rooms.find(x => x.id === Q.get('room') || String(x.index) === Q.get('room')) || null : null, m = modeOf(Q.get('mode'));
+      const why = r && !LEGACY ? T3.lockReason(r, m) : null;
+      if (why) setTimeout(() => ctx.ui.toast(`${why} để vào bàn ${r.name}`, 'emoji-fluent-3d/game/locked.png'), 300);
+      else if (r || LEGACY) choice = { room: r, mode: m };
+    }
+    if (!choice) {
+      $('#loading').classList.add('hide');
+      const lob = T3.lobby({ key: KEY, def, topPx: () => $('#top').getBoundingClientRect().bottom, last: Q.has('mode') ? { room: last && last.room, mode: Q.get('mode') } : last,
+        toast: msg => ctx.ui.toast(msg, 'emoji-fluent-3d/game/locked.png') });
+      choice = await lob.done;
+      HC.store.set('lobby_' + KEY, { room: choice.room.id, mode: choice.mode ? choice.mode.id : null });
+      if (!ready) $('#loading').classList.remove('hide', 'out');
+    }
+    ctx.room = choice.room; ctx.mode = choice.mode; atTable = true; $('#back').title = 'Đổi bàn';
+    if (ctx.room) $('#gsub').textContent = [modes.length > 1 && ctx.mode ? ctx.mode.name : null, 'Bàn ' + ctx.room.name, (def.stakeName || 'Cược') + ' ' + T3.stakeText(ctx.room)].filter(Boolean).join(' · ');
+    else if (modes.length > 1 && ctx.mode && Q.has('mode')) $('#gsub').textContent = ctx.mode.name + ' · ' + (def.sub || '');
+    await initP;
     fit(); ctx.ui.refreshCoins(); await ctx.texReady();
-    $('#rulesBtn').onclick = () => ctx.ui.modal({ title: 'Luật ' + def.title, html: def.rules || '', width: 1100, icon: `games/lobby-icons/${KEY}.png` });
     $('#loading').classList.add('out'); setTimeout(() => $('#loading').classList.add('hide'), 450);
     if (Q.has('shot')) setInterval(() => ctx.tick(), 33);   // screenshots run headless, where requestAnimationFrame barely runs
     if (Q.has('selftest')) {

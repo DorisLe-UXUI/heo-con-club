@@ -25,7 +25,7 @@
   };
 
   T3.register('lo-to', {
-    title: 'Lô Tô', sub: 'Dò số · 5 số một hàng là KINH!',
+    title: 'Lô Tô', sub: 'Dò số · 5 số một hàng là KINH!', stakeName: 'Giá vé',
     table: 'rect', theme: 'mint', tex: ['lo-to', 'chips'], scripts: ['js/games3d/rules/lo-to.js'], models: ['hp_monstera', 'hp_yucca', 'hp_pothos', 'pp_lantern'],
     cam: { pos: [0, 11.6, 14.6], look: [0, 0, -.15] },
     rules: `<p>Mỗi người mua <b>một vé</b> (chọn giá vé bên trái). Vé có <b>3 hàng × 9 cột</b>, mỗi hàng <b>5 số</b>; cột 1 là số 1–9, cột 2 là 10–19, … cột cuối là 80–90.</p>
@@ -387,6 +387,7 @@
       drawBoard([]); drawCaller(null, 'Mua vé đi bà con ơi! 🎫'); caller.style.display = 'none'; board.style.display = '';
       // ---- buy a ticket
       picker = ctx.ui.chipPicker(PRICES, v => { price = v; acts.set('buy', { label: `MUA VÉ ${HC.short(v)}` }); }, PRICES.indexOf(price));
+      price = picker.value;     // a lobby room may only offer some prices
       ctx.ui.status(`Chọn giá vé bên trái rồi bấm <b>MUA VÉ</b> · KINH nhận <b>90%</b> hũ`);
       await new Promise(res => {
         acts = ctx.ui.actions([
@@ -398,7 +399,7 @@
       ctx.ui.clearActions(); if (picker) { picker.el.remove(); picker = null; }
       mine.setTicket(mine.tk, price);
       bots.forEach((b, i) => {
-        if (b.coins < price) { b.setCoins(b.coins + 500000); b.say('Nạp thêm xu mua vé nè 😅'); }      // bots never go broke
+        if (ctx.topUp(b, price, 500000, 2)) b.say('Nạp thêm xu mua vé nè 😅');      // bots never go broke
         if (opt.tickets && opt.tickets[i + 1]) b.tm.setTicket(opt.tickets[i + 1], price); else b.tm.setTicket(b.tm.tk, price);
         b.setCoins(b.coins - price); setBotWait(b, 5);
       });

@@ -68,6 +68,26 @@ Mặt bàn là `y = 0`. Trục `x` sang phải, `z` hướng về phía người
 
 **Tiện ích:** `ctx.shuffle(arr)`, `ctx.pick(arr)`, `ctx.rand()`, `ctx.SHOT` (đang chụp ảnh), `ctx.TEST` (đang tự kiểm), `ctx.Q` (tham số URL). Khi `ctx.TEST` hoặc `ctx.SHOT`, `ctx.wait` và `tween` chạy nhanh hơn.
 
+## Sảnh chọn bàn, mức cược và chế độ chơi
+
+Trước khi vào bàn, `play3d.html` hiện **sảnh "Chọn bàn"** (`js/t3-lobby.js`): 4–5 bàn **Tập Sự, Bình Dân, Cao Thủ, Đại Gia, Hoàng Gia**, mỗi bàn có mức cược, số xu tối thiểu, cấp cần có (`HC.prog.level()`), sức bot và ảnh bàn (`assets/bg-tables-generated/with-table/table_scene_<scene>.png`). Mặc định theo loại game (`T3.ROOM_KIND`: `bet`, `unit`, `blind`, `board`, `ticket`, `fish`); module có thể thay trong `T3.register`:
+
+```js
+stakeName: 'Mù nhỏ',                       // chữ trước mức cược trên thẻ bàn ('Cược' nếu bỏ trống)
+rooms: [{ id: 'tap-su', stakes: [1000, 5000], min: 20000, lv: 1, ai: 0, bank: [80000, 600000], scene: 'mint' }, …],   // ghi đè từng bàn
+modes: [{ id: 'thuong', name: 'Thường', desc: 'một dòng dưới tab', rules: 'đoạn luật thêm vào nút ?', minMul: 1 }, …], // ≥ 2 chế độ thì sảnh có tab
+botLabel: false,                            // ẩn "Bot Khó" (game may rủi)
+```
+
+Bàn và chế độ đã chọn nằm ở `ctx.room` / `ctx.mode` khi `start(ctx)` chạy (`ctx.room = null` với `?selftest`, `?shot`, `?demo`: giữ mức cược cũ). Khung tự lo phần chung:
+
+- `ctx.ui.chipPicker(values, …)` chỉ hiện các mức `ctx.room.stakes`.
+- Bot trong `ctx.seats()` có vốn theo bàn. `ctx.botBank()`, `ctx.botStake(fallback)` (bot đặt cược theo bàn), `ctx.maxStake(fallback)`, `ctx.topUp(seat, legacyMin, legacyAdd, mult)` (nạp xu cho bot sắp hết), `ctx.aiLevel(fallback)` (0 Dễ … 3 Siêu khó).
+- `ctx.ui.countdown(giây, onEnd, nhãn)`: đồng hồ đặt cược (Bầu Cua, Xóc Đĩa, Tài Xỉu dùng cho chế độ Thường / Nhanh).
+- Nút quay lại ở bàn thành **Đổi bàn** (về sảnh); ở sảnh thì về thị trấn / bản đồ như cũ.
+
+URL: `?game=<key>&room=<id>&mode=<id>` vào thẳng bàn (không đủ xu / cấp thì quay về sảnh), `&lobby=1` ép hiện sảnh (kể cả khi chụp ảnh `&shot=1`). Tự kiểm một chế độ: `?game=xi-dach&selftest=1&mode=lam-cai`.
+
 ## Gói ảnh có sẵn (`tex`)
 
 | Gói | Key |

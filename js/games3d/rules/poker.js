@@ -118,11 +118,13 @@
 
   // ---------------------------------------------------------------- bot strategy
   const PERSONAS = [{ loose: .35, aggr: .4, bluff: .04, tag: 'chặt' }, { loose: .6, aggr: .7, bluff: .09, tag: 'máu' }, { loose: .7, aggr: .35, bluff: .05, tag: 'lì' }, { loose: .5, aggr: .55, bluff: .07, tag: 'cân bằng' }];
-  /** o: {hole, board, legal (C.legal), pot (all chips in the middle incl. current bets), nOpp, bb, unit, street 0..3, pers, sims}. → {type, to?, eq}. */
+  /** How much a bot misjudges its equity, by strength level 0 (dễ) … 3 (siêu khó); no level = the original ±5%. */
+  const NOISE = [.36, .18, .1, .05];
+  /** o: {hole, board, legal (C.legal), pot (all chips in the middle incl. current bets), nOpp, bb, unit, street 0..3, pers, sims, level}. → {type, to?, eq}. */
   function botDecide(o, rng = Math.random) {
     const Lg = o.legal, pers = o.pers || PERSONAS[3], unit = o.unit || 1;
     const eq0 = o.board.length ? equity(o.hole, o.board, Math.max(1, o.nOpp), o.sims || 150, rng) : preflopEquity(o.hole, o.nOpp);
-    const e = eq0 + (rng() - .5) * .1 + (pers.loose - .5) * .08;
+    const e = eq0 + (rng() - .5) * (o.level == null ? .1 : NOISE[Math.max(0, Math.min(3, o.level))]) + (pers.loose - .5) * .08;
     const potAfter = o.pot + Lg.toCall, odds = Lg.toCall / Math.max(1, potAfter);
     const raiseTo = f => C.roundTo(Lg.currentBet + Math.max(o.bb, f * potAfter), unit, Lg.raise.min, Lg.raise.max);
     const share = 1 / (Math.max(1, o.nOpp) + 1);           // fair share of the pot
@@ -149,5 +151,5 @@
     const sc = hands.map(h => (h ? evaluate(h).score : -1));
     return C.award(st.players, C.pots(st.players), (i, j) => sc[i] - sc[j], order);
   }
-  return { CAT, straightHigh, evaluate, bestOf, fastScore, code, catOf, equity, chen, preflopEquity, nextSeat, positions, botDecide, PERSONAS, showdown };
+  return { CAT, straightHigh, evaluate, bestOf, fastScore, code, catOf, equity, chen, preflopEquity, nextSeat, positions, botDecide, PERSONAS, NOISE, showdown };
 });

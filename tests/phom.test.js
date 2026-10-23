@@ -214,6 +214,42 @@ t('thousands of bot games: legal moves, cards and coins conserved, payouts recom
     passed++;
   }
 });
+// ---------------------------------------------------------------- chế độ "Không gửi bài" + bot strength
+function botGame(opts) {
+  const g = new R.Game(opts); g.deal();
+  for (let steps = 0; !g.over && steps < 300; steps++) {
+    if (g.phase === 'lay') { g.lay(); break; }
+    const p = g.turn;
+    const ev = g.phase === 'take' ? (g.aiTake(p) === 'eat' ? g.eat(p) : g.draw(p)) : (() => { const c = g.aiDiscard(p); if (!g.canDiscard(p, c)) throw new Error('illegal bot discard'); return g.discard(p, c); })();
+    if (ev.some(e => e.type === 'invalid')) throw new Error('invalid ' + JSON.stringify(ev));
+  }
+  if (!g.over) throw new Error('bot game stuck');
+  return g;
+}
+t('không gửi bài: same deal, nobody lays off, scores are the cards left after hạ phỏm', () => {
+  let compared = 0, differ = 0;
+  for (let i = 0; i < 400 && compared < 40; i++) {
+    const a = botGame({ seed: 9000 + i, starter: i % 4 }), b = botGame({ seed: 9000 + i, starter: i % 4, send: false });
+    if (a.result.kind !== 'normal') continue;
+    assert.strictEqual(b.result.kind, 'normal');
+    assert.deepStrictEqual(b.result.sent, [[], [], [], []], 'no gửi bài');
+    assert.ok(!b.sendOptions(0).length, 'GỬI BÀI button has nothing to offer');
+    for (let p = 0; p < 4; p++) assert.strictEqual(b.result.score[p], b.result.rest[p].reduce((x, id) => x + R.pts(id), 0));
+    assert.deepStrictEqual(R.Game.expectedUnits(b.result), b.result.units, 'payout recomputation without gửi');
+    if (a.result.sent.flat().length) { compared++; if (a.result.score.join() !== b.result.score.join()) differ++; }
+  }
+  assert.ok(compared >= 20, 'found games where gửi bài mattered: ' + compared);
+  assert.ok(differ === compared, 'every one of them scores differently without gửi bài');
+});
+t('bot levels: easy bots play legal games, coins conserved', () => {
+  let eatsEasy = 0, eatsHard = 0;
+  for (let i = 0; i < 300; i++) {
+    const e = botGame({ seed: 500 + i, starter: i % 4, level: 0 }), h = botGame({ seed: 500 + i, starter: i % 4, level: 3 });
+    for (const g of [e, h]) { assert.strictEqual(g.result.units.reduce((x, y) => x + y, 0), 0); assert.deepStrictEqual(R.Game.expectedUnits(g.result), g.result.units); }
+    eatsEasy += e.result.eats.length; eatsHard += h.result.eats.length;
+  }
+  assert.ok(eatsEasy < eatsHard, `easy bots eat fewer cards (${eatsEasy} vs ${eatsHard})`);
+});
 console.log('stats', JSON.stringify(stats));
 console.log(passed + ' passed, ' + failed + ' failed');
 process.exit(failed ? 1 : 0);

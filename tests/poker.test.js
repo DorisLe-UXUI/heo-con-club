@@ -105,9 +105,9 @@ eq(E('7♥ 6♥ 5♥ 4♣ 3♠ 2♥ 8♣').desc, 'Sảnh tới 8', 'two straight
 }
 
 // ---- preflop betting with blinds
-function newHand(stacks, button, bb) {
+function newHand(stacks, button, bb, o = {}) {
   const pos = P.positions(stacks.map(s => s > 0), button);
-  const st = C.table(stacks, { minRaise: bb, unit: bb / 2 });
+  const st = C.table(stacks, Object.assign({ minRaise: bb, unit: bb / 2 }, o));
   C.street(st); C.blind(st, pos.sb, bb / 2); C.blind(st, pos.bb, bb); C.street(st, { keepBets: true, level: bb });
   return { st, pos };
 }
@@ -180,12 +180,12 @@ function newHand(stacks, button, bb) {
 }
 
 // ================================================================ random full hands
-function simulate(hands, seed, mode) {
+function simulate(hands, seed, mode, o = {}) {
   const rng = C.seeded(seed), bb = 2000; let stacks = [200000, 150000, 80000, 30000, 12000], button = 0;
   const stats = { showdowns: 0, folds: 0, sidePots: 0, allInRunouts: 0, splits: 0, maxActs: 0 };
   for (let t = 0; t < hands; t++) {
     stacks = stacks.map(s => (s < bb ? 40000 + Math.floor(rng() * 200) * 1000 : s));
-    const { st, pos } = newHand(stacks, button, bb), chips0 = C.chipsInPlay(st);
+    const { st, pos } = newHand(stacks, button, bb, { potLimit: !!o.potLimit }), chips0 = C.chipsInPlay(st);
     const deck = C.deck(rng), hole = stacks.map(() => [deck.pop(), deck.pop()]), board = [];
     let acts = 0, runout = false;
     for (let s = 0; s < 4; s++) {
@@ -194,13 +194,14 @@ function simulate(hands, seed, mode) {
       while (i >= 0) {
         const Lg = C.legal(st, i); let a;
         if (mode === 'random') { const x = rng(); a = x < .15 ? { type: 'fold' } : x < .55 ? { type: Lg.check ? 'check' : 'call' } : x < .9 && Lg.raise ? { type: 'raise', to: Lg.raise.min + Math.floor(rng() * (Lg.raise.max - Lg.raise.min + 1)) } : { type: 'allin' }; }
-        else a = P.botDecide({ hole: hole[i], board, legal: Lg, pot: C.potTotal(st), nOpp: C.liveCount(st) - 1, bb, unit: bb / 2, street: s, pers: P.PERSONAS[i % 4], sims: 16 }, rng);
+        else a = P.botDecide({ hole: hole[i], board, legal: Lg, pot: C.potTotal(st), nOpp: C.liveCount(st) - 1, bb, unit: bb / 2, street: s, pers: P.PERSONAS[i % 4], sims: 16, level: o.levels ? o.levels[i] : undefined }, rng);
         if (a.type === 'check' && Lg.toCall > 0) throw new Error('checked facing a bet');
         if (a.type === 'raise' && !Lg.raise) throw new Error('raised without the right to');
         if (a.type === 'raise' && mode !== 'random' && (a.to < Lg.raise.min || a.to > Lg.raise.max)) throw new Error('bot raise out of range ' + a.to + ' ' + JSON.stringify(Lg.raise));
         const before = st.players[i].stack, res = C.act(st, i, a);
         if (before - st.players[i].stack !== res.put) throw new Error('put mismatch');
         if (res.type === 'raise' && res.to < Lg.raise.min && !st.players[i].allIn) throw new Error('raise below minimum');
+        if (res.type === 'raise' && o.potLimit && res.to > Lg.raise.max) throw new Error('pot-limit raise above the pot');
         if (C.chipsInPlay(st) !== chips0) throw new Error('chips not conserved');
         i = C.nextActor(st, i);
         if (++acts > 120) throw new Error('hand does not end');
@@ -234,6 +235,38 @@ function simulate(hands, seed, mode) {
   const b = simulate(5000, 9, 'random');
   ok(b.sidePots > 100 && b.allInRunouts > 100 && b.splits > 5, `random actions: 5000 hands (${b.sidePots} side pots, ${b.allInRunouts} all-in run-outs, ${b.splits} splits)`);
   ok(Date.now() - t0 < 60000, 'simulations finish quickly');
+}
+// ---- Pot-Limit (chế độ "Giới hạn hũ"): a raise goes at most to the pot raise
+{
+  const stacks = [1e6, 1e6, 1e6, 1e6, 1e6], { st, pos } = newHand(stacks, 0, 10000, { potLimit: true });
+  const utg = C.nextActor(st, pos.bb);
+  eq(C.legal(st, utg).raise, { min: 20000, max: 35000 }, 'pot-limit preflop with blinds 5K/10K: pot raise = 35K');
+  const r = C.act(st, utg, { type: 'allin' });
+  ok(r.type === 'raise' && st.players[utg].bet === 35000 && !st.players[utg].allIn, 'pot-limit: the ALL-IN button becomes a pot raise');
+  const nx = C.nextActor(st, utg);
+  eq(C.legal(st, nx).raise.max, 120000, 'pot-limit re-raise: call 35K + pot 85K → raise to 120K');
+  C.act(st, nx, { type: 'raise', to: 999999 });
+  eq(st.players[nx].bet, 120000, 'pot-limit: oversized raises are clamped to the pot');
+  const nl = newHand(stacks, 0, 10000);
+  eq(C.legal(nl.st, C.nextActor(nl.st, nl.pos.bb)).raise.max, 1e6, 'no-limit: the max raise is the whole stack');
+  const short = newHand([1e6, 1e6, 1e6, 25000, 1e6], 0, 10000, { potLimit: true });
+  eq(C.legal(short.st, 3).raise.max, 25000, 'pot-limit: a short stack can still go all-in below the pot');
+  const flop = newHand(stacks, 0, 10000, { potLimit: true }); let k = C.nextActor(flop.st, flop.pos.bb);
+  while (k >= 0) { C.act(flop.st, k, { type: 'call' }); k = C.nextActor(flop.st, k); }
+  C.street(flop.st);
+  eq(C.legal(flop.st, C.nextActor(flop.st, flop.pos.button)).raise.max, 50000, 'pot-limit flop bet: at most the 50K pot');
+  const pl = simulate(1500, 31, 'bots', { potLimit: true });
+  ok(pl.showdowns > 100 && pl.folds > 100, `pot-limit bots: 1500 hands, chips conserved, no raise above the pot (${pl.showdowns} showdowns)`);
+  const pr = simulate(2500, 32, 'random', { potLimit: true });
+  ok(pr.sidePots > 20, `pot-limit random actions: 2500 hands (${pr.sidePots} side pots)`);
+}
+// ---- bot strength (room tiers): every level only takes legal actions; easy bots misjudge more than hard ones
+{
+  const lv = simulate(800, 55, 'bots', { levels: [0, 1, 2, 3, 0] });
+  ok(lv.showdowns + lv.folds === 800, 'bots at levels 0–3 play 800 legal hands');
+  const rng = C.seeded(5), spread = level => { const xs = []; for (let i = 0; i < 400; i++) { const o = { hole: h('7♣ 2♦'), board: [], legal: { toCall: 2000, stack: 1e5, currentBet: 2000, bet: 0, raise: { min: 4000, max: 1e5 }, check: false }, pot: 3000, nOpp: 3, bb: 2000, unit: 1000, street: 0, level }; xs.push(P.botDecide(o, rng).type); } return xs.filter(t => t !== 'fold').length; };
+  ok(spread(0) > spread(3), `easy bots play 7-2 offsuit more often than hard bots (${spread(0)} vs ${spread(3)} of 400)`);
+  eq(P.NOISE.length, 4, 'four bot levels: Dễ, Vừa, Khó, Siêu khó');
 }
 
 console.log(`${pass} passed, ${fail} failed`);

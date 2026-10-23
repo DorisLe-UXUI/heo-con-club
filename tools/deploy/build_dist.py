@@ -32,8 +32,8 @@ for f in files:
             old = "const A = p => /^(data:|blob:|https?:)/.test(p) ? p : (window.HC_ASSET_BASE || 'assets/') + p.split('/').map(encodeURIComponent).join('/') + '?' + V;"
             assert old in s; s = s.replace(old, "const A = p => /^(data:|blob:|https?:)/.test(p) ? p : (window.HC_PACK && window.HC_PACK[p]) || (window.HC_ASSET_BASE || 'assets/') + p.split('/').map(encodeURIComponent).join('/') + '?' + V;")
         if f == 'tien-len.html':
-            old = "const A = p => 'assets/' + p.split('/').map(encodeURIComponent).join('/');"
-            assert old in s; s = s.replace(old, "const A = p => (window.HC_PACK && window.HC_PACK[p]) || 'assets/' + p.split('/').map(encodeURIComponent).join('/');")
+            old = "const A = window.HC ? HC.A : p => 'assets/' + p.split('/').map(encodeURIComponent).join('/');"   # HC.A already reads the pack
+            assert old in s; s = s.replace(old, "const A = window.HC ? HC.A : p => (window.HC_PACK && window.HC_PACK[p]) || 'assets/' + p.split('/').map(encodeURIComponent).join('/');")
         if f.endswith('.html'):
             i = s.index('<script'); s = s[:i] + PACK_TAG + '\n' + s[i:]
         open(d, 'w', encoding='utf-8').write(s)

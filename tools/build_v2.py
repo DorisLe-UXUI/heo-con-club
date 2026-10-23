@@ -151,7 +151,8 @@ M['recommended'] = {
 
 # ================= v3 additions: more games, premium UI, 3D characters, animated emoji
 GAME_NAMES = {'tien-len': 'Tiến Lên', 'phom': 'Phỏm', 'mau-binh': 'Mậu Binh', 'xi-dach': 'Xì Dách', 'poker': 'Poker', 'bai-cao': 'Bài Cào', 'sam-loc': 'Sâm Lốc', 'lieng': 'Liêng',
-              'bau-cua': 'Bầu Cua', 'xoc-dia': 'Xóc Đĩa', 'tai-xiu': 'Tài Xỉu', 'co-tuong': 'Cờ Tướng', 'co-ca-ngua': 'Cá Ngựa', 'co-caro': 'Cờ Caro', 'bai-mau': 'Bài Màu', 'lo-to': 'Lô Tô', 'ban-ca': 'Bắn Cá'}
+              'bau-cua': 'Bầu Cua', 'xoc-dia': 'Xóc Đĩa', 'tai-xiu': 'Tài Xỉu', 'co-tuong': 'Cờ Tướng', 'co-ca-ngua': 'Cá Ngựa', 'co-caro': 'Cờ Caro', 'bai-mau': 'Bài Màu', 'lo-to': 'Lô Tô', 'ban-ca': 'Bắn Cá',
+              'day-xu': 'Đẩy Xu', 'gap-thu': 'Gắp Thú', 'xuc-ve': 'Máy Xúc Vé'}
 GD = A / 'games'
 def tree(folder):
     out = {}
@@ -487,10 +488,10 @@ secs.append(section('tables', 'Bàn chơi pastel (tự vẽ, CC0)', '7 theme × 
                     row('Tile họa tiết', thumbs([M['tables'][t]['pattern_tile'] for t in THEMES], 90))))
 secs += [deck_section(k) for k in SHOW_DECKS]
 shots = sorted((ROOT / 'screenshots').glob('*.jpg'))
-secs.insert(1, section('lobby', 'Sảnh game tương tác (lobby.html)', '<b>Mở <code>index.html</code>: thị trấn 3D có đăng nhập, 18 game (thêm Máy Đẩy Xu).</b> <b>Tiến Lên chơi thật đủ luật: mở <code>tien-len.html</code></b>. Mở <code>lobby.html</code> để xem bản đồ chọn game (bản sảnh 2D cũ: <code>lobby-classic.html</code>). Link nhanh: <code>lobby.html?game=bau-cua</code>, <code>?modal=profile</code>.',
+secs.insert(1, section('lobby', 'Sảnh game tương tác (lobby.html)', '<b>Mở <code>index.html</code>: thị trấn 3D có đăng nhập, 20 game (thêm Máy Đẩy Xu, Gắp Thú, Máy Xúc Vé).</b> <b>Tiến Lên chơi thật đủ luật: mở <code>tien-len.html</code></b>. Mở <code>lobby.html</code> để xem bản đồ chọn game (bản sảnh 2D cũ: <code>lobby-classic.html</code>). Link nhanh: <code>lobby.html?game=bau-cua</code>, <code>?modal=profile</code>.',
                     '<div class="grid">' + ''.join(f'<figure><a href="lobby.html"><img loading="lazy" width="1920" height="1080" src="screenshots/{quote(p.name)}" alt="{html.escape(p.stem)}"></a><figcaption>{html.escape(p.stem[3:].replace("_", " "))}</figcaption></figure>' for p in shots) + '</div>'))
 icons_html = '<div class="grid icons">' + ''.join(f'<figure>{img(M["games"][k]["lobby_icon"], 150)}<figcaption>{html.escape(v)}</figcaption></figure>' for k, v in GAME_NAMES.items()) + '</div>'
-secs.append(section('icons17', 'Icon 18 game cho sảnh', '512×512, bo góc kiểu app. ' + path_code('games/lobby-icons/'), icons_html))
+secs.append(section('icons17', 'Icon 20 game cho sảnh', '512×512, bo góc kiểu app. ' + path_code('games/lobby-icons/'), icons_html))
 gb = ''
 gb += row('Bầu Cua', thumbs(M['games']['bau-cua']['assets'].get('symbols', []), 70) + thumbs(M['games']['bau-cua']['assets'].get('tiles', []), 90) + thumbs(M['games']['bau-cua']['assets'].get('dice-3d', []), 90) + img('games/bau-cua/board_bau_cua.png', 150))
 gb += row('Bát & đĩa', thumbs([p for v in M['games']['_shared']['plates_bowls'].values() for p in v], 90))
@@ -617,7 +618,7 @@ ul.music{{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:
 .fd p{{font-size:34px;margin:10px 0 0;line-height:1.25}}.fd small{{color:var(--muted)}}
 @media (max-width:640px){{header h1{{font-size:32px}}.row{{flex-direction:column;gap:4px}}.lab{{max-width:none}}ul.music{{grid-template-columns:1fr}}ul.music li{{flex-direction:column;align-items:flex-start}}audio{{width:100%}}.fd p{{font-size:26px}}}}
 </style></head><body>
-<header><h1>🐷 Bộ asset bài dễ thương</h1><p>18 game · {len(D)} biến thể bộ bài · sảnh game chơi thử · UI kẹo pastel · 560+ emoji & nhân vật 3D · 127 emoji động · 800+ avatar · {len(M["music"])} bài nhạc · 900+ âm thanh · {len(ALL_FONTS)} font</p></header>
+<header><h1>🐷 Bộ asset bài dễ thương</h1><p>20 game · {len(D)} biến thể bộ bài · sảnh game chơi thử · UI kẹo pastel · 560+ emoji & nhân vật 3D · 127 emoji động · 800+ avatar · {len(M["music"])} bài nhạc · 900+ âm thanh · {len(ALL_FONTS)} font</p></header>
 <nav>{''.join(f'<a href="#{i}">{t}</a>' for i, t in nav_items)}</nav>
 <main><nav class="decks">{deck_nav}</nav>
 {''.join(secs)}

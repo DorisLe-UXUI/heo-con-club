@@ -18,6 +18,11 @@
       <li>So với từng người: thắng chi nào ăn <b>1</b>, thua chi nào trả <b>1</b>. Thắng cả 3 chi là <b>sập 3 chi</b>: ăn gấp đôi (<b>6</b>).</li>
       <li><b>Mậu Binh</b> (tới trắng) thắng ngay: <b>Sảnh rồng</b> (13 lá khác số) ăn <b>12</b> mỗi nhà; <b>6 đôi</b>, <b>3 thùng</b>, <b>3 sảnh</b> ăn <b>6</b>. Hai nhà cùng Mậu Binh thì Sảnh rồng &gt; 6 đôi &gt; 3 thùng &gt; 3 sảnh, cùng loại hoà.</li></ul>
       <p>Chạm 1 lá rồi chạm lá khác để <b>đổi chỗ</b>. <b>XẾP TỰ ĐỘNG</b> tìm cách xếp tốt, <b>XONG</b> để chốt. Hết giờ mà còn lủng thì máy tự xếp giúp.</p>`,
+    modes: [
+      { id: 'thuong', name: 'Thường', desc: 'Thắng mỗi chi ăn 1, sập 3 chi ăn đôi.', rules: 'mỗi chi thắng ăn 1, thua trả 1; sập 3 chi ăn 6.' },
+      { id: 'thuong-chi', name: 'Có thưởng chi', desc: 'Chi mạnh ăn nhiều hơn: chi cuối sám cô ăn 3, chi giữa cù lũ ăn 2, tứ quý chi đầu ăn 4…',
+        rules: 'thắng chi bằng bài mạnh được thưởng: <b>chi 1</b> tứ quý ăn 4, thùng phá sảnh ăn 5; <b>chi 2</b> cù lũ ăn 2, tứ quý ăn 8, thùng phá sảnh ăn 10; <b>chi 3</b> sám cô ăn 3. Chi thắng bằng bài thường vẫn ăn 1. Sập 3 chi thì nhân đôi tổng. Mậu Binh và binh lủng tính như chế độ thường.' },
+    ],
     async start(ctx) {
       const R = window.Rules['mau-binh'];
       const ut = ctx.Q.has('uitest') ? uiDriver(ctx, +ctx.Q.get('uitest') || 2, ({ by, click, memo, S }) => {
@@ -30,14 +35,14 @@
         else if (st === 3) click(by('XONG'));
         else if (st === 4) click(by('XẾP TỰ ĐỘNG'));
         else if (st >= 6) click(by('XONG'));
-      }, r => r.delta === R.settle(r.players).units[0] * r.stake && r.cardsOk && r.players.every(p => p.special || R.isValid(p.chi))) : null;
+      }, r => r.delta === R.settle(r.players, { bonus: r.bonus }).units[0] * r.stake && r.cardsOk && r.players.every(p => p.special || R.isValid(p.chi))) : null;
       for (;;) { const r = await game(ctx, null); if (ut) { r.summary = { units: r.units, delta: r.delta }; ut.done(r); } }
     },
     async selftest(ctx) {
       const R = window.Rules['mau-binh'], out = { pass: 0, fail: 0, games: [] };
       for (let i = 0; i < 2; i++) {
         const r = await game(ctx, { auto: true });
-        const exp = R.settle(r.players).units[0] * r.stake;
+        const exp = R.settle(r.players, { bonus: r.bonus }).units[0] * r.stake;
         const ok = r.delta === exp && r.units.reduce((a, b) => a + b, 0) === 0 && r.cardsOk && r.players.every(p => p.special || R.isValid(p.chi));
         out[ok ? 'pass' : 'fail']++;
         out.games.push({ units: r.units, stake: r.stake, delta: r.delta, expected: exp, specials: r.players.map(p => (p.special ? p.special.kind : null)), chi: r.players.map(p => p.chi.map(c => R.evaluate(c).name).join('/')), cardsOk: r.cardsOk });
@@ -124,7 +129,7 @@
     hands[0] = [...hands[0]].reverse();    // your cards land high to low: chi 1 starts with the big ones
     await dealAnim(ctx, hands);
     // bots arrange (in the background, they take a few "seconds")
-    const bots = [null, 1, 2, 3].map(p => (p ? RR.botArrange(hands[p], rng) : null));
+    const bots = [null, 1, 2, 3].map(p => (p ? RR.botArrange(hands[p], rng, ctx.room ? ctx.aiLevel(1) : undefined) : null));
     const botDone = [false, false, false, false];
     for (let p = 1; p < 4; p++) { setBotTag(p, '13 lá · đang xếp…', 'sky'); S.seats[p].turn(true); }
     S.seats[0].turn(true);
@@ -144,7 +149,7 @@
       const sp = RR.special(hands[p]);
       return { chi, special: sp };
     });
-    const res = RR.settle(players);
+    const res = RR.settle(players, { bonus: !!(ctx.mode && ctx.mode.id === 'thuong-chi') });
     await reveal(ctx, players, res);
     return finish(ctx, players, res, stake, test);
   }
@@ -318,7 +323,8 @@
         if (players[p].special) continue;
         const ev = RR.evaluate(players[p].chi[k]);
         let net = 0;
-        if (valid[p]) for (let q = 0; q < 4; q++) if (q !== p && !players[q].special && valid[q]) net += Math.sign(ev.score - RR.evaluate(players[q].chi[k]).score);
+        const bonus = ctx.mode && ctx.mode.id === 'thuong-chi';   // chế độ có thưởng chi: a chi won with a strong hand is worth more
+        if (valid[p]) for (let q = 0; q < 4; q++) if (q !== p && !players[q].special && valid[q]) { const o = RR.evaluate(players[q].chi[k]), d = Math.sign(ev.score - o.score); net += !bonus ? d : d > 0 ? RR.chiBonus(k, ev.cat) : d < 0 ? -RR.chiBonus(k, o.cat) : 0; }
         const sign = valid[p] ? ` <span style="color:${net > 0 ? '#1f9a70' : net < 0 ? '#d24a6a' : '#8a6a80'}">${net > 0 ? '+' : net < 0 ? '−' : '±'}${Math.abs(net)}</span>` : '';
         if (p) boardLine(p, `<b style="color:#b8542a">${CHI[k]}</b> ${ev.name}${sign}`);
         else S.tags.push(ctx.label(tagPos(0, k), `<div class="tag3 ${!valid[p] ? 'grey' : net > 0 ? 'mint' : net < 0 ? 'grey' : 'sky'}" style="font-size:21px;padding:3px 12px">${ev.name}${valid[p] ? ` ${net > 0 ? '+' : net < 0 ? '−' : '±'}${Math.abs(net)}` : ''}</div>`));
@@ -382,7 +388,7 @@
       parts.push(`${units[p] > 0 ? '+' : ''}${units[p]} chi`);
       return { name: p ? s.name : (s.name === 'Bạn' ? 'Bạn' : s.name + ' (bạn)'), avatar: s.avatar, me: !p, amount: units[p] * stake, tag: pl.special ? 'Mậu Binh' : saps.length ? 'Sập 3 chi' : !res.valid[p] ? 'Lủng' : null, detail: parts.join(' · ') };
     }).sort((a, b) => b.amount - a.amount);
-    const result = { players, units, stake, delta: ctx.coins - coins0, cardsOk };
+    const result = { players, units, stake, delta: ctx.coins - coins0, cardsOk, bonus: !!(ctx.mode && ctx.mode.id === 'thuong-chi') };
     ctx.ui.status(`Ván kết thúc · ${delta >= 0 ? 'bạn ăn' : 'bạn mất'} <b>${HC.fmt(Math.abs(delta))}</b> xu`);
     if (ctx.Q.get('demo') === 'lay' && !auto) await new Promise(() => {});   // screenshot aid
     if (!auto) {

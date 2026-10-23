@@ -72,9 +72,11 @@
     }
     return n;
   }
-  /** Bot choice: finish > kick > leave the stable > reach the home column > run from danger, avoid danger, advance. */
-  function chooseMove(st, pl, roll, moves, rand = Math.random) {
+  /** Bot choice: finish > kick > leave the stable > reach the home column > run from danger, avoid danger, advance.
+   *  level (room tier) 0 = dễ: a random legal move half of the time; undefined/1+ = the full heuristic. */
+  function chooseMove(st, pl, roll, moves, rand = Math.random, level) {
     if (!moves || !moves.length) return null;
+    if (level === 0 && rand() < .5) return moves[Math.floor(rand() * moves.length)];
     let best = moves[0], bestV = -Infinity;
     for (const m of moves) {
       let v = 0;

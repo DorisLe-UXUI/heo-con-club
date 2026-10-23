@@ -48,5 +48,17 @@
     if (s.points === 0) return pick(['Bù rồi 😭', 'Bù sạch trơn…', 'Hic, bù 🥲']);
     return pick([s.points + ' nút thôi 😅', 'Hên xui ' + s.points + ' nút', 'Mong nhà cái thấp hơn 🙏']);
   }
-  return { FACE, pts, power, topCard, score, compare, settle, payout, settleTable, botBet, quip };
+  /** Who holds the bank next. withYou = chế độ "Xoay cái": the bank goes round all `n` seats (seat 0 is you); otherwise it
+   *  only goes round the bots (seats 1..n-1). */
+  function nextDealer(cur, n, withYou) { if (withYou) return (cur + 1) % n; const x = cur % (n - 1) + 1; return x >= n ? 1 : x; }
+  /** You hold the bank: a winning Ba Tây takes 2× its stake, so shrink bot bets (to a lower allowed level, else 0) until the bank covers all of them. */
+  function capBets(bets, bank, levels) {
+    const out = bets.slice(), lv = levels.slice().sort((a, b) => a - b);
+    for (let guard = 0; guard < 99 && out.reduce((a, b) => a + b * 2, 0) > bank; guard++) {
+      const i = out.indexOf(Math.max(...out)), lower = lv.filter(v => v < out[i]);
+      out[i] = lower.length ? lower[lower.length - 1] : 0;
+    }
+    return out;
+  }
+  return { FACE, pts, power, topCard, score, compare, settle, payout, settleTable, botBet, quip, nextDealer, capBets };
 });

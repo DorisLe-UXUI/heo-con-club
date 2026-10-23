@@ -5,7 +5,8 @@
  * Suits never matter for combos or for beating; they only pick who leads the very first game.
  *
  * Rule choices (shown to the player in the module's rules text):
- *  - 4 players × 10 cards, the other 12 cards stay out of play.
+ *  - 4 players × 10 cards, the other 12 cards stay out of play. Chế độ "Solo": opts.seats = [0, 2] — two players
+ *    sitting face to face, 10 cards each, 32 cards out of play; everything else is the same.
  *  - Combos: single, pair, triple, tứ quý (4 of a kind), straight of 3+ consecutive ranks.
  *    A '2' never sits in a straight; A may end one (Q-K-A); A-2-3 and K-A-2 are NOT straights.
  *  - Beat with the same type and the same number of cards but a higher (top) rank. Tứ quý also beats
@@ -119,9 +120,12 @@
 
   // ------------------------------------------------------------------ game
   class Game {
-    /** opts: { seed, starter (seat index or null = holder of the lowest card), samThreshold, samples } */
+    /** opts: { seed, starter (seat index or null = holder of the lowest card), samThreshold, samples,
+     *          seats (seats in play, default [0,1,2,3]; Solo = [0,2]), level (bot strength 0..3, null = default) } */
     constructor(opts = {}) {
       this.rng = mulberry32(opts.seed != null ? opts.seed : (Math.random() * 2 ** 32) >>> 0);
+      this.seats = (opts.seats || [0, 1, 2, 3]).slice().sort((a, b) => a - b);
+      this.level = opts.level != null ? opts.level : null;
       this.starter = opts.starter != null ? opts.starter : null;
       this.samThreshold = opts.samThreshold != null ? opts.samThreshold : .72;
       this.samples = opts.samples || 40;
@@ -129,11 +133,13 @@
     }
     emit(e) { this.events.push(e); return e; }
     drain() { const e = this.events; this.events = []; return e; }
-    order(from) { return [0, 1, 2, 3].map(i => (from + i) % 4); }
+    order(from) { return [0, 1, 2, 3].map(i => (from + i) % 4).filter(p => this.present(p)); }
+    present(p) { return this.seats.includes(p); }
 
     deal(hands) {
       const deck = shuffled(this.rng);
-      this.hands = hands ? hands.map(sortIds) : [0, 1, 2, 3].map(p => sortIds(deck.slice(p * 10, p * 10 + 10)));
+      if (hands) this.hands = hands.map((h, p) => (this.present(p) ? sortIds(h) : []));
+      else { this.hands = [[], [], [], []]; this.seats.forEach((p, k) => { this.hands[p] = sortIds(deck.slice(k * 10, k * 10 + 10)); }); }
       this.dealt = this.hands.flat();
       this.gone = []; this.played = [0, 0, 0, 0]; this.passed = [false, false, false, false];
       this.current = null; this.leader = null; this.turn = null; this.sam = -1; this.over = false; this.result = null;
@@ -150,7 +156,7 @@
       if (this.phase !== 'bao' || p !== this.baoTurn) return [{ type: 'invalid', p, reason: 'Không phải lúc báo sâm' }];
       if (yes) { this.sam = p; this.phase = 'play'; this.emit({ type: 'sam', p }); this.startRound(p); return this.drain(); }
       this.emit({ type: 'no_sam', p });
-      if (++this.baoIdx >= 4) { this.phase = 'play'; this.startRound(this.starter); } else this.emit({ type: 'bao_turn', p: this.baoTurn });
+      if (++this.baoIdx >= this.baoOrder.length) { this.phase = 'play'; this.startRound(this.starter); } else this.emit({ type: 'bao_turn', p: this.baoTurn });
       return this.drain();
     }
     startRound(leader) {
@@ -193,7 +199,7 @@
       for (let k = 1; k <= 3; k++) {
         const q = (this.turn + k) % 4;
         if (q === this.leader) break;
-        if (this.passed[q]) continue;
+        if (this.passed[q] || !this.present(q)) continue;
         this.turn = q; this.emit({ type: 'turn', p: q, lead: false }); return;
       }
       this.emit({ type: 'round_end', winner: this.leader });
@@ -205,12 +211,12 @@
       const transfers = [], notes = [[], [], [], []], units = [0, 0, 0, 0];
       const pay = (from, to, u, why) => { if (u <= 0) return; transfers.push({ from, to, units: u, why }); units[from] -= u; units[to] += u; };
       let winner = p;
-      if (kind === 'instant') { for (let q = 0; q < 4; q++) if (q !== p) { pay(q, p, PAY.instant, 'toi_trang'); notes[q].push('Thua tới trắng'); } notes[p].push('Tới trắng: ' + info.label); }
-      else if (kind === 'sam') { for (let q = 0; q < 4; q++) if (q !== p) { pay(q, p, PAY.sam, 'sam'); notes[q].push('Thua sâm'); } notes[p].push('Báo sâm thành công'); }
-      else if (kind === 'sam_fail') { const d = this.sam; for (let q = 0; q < 4; q++) if (q !== d) pay(d, q, PAY.sam, 'den_sam'); notes[d].push('Bị chặn sâm, đền ' + PAY.sam + ' mỗi nhà'); notes[p].push('Chặn sâm'); }
+      const others = x => this.seats.filter(q => q !== x);
+      if (kind === 'instant') { for (const q of others(p)) { pay(q, p, PAY.instant, 'toi_trang'); notes[q].push('Thua tới trắng'); } notes[p].push('Tới trắng: ' + info.label); }
+      else if (kind === 'sam') { for (const q of others(p)) { pay(q, p, PAY.sam, 'sam'); notes[q].push('Thua sâm'); } notes[p].push('Báo sâm thành công'); }
+      else if (kind === 'sam_fail') { const d = this.sam; for (const q of others(d)) pay(d, q, PAY.sam, 'den_sam'); notes[d].push('Bị chặn sâm, đền ' + PAY.sam + ' mỗi nhà'); notes[p].push('Chặn sâm'); }
       else {
-        for (let q = 0; q < 4; q++) {
-          if (q === p) continue;
+        for (const q of others(p)) {
           const left = this.hands[q].length, heo = counts(this.hands[q])[HEO], cong = this.played[q] === 0;
           const base = cong ? PAY.cong : left * PAY.perCard;
           pay(q, p, base, cong ? 'cong' : 'la');
@@ -219,30 +225,30 @@
         }
         notes[p].push('Về nhất');
       }
-      this.result = { kind, winner, info: info || null, transfers, units, notes, sam: this.sam, left: this.hands.map(h => [...h]), played: [...this.played] };
+      this.result = { kind, winner, info: info || null, transfers, units, notes, sam: this.sam, left: this.hands.map(h => [...h]), played: [...this.played], seats: this.seats.slice() };
       this.emit({ type: 'game_over', result: this.result });
     }
     /** Expected units of the finished game recomputed from the final state (used by tests and the selftest). */
     static expectedUnits(res) {
-      const u = [0, 0, 0, 0], w = res.winner;
-      if (res.kind === 'instant' || res.kind === 'sam') { for (let q = 0; q < 4; q++) if (q !== w) { u[q] -= 20; u[w] += 20; } }
-      else if (res.kind === 'sam_fail') { for (let q = 0; q < 4; q++) if (q !== res.sam) { u[q] += 20; u[res.sam] -= 20; } }
-      else for (let q = 0; q < 4; q++) if (q !== w) { const v = (res.played[q] === 0 ? 15 : res.left[q].length) + 5 * res.left[q].filter(id => rankOf(id) === HEO).length; u[q] -= v; u[w] += v; }
+      const u = [0, 0, 0, 0], w = res.winner, seats = res.seats || [0, 1, 2, 3];
+      if (res.kind === 'instant' || res.kind === 'sam') { for (const q of seats) if (q !== w) { u[q] -= 20; u[w] += 20; } }
+      else if (res.kind === 'sam_fail') { for (const q of seats) if (q !== res.sam) { u[q] += 20; u[res.sam] -= 20; } }
+      else for (const q of seats) if (q !== w) { const v = (res.played[q] === 0 ? 15 : res.left[q].length) + 5 * res.left[q].filter(id => rankOf(id) === HEO).length; u[q] -= v; u[w] += v; }
       return u;
     }
 
     // ---------------------------------------------------------------- bots
     unseen(p) { const c = [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]; for (const id of this.hands[p]) c[rankOf(id)]--; for (const id of this.gone) c[rankOf(id)]--; return c; }
-    minOpp(p) { let m = 99; for (let q = 0; q < 4; q++) if (q !== p) m = Math.min(m, this.hands[q].length); return m; }
+    minOpp(p) { let m = 99; for (const q of this.seats) if (q !== p) m = Math.min(m, this.hands[q].length); return m; }
     /** Monte-Carlo chance that nobody can beat any group of p's best split (= Báo Sâm would succeed). */
     samChance(p, samples = this.samples) {
       const hand = this.hands[p], groups = plan(counts(hand)).groups, mine = new Set(hand);
       const unseen = []; for (let id = 0; id < 52; id++) if (!mine.has(id)) unseen.push(id);
-      let ok = 0;
+      let ok = 0; const nOpp = this.seats.length - 1;
       for (let s = 0; s < samples; s++) {
-        for (let i = unseen.length - 1; i > unseen.length - 31; i--) { const j = Math.floor(this.rng() * (i + 1)); [unseen[i], unseen[j]] = [unseen[j], unseen[i]]; }
+        for (let i = unseen.length - 1; i > unseen.length - (10 * nOpp + 1); i--) { const j = Math.floor(this.rng() * (i + 1)); [unseen[i], unseen[j]] = [unseen[j], unseen[i]]; }
         let safe = true;
-        for (let o = 0; o < 3 && safe; o++) { const c = counts(unseen.slice(unseen.length - 10 * (o + 1), unseen.length - 10 * o)); if (groups.some(g => beatable(c, g))) safe = false; }
+        for (let o = 0; o < nOpp && safe; o++) { const c = counts(unseen.slice(unseen.length - 10 * (o + 1), unseen.length - 10 * o)); if (groups.some(g => beatable(c, g))) safe = false; }
         if (safe) ok++;
       }
       return ok / samples;
@@ -271,6 +277,11 @@
         if (p !== this.sam) { const o = this.options(p); return o.length ? { action: 'play', cards: o[0].cards } : { action: 'pass' }; }
         if (!cur) { const g = plan(cnt).groups.slice().sort((a, b) => b.rank - a.rank)[0]; return { action: 'play', cards: cardsFor(hand, g) }; }
         return { action: 'pass' };
+      }
+      if (this.level === 0 && this.rng() < .3) {   // easy bots: a random legal move now and then
+        const o = this.options(p);
+        if (!cur) return { action: 'play', cards: o[Math.floor(this.rng() * o.length)].cards };
+        return o.length && this.rng() < .5 ? { action: 'play', cards: o[Math.floor(this.rng() * o.length)].cards } : { action: 'pass' };
       }
       if (!cur) return { action: 'play', cards: cardsFor(hand, this.leadChoice(p)) };
       const opts = this.options(p);

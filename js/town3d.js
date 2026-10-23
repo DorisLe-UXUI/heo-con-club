@@ -60,7 +60,9 @@
     { key: 'event', name: 'Sự Kiện', cat: 'sp', arm: 'W', s: -1, w: 10, d: 8, h: 6.6, roof: 'tent', prop: 'flag', action: 'event', desc: 'Lễ hội Heo Con: nhiệm vụ nhận quà.' },
     { key: 'daily', name: 'Quà Ngày', cat: 'sp', arm: 'S', s: 1, w: 9, d: 8, h: 6.6, roof: 'gable', prop: 'gift', action: 'daily', desc: 'Ghé mỗi ngày nhận xu miễn phí.' },
     { key: 'day-xu', name: 'Đẩy Xu', cat: 'khac', arm: 'S', s: 1, w: 11, d: 9, h: 7.2, roof: 'dome', prop: 'tower', hot: true, isNew: true, desc: 'Máy đẩy xu: canh khay đẩy, ngắm góc sát mép, hốt cuộn vé và Heo Vàng.' },
-    { key: 'hall', name: 'Sảnh Game', cat: 'sp', arm: 'S', s: -1, w: 11, d: 9, h: 7.2, roof: 'dome', prop: 'star', action: 'hall', desc: 'Bản đồ menu của cả thị trấn: xem hết 18 game, chọn và vào chơi ngay.' },
+    { key: 'gap-thu', name: 'Gắp Thú', cat: 'khac', arm: 'S', s: 1, w: 10, d: 8, h: 6.8, roof: 'tent', prop: 'plush', isNew: true, desc: 'Máy gắp thú bông: thả càng đúng giữa, kẹp chặt mang về lỗ quà là trúng.' },
+    { key: 'xuc-ve', name: 'Xúc Vé', cat: 'khac', arm: 'S', s: 1, w: 10, d: 8, h: 6.8, roof: 'flat', prop: 'tickets', isNew: true, desc: 'Máy xúc vé: canh muỗng trên đống vé, khay đẩy cuộn 10K đến 500K rơi ra.' },
+    { key: 'hall', name: 'Sảnh Game', cat: 'sp', arm: 'S', s: -1, w: 11, d: 9, h: 7.2, roof: 'dome', prop: 'star', action: 'hall', desc: 'Bản đồ menu của cả thị trấn: xem hết 20 game, chọn và vào chơi ngay.' },
   ];
   const ICON_TEX = k => 'icon_' + (CAT[k] ? k : k);
 
@@ -484,6 +486,13 @@
         case 'star': await addM('mini_star', 3.2, 0, 1, 0); spin = 1.4; break;
         case 'flag': await addM('mini_flag_red', 3, 0, 0, 0); spin = .3; bob = .1; break;
         case 'gift': await addM('hh_package', 2.4, 0, .2, 0); await addM('mini_heart_red', 1.6, 0, 2.6, 0); spin = .7; break;
+        case 'plush': await addM('mini_bear', 2.4, 0, 0, 0); await addM('mini_heart_red', 1.1, 1.1, 2.3, 0); spin = .5; break;
+        case 'tickets': {
+          const roll = (hex, ring, y, rz) => { const c = new T.Mesh(new T.CylinderGeometry(.85, .85, .6, 28), [H.mat(0xffffff, { roughness: .5 }), H.mat(hex, { roughness: .45 }), H.mat(hex)]); c.position.set(0, y, 0); c.rotation.z = rz; c.castShadow = true; holder.add(c);
+            const r2 = new T.Mesh(new T.TorusGeometry(.86, .07, 8, 28), H.mat(ring, { roughness: .4 })); r2.rotation.x = Math.PI / 2; c.add(r2); return c; };
+          roll(0xff8fbf, 0xff4f95, .4, .1); roll(0x6fbfff, 0x2a7fd0, 1.05, -.12); roll(0xffd34d, 0xffb300, 1.7, .08).material[1] = H.mat(0xffd34d, { metalness: .5, roughness: .3, emissiveHex: 0xa86d00, emissiveIntensity: .25 });
+          spin = .8; break;
+        }
       }
       this.dyn.push({ obj: holder, spin, bob, y0: holder.position.y, ph: srnd() * 6 });
       if (b.hot) for (let i = 0; i < 5; i++) {

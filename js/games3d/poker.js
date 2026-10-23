@@ -24,6 +24,12 @@
       <li>Ai all-in chỉ ăn được phần hũ mà mình theo đủ — phần dư thành <b>hũ phụ</b> cho những người còn lại. Tiền cược không ai theo được trả lại.</li></ul>
       <p>Thứ tự bài từ cao xuống: <b>Thùng phá sảnh</b> › <b>Tứ quý</b> › <b>Cù lũ</b> › <b>Thùng</b> › <b>Sảnh</b> (A-2-3-4-5 là sảnh nhỏ nhất) › <b>Sám cô</b> › <b>Thú</b> (2 đôi) › <b>Đôi</b> › <b>Mậu thầu</b>. Cùng loại thì so các lá theo thứ tự (lá phụ / kicker). Chất không phân định thắng thua: bằng nhau thì <b>chia đều hũ</b> (xu lẻ cho người ngồi gần bên trái nút D nhất).</p>
       <p>Chồng xu của bạn chính là ví xu của bạn. Bot hết chip sẽ tự mua thêm.</p>`,
+    stakeName: 'Mù nhỏ',
+    modes: [
+      { id: 'nl', name: 'Không giới hạn', desc: "No-Limit Hold'em: tố bao nhiêu cũng được, kể cả All-in cả chồng xu.", rules: 'mỗi lần tố tối thiểu bằng lần tố trước, tối đa là cả chồng xu (All-in).' },
+      { id: 'pl', name: 'Giới hạn hũ', desc: "Pot-Limit Hold'em: mỗi lần tố tối đa bằng cả hũ — ván chậm hơn, ít All-in bất ngờ.",
+        rules: 'mỗi lần tố tối đa lên tới <b>mức đang theo + cả hũ + số bạn phải theo</b> (tố bằng hũ). Ví dụ mù 5K/10K, người đầu tiên tố tối đa 35K. Nút <b>TỐ HŨ</b> thay cho All-in; chồng xu nhỏ hơn hũ thì vẫn All-in được.' },
+    ],
     async start(ctx) { for (;;) await hand(ctx, null); },
     async selftest(ctx) {
       const C = window.Rules['cards-common'], P = window.Rules['poker'], checks = [];
@@ -31,7 +37,7 @@
         if (ctx.coins < 400000) ctx.coins = 1250000;   // the all-in test may empty the (throw-away) test wallet
         const r = await hand(ctx, Object.assign({ auto: true, bb: 10000 }, opts));
         // replay the logged actions on a fresh engine and settle independently
-        const st = C.table(r.stacks0, { minRaise: r.bb, unit: r.bb / 2 });
+        const st = C.table(r.stacks0, { minRaise: r.bb, unit: r.bb / 2, potLimit: r.potLimit });
         C.street(st); C.blind(st, r.pos.sb, r.bb / 2); C.blind(st, r.pos.bb, r.bb); C.street(st, { keepBets: true, level: r.bb });
         let street = 0;
         for (const e of r.log) { if (e.street != null) { if (e.street > 0) C.street(st); street = e.street; continue; } C.act(st, e.i, e.a); }
@@ -114,7 +120,7 @@
     g.position.set(0, 0, 9); ctx.add(g); return g;
   }
   /** Raise slider + presets in a glass panel above the right end of the action bar. */
-  function raiseBox(ctx, bar, fmtLabel) {
+  function raiseBox(ctx, bar, fmtLabel, potLimit) {
     bar.el.classList.add('ct-bar');
     const box = ctx.ui.h('div', { class: 'rz glass off' }, bar.el);
     const amt = ctx.ui.h('div', { class: 'amt', text: '0' }, box);
@@ -126,7 +132,7 @@
     rng.addEventListener('input', () => { if (!lim) return; const t = (+rng.value / 1000) ** 2; let v = lim.min + (lim.max - lim.min) * t; v = v >= lim.max ? lim.max : Math.round(v / lim.unit) * lim.unit; val = Math.max(lim.min, Math.min(lim.max, v)); show(); });
     const presets = {};
     const mk = (id, text, cls) => { const b = ctx.ui.h('b', { text, class: cls || '' }, pre); b.onclick = () => { ctx.sfx('click', .3); presets[id] && set(presets[id]()); }; return b; };
-    mk('min', 'Min'); mk('half', '½ Hũ'); mk('pot', 'Cả hũ'); mk('x3', '3 BB'); mk('max', 'All-in', 'all');
+    mk('min', 'Min'); mk('half', '½ Hũ'); mk('pot', 'Cả hũ'); mk('x3', '3 BB'); mk('max', potLimit ? 'Tối đa' : 'All-in', 'all');
     return {
       get value() { return val; },
       setLimits(l) {   // {min, max, unit, pot, currentBet, bb, prefix} or null
@@ -230,7 +236,8 @@
     place(mk.d, seats[pos.button], btnSpot); place(mk.sb, seats[pos.sb], blindSpot); place(mk.bb, seats[pos.bb], blindSpot);
     await Promise.all([ctx.tween(S.deckG, { x: DECK.x, y: 0, z: DECK.z, arc: .8 }, 420, 'io'), ctx.wait(450)]);
     const coinsStart = ctx.coins, stacks0 = seats.map((s, i) => (s.me ? ctx.coins : S.stacks[i]));
-    const st = C.table(stacks0, { minRaise: bb, unit: sb }), chips0 = C.chipsInPlay(st);
+    const potLimit = !!(ctx.mode && ctx.mode.id === 'pl');
+    const st = C.table(stacks0, { minRaise: bb, unit: sb, potLimit }), chips0 = C.chipsInPlay(st);
     const log = [];
     const sync = i => { if (!seats[i].me) seats[i].setCoins(st.players[i].stack); };
     const betG = seats.map(() => null), betL = seats.map(() => null);
@@ -298,9 +305,10 @@
       { id: 'fold', label: 'BỎ', cls: 'grey', icon: 'emoji-fluent-3d/hands/waving_hand.png', onClick: () => turnRes && turnRes({ type: 'fold' }) },
       { id: 'call', label: 'XEM', cls: 'mint', icon: 'emoji-fluent-3d/hands/thumbs_up.png', onClick: () => turnRes && turnRes({ type: 'call' }) },
       { id: 'raise', label: 'TỐ', cls: 'pink', icon: 'emoji-fluent-3d/symbols/fire.png', onClick: () => turnRes && turnRes(rz.value >= lastLegal.raise.max ? { type: 'allin' } : { type: 'raise', to: rz.value }) },
-      { id: 'allin', label: 'ALL-IN', cls: 'lavender', onClick: () => turnRes && turnRes({ type: 'allin' }) },
+      { id: 'allin', label: potLimit ? 'TỐ HŨ' : 'ALL-IN', cls: 'lavender', onClick: () => turnRes && turnRes({ type: 'allin' }) },
     ]);
-    const rz = raiseBox(ctx, bar, v => bar.set('raise', { label: lastLegal && lastLegal.raise && v >= lastLegal.raise.max ? 'ALL-IN' : (lastLegal && lastLegal.currentBet ? 'TỐ ' : 'CƯỢC ') + HC.short(v) }));
+    const capped = L => potLimit && L && L.raise && L.raise.max < L.bet + L.stack;   // pot-limit: the max is the pot, not the stack
+    const rz = raiseBox(ctx, bar, v => bar.set('raise', { label: lastLegal && lastLegal.raise && v >= lastLegal.raise.max ? (capped(lastLegal) ? 'TỐ HŨ' : 'ALL-IN') : (lastLegal && lastLegal.currentBet ? 'TỐ ' : 'CƯỢC ') + HC.short(v) }), potLimit);
     const refit = fitBar(ctx, bar);
     const lock = () => { ['fold', 'call', 'raise', 'allin'].forEach(id => bar.set(id, { disabled: true })); rz.setLimits(null); };
     lock();
@@ -309,7 +317,7 @@
       bar.set('fold', { disabled: false });
       bar.set('call', { disabled: false, label: L.toCall === 0 ? 'XEM' : L.toCall >= L.stack ? 'THEO HẾT' : 'THEO ' + HC.short(L.toCall) });
       bar.set('raise', { disabled: !L.raise });
-      bar.set('allin', { disabled: !(L.raise || (L.toCall > 0 && L.toCall >= L.stack)) });
+      bar.set('allin', { disabled: !(L.raise || (L.toCall > 0 && L.toCall >= L.stack)), label: capped(L) ? 'TỐ HŨ ' + HC.short(L.raise.max) : 'ALL-IN' });
       rz.setLimits(L.raise ? { min: L.raise.min, max: L.raise.max, unit: sb, pot: C.potTotal(st) + L.toCall, currentBet: L.currentBet, bb } : null);
       if (!L.raise) bar.set('raise', { label: 'TỐ' });
       ctx.ui.status(`${STREET[street]} · ${L.toCall ? `cần theo <b>${HC.fmt(L.toCall)}</b>` : 'tới lượt bạn'} · ${showMyHand()}`);
@@ -376,7 +384,7 @@
           const botPol = test && test.botPolicy;
           if (botPol === 'call') a = { type: 'call' };
           else if (demo) a = street === 0 ? { type: 'call' } : (() => { const plan = ['check', 'bet', 'call', 'fold'][demoStep++ % 4]; return plan === 'bet' && L.raise ? { type: 'raise', to: Math.min(L.raise.max, Math.max(L.raise.min, Math.round(C.potTotal(st) * .5 / sb) * sb)) } : { type: plan === 'fold' ? 'fold' : 'call' }; })();
-          else a = P.botDecide({ hole: hole[i], board, legal: L, pot: C.potTotal(st), nOpp: C.liveCount(st) - 1, bb, unit: sb, street, pers: P.PERSONAS[i % P.PERSONAS.length], sims: ctx.TEST ? 50 : 140 }, ctx.rand);
+          else { const lv = ctx.room ? ctx.aiLevel(1) : undefined; a = P.botDecide({ hole: hole[i], board, legal: L, pot: C.potTotal(st), nOpp: C.liveCount(st) - 1, bb, unit: sb, street, pers: P.PERSONAS[i % P.PERSONAS.length], sims: ctx.TEST ? 50 : lv == null ? 140 : [40, 90, 140, 220][lv], level: lv }, ctx.rand); }
         }
         const before = st.players[i].bet, cb = st.currentBet, r = C.act(st, i, a);
         log.push({ i, a: { type: a.type, to: a.to } });
@@ -453,7 +461,7 @@
         detail: `${p.folded ? 'Bỏ bài' : shown ? evals[k].desc + ' · ' + evals[k].best.map(C.name).join(' ') : s.me ? 'Không cần lật' : 'Không lật bài'} · đã cược ${HC.short(p.total)}${p.allIn ? ' · all-in' : ''}`,
         tag: winners.includes(k) ? (shown ? evals[k].name : 'Ăn hũ') : k === pos.button ? 'D' : null };
     });
-    const result = { log, hole: hole.map(h => h.slice()), board: board.slice(), order, stacks0, bb, pos, coinsDelta: ctx.coins - coinsStart, chipsOk };
+    const result = { log, hole: hole.map(h => h.slice()), board: board.slice(), order, stacks0, bb, pos, potLimit, coinsDelta: ctx.coins - coinsStart, chipsOk };
     if (!auto) await ctx.ui.results(myNet > 0 ? 'Bạn thắng ' + HC.short(myNet) + '!' : winners.length ? seats[winners[0]].name + ' ăn hũ' : 'Kết thúc ván', rows, { again: 'Ván tiếp' });
     // ---- clear the table
     for (const m of [...meshes.flat(), ...boardM]) ctx.tween(m, { x: DECK.x, y: .3, z: DECK.z, rx: 0, arc: 1 }, 380, 'io').then(() => ctx.remove(m));

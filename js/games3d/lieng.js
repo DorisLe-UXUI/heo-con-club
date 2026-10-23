@@ -21,13 +21,19 @@
       <li>Hết xu khi đang theo thì được <b>theo hết</b> (all-in) và chỉ ăn phần hũ tương ứng (hũ phụ).</li></ul>
       <p>Lật bài: mạnh nhất là <b>Sáp</b> (3 lá giống nhau, Sáp A lớn nhất) › <b>Liêng</b> (3 lá liên tiếp, không cần đồng chất: Q-K-A lớn nhất, A-2-3 nhỏ nhất, K-A-2 không phải Liêng) › <b>Ảnh</b> (3 lá J/Q/K) › <b>Điểm</b> (tổng 3 lá lấy hàng đơn vị: A = 1, 10/J/Q/K = 0).</p>
       <p><b>Bằng nhau</b> (cùng Liêng, cùng Ảnh, cùng điểm): so <b>lá to nhất</b> — xét số trước (A › K › Q › … › 2; Liêng A-2-3 thì lá to là 3), cùng số thì xét chất ♦ › ♥ › ♠ › ♣. Vì vậy không bao giờ hoà, hũ không bị chia.</p>`,
+    stakeName: 'Tiền gà',
+    modes: [
+      { id: 'tu-do', name: 'Tố tự do', desc: 'Tố bao nhiêu cũng được, tới Tất tay cả chồng xu (tối đa 3 lần tố mỗi ván).', rules: 'mỗi lần tố tối thiểu bằng lần tố trước, tối đa là tất cả số xu đang có.' },
+      { id: 'gioi-han', name: 'Tố tối đa bằng hũ', desc: 'Mỗi lần tố tối đa bằng số tiền đang có trong hũ — chơi chắc tay, khó bị Tất tay ép bỏ bài.',
+        rules: 'mỗi lần tố chỉ được nâng tới <b>mức đang theo + cả hũ + số bạn phải theo</b>. Ví dụ 5 người bỏ tiền gà 5K (hũ 25K): lần tố đầu tối đa 25K. Vẫn tối đa 3 lần tố mỗi ván; chồng xu nhỏ hơn hũ thì vẫn Tất tay được.' },
+    ],
     async start(ctx) { for (;;) await hand(ctx, null); },
     async selftest(ctx) {
       const C = window.Rules['cards-common'], R = window.Rules['lieng'], checks = [];
       const run = async (label, opts) => {
         const r = await hand(ctx, Object.assign({ auto: true, ante: 5000 }, opts));
         // replay the logged actions on a fresh engine and settle independently
-        const st = C.table(r.stacks0, { minRaise: r.ante, raiseCap: R.RAISE_CAP, unit: 1000 });
+        const st = C.table(r.stacks0, { minRaise: r.ante, raiseCap: R.RAISE_CAP, unit: 1000, potLimit: r.potLimit });
         r.log.filter(e => e.ante != null).forEach(e => C.ante(st, e.i, r.ante)); C.street(st);
         let myPut = st.players[0].total;
         for (const e of r.log) if (e.a) { const x = C.act(st, e.i, e.a); if (e.i === 0) myPut += x.put; }
@@ -144,7 +150,7 @@
   }
 
   /** Raise slider + presets placed inside the action bar. */
-  function raiseBox(ctx, bar, fmtLabel) {
+  function raiseBox(ctx, bar, fmtLabel, potLimit) {
     bar.el.classList.add('ct-bar');
     const box = ctx.ui.h('div', { class: 'rz glass off' }, bar.el);
     const amt = ctx.ui.h('div', { class: 'amt', text: '0' }, box);
@@ -156,7 +162,7 @@
     rng.addEventListener('input', () => { if (!lim) return; const t = (+rng.value / 1000) ** 2; let v = lim.min + (lim.max - lim.min) * t; v = v >= lim.max ? lim.max : Math.round(v / lim.unit) * lim.unit; val = Math.max(lim.min, Math.min(lim.max, v)); show(); });
     const presets = {};
     const mk = (id, text, cls) => { const b = ctx.ui.h('b', { text, class: cls || '' }, pre); b.onclick = () => { ctx.sfx('click', .3); presets[id] && set(presets[id]()); }; return b; };
-    mk('min', 'Min'); mk('half', '½ hũ'); mk('pot', 'Cả hũ'); mk('max', 'Tất tay', 'all');
+    mk('min', 'Min'); mk('half', '½ hũ'); mk('pot', 'Cả hũ'); mk('max', potLimit ? 'Tối đa' : 'Tất tay', 'all');
     return {
       get value() { return val; },
       setLimits(l) {   // {min, max, unit, pot, currentBet, base (chips already in this round), prefix} or null
@@ -180,7 +186,7 @@
     const bs = btnSpot(ctx, seats[S.dealer]), DECK = deckSpot(ctx, seats[S.dealer]);
     ctx.tween(S.btn, { x: bs.x, y: 0, z: bs.z, arc: .8 }, 420, 'io');
     const deckMove = ctx.tween(S.deckG, { x: DECK.x, y: 0, z: DECK.z, arc: .8 }, 420, 'io');
-    for (const s of seats) if (!s.me && s.coins < 300000) { s.setCoins(s.coins + 1500000); s.say('Nạp thêm xu nè 😅', 1500); }
+    for (const s of seats) if (!s.me && ctx.topUp(s, 300000, 1500000, 30)) s.say('Nạp thêm xu nè 😅', 1500);
     // ---- choose the ante
     let ante = 0;
     await new Promise(res => {
@@ -195,7 +201,8 @@
     ctx.ui.clearActions();
     // ---- engine state; your stack is the wallet
     const coinsStart = ctx.coins, stacks0 = seats.map(s => (s.me ? ctx.coins : s.coins));
-    const st = C.table(stacks0, { minRaise: ante, raiseCap: R.RAISE_CAP, unit: 1000 }), chips0 = C.chipsInPlay(st);
+    const potLimit = !!(ctx.mode && ctx.mode.id === 'gioi-han');
+    const st = C.table(stacks0, { minRaise: ante, raiseCap: R.RAISE_CAP, unit: 1000, potLimit }), chips0 = C.chipsInPlay(st);
     const log = [], order = [1, 2, 3, 4, 5].map(k => (S.dealer + k) % N);
     const sync = i => { const s = seats[i]; if (!s.me) s.setCoins(st.players[i].stack); };
     // antes fly into the pot
@@ -264,7 +271,8 @@
       { id: 'call', label: 'THEO', cls: 'mint', icon: 'emoji-fluent-3d/hands/thumbs_up.png', onClick: () => turnRes && turnRes({ type: 'call' }) },
       { id: 'raise', label: 'TỐ', cls: 'pink', icon: 'emoji-fluent-3d/symbols/fire.png', onClick: () => turnRes && turnRes(rz.value >= lastLegal.raise.max ? { type: 'allin' } : { type: 'raise', to: rz.value }) },
     ]);
-    const rz = raiseBox(ctx, bar, v => bar.set('raise', { label: v >= (lastLegal && lastLegal.raise ? lastLegal.raise.max : Infinity) ? 'TẤT TAY' : 'TỐ ' + HC.short(v - (lastLegal ? lastLegal.bet : 0)) }));
+    const capped = L => potLimit && L && L.raise && L.raise.max < L.bet + L.stack;   // tố tối đa bằng hũ: the max is the pot, not the stack
+    const rz = raiseBox(ctx, bar, v => bar.set('raise', { label: v >= (lastLegal && lastLegal.raise ? lastLegal.raise.max : Infinity) ? (capped(lastLegal) ? 'TỐ HŨ' : 'TẤT TAY') : 'TỐ ' + HC.short(v - (lastLegal ? lastLegal.bet : 0)) }), potLimit);
     const refit = fitBar(ctx, bar);
     const lock = () => { ['fold', 'call', 'raise'].forEach(id => bar.set(id, { disabled: true })); rz.setLimits(null); };
     lock();
@@ -300,7 +308,7 @@
         anim(s, 'think');
         await ctx.wait(480 + ctx.rand() * 420);
         if (demo) { const plan = ['call', 'raise', 'call', 'fold'][demoStep++ % 4]; a = plan === 'raise' && L.raise ? { type: 'raise', to: Math.min(L.raise.max, Math.max(L.raise.min, ante * 4)) } : { type: plan === 'fold' ? 'fold' : 'call' }; }
-        else a = R.botDecide({ hand: hands[i], legal: L, pot: C.potTotal(st), nOpp: C.liveCount(st) - 1, ante, unit: 1000, pers: R.PERSONAS[i % R.PERSONAS.length] }, ctx.rand);
+        else a = R.botDecide({ hand: hands[i], legal: L, pot: C.potTotal(st), nOpp: C.liveCount(st) - 1, ante, unit: 1000, pers: R.PERSONAS[i % R.PERSONAS.length], level: ctx.room ? ctx.aiLevel(1) : undefined }, ctx.rand);
       }
       const before = st.players[i].bet, r = C.act(st, i, a);
       log.push({ i, a: { type: a.type, to: a.to } });
@@ -372,7 +380,7 @@
         detail: `${p.folded ? 'Úp bài' : shown || s.me ? evals[k].desc : 'Không lật bài'} · đã bỏ ${HC.short(p.total)}${p.allIn ? ' · theo hết' : ''}`,
         tag: winners.includes(k) ? (shown ? evals[k].name : 'Thắng') : null };
     });
-    const result = { log, hands: hands.map(h => h.slice()), order, stacks0, ante, coinsDelta: ctx.coins - coinsStart, chipsOk };
+    const result = { log, hands: hands.map(h => h.slice()), order, stacks0, ante, potLimit, coinsDelta: ctx.coins - coinsStart, chipsOk };
     if (!auto) await ctx.ui.results(myNet > 0 ? 'Bạn ăn hũ!' : winners.length ? seats[winners[0]].name + ' ăn hũ' : 'Kết thúc ván', rows, { again: 'Ván mới' });
     // ---- clear the table
     for (const ms of meshes) for (const m of ms) ctx.tween(m, { x: DECK.x, y: .3, z: DECK.z, rx: 0, arc: 1 }, 380, 'io').then(() => ctx.remove(m));

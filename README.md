@@ -1,7 +1,7 @@
 # Heo Con Club: bộ asset game bài & game dân gian dễ thương 🐷🃏
 
-Asset miễn phí, phong cách kẹo pastel, cho một cổng game kiểu "chặt heo" với **18 game**:
-Tiến Lên, Phỏm, Mậu Binh, Xì Dách, Poker, Bài Cào, Sâm Lốc, Liêng, Bầu Cua, Xóc Đĩa, Tài Xỉu, Cờ Tướng, Cá Ngựa, Cờ Caro, Bài Màu, Lô Tô, Bắn Cá và **Máy Đẩy Xu**.
+Asset miễn phí, phong cách kẹo pastel, cho một cổng game kiểu "chặt heo" với **20 game**:
+Tiến Lên, Phỏm, Mậu Binh, Xì Dách, Poker, Bài Cào, Sâm Lốc, Liêng, Bầu Cua, Xóc Đĩa, Tài Xỉu, Cờ Tướng, Cá Ngựa, Cờ Caro, Bài Màu, Lô Tô, Bắn Cá, **Máy Đẩy Xu**, **Gắp Thú** và **Máy Xúc Vé**.
 Khoảng 13.700 file, 387 MB, trong đó có 88 model 3D thật chạy ngay trong trình duyệt.
 
 **Chơi online:** https://dorisle-uxui.github.io/heo-con-club/ (GitHub Pages, lần đầu tải hơi lâu).
@@ -15,7 +15,7 @@ Khoảng 13.700 file, 387 MB, trong đó có 88 model 3D thật chạy ngay tron
 | `index.html` | **Cửa vào chính.** Màn loading, đăng nhập và đăng ký, rồi thị trấn 3D tràn màn hình. Có HUD, bản đồ nhỏ, nhiệm vụ, quà ngày, cửa hàng, xếp hạng, hộp thư và màn hướng dẫn lần đầu. |
 | `pusher.html` | **Máy Đẩy Xu 3D**: 3 máy, khay đẩy chạy thật, ngắm và thả xu, cuộn vé, thẻ bài, Heo Vàng jackpot, đổi vé lấy xu. |
 | `tien-len.html` | **Tiến Lên Miền Nam chơi thật, đủ luật**, đấu với 3 máy. Có chọn bàn 4 mức cược, chia bài, đồng hồ lượt, chặt heo, bảng kết quả, tự chuyển ván. Có xu 3D bay, đồng hồ cát 3D và linh vật 3D. Xu dùng chung với sảnh. |
-| `play3d.html?game=<key>` | **16 game 3D chơi thật**: Phỏm, Mậu Binh, Xì Dách, Poker, Bài Cào, Sâm Lốc, Liêng, Bầu Cua, Xóc Đĩa, Tài Xỉu, Cờ Tướng, Cá Ngựa, Cờ Caro, Bài Màu, Lô Tô, Bắn Cá. Mỗi game có luật đầy đủ (nút **?**) và bot. |
+| `play3d.html?game=<key>` | **18 game 3D chơi thật**: Phỏm, Mậu Binh, Xì Dách, Poker, Bài Cào, Sâm Lốc, Liêng, Bầu Cua, Xóc Đĩa, Tài Xỉu, Cờ Tướng, Cá Ngựa, Cờ Caro, Bài Màu, Lô Tô, Bắn Cá, Gắp Thú, Máy Xúc Vé. Mỗi game có luật đầy đủ (nút **?**), game bài và cờ có bot. |
 | `lobby.html` | **Bản đồ menu**: ảnh chụp thị trấn từ trên cao, mỗi cửa tiệm là một ghim. Lọc theo loại game, bấm ghim để xem thông tin rồi **CHƠI NGAY** hoặc **Tới tiệm**. |
 | `lobby-classic.html` | Sảnh 2D cũ (linh vật 3D, quà ngày, lì xì, bản chơi thử ngắn), giữ lại để tham khảo. |
 | `screenshots/` | 31 ảnh: thị trấn 3D, đăng nhập, loading, bản đồ menu, hộp thư, Máy Đẩy Xu, từng game, Tiến Lên. |
@@ -33,35 +33,56 @@ python3 -m http.server 8765
 
 - **Loading thật:** nền thế giới mây kẹo, logo Heo Con Club, thanh tiến độ chạy theo số model đã tải, có heo chạy trên thanh, mẹo chơi đổi liên tục.
 - **Đăng nhập / đăng ký:** nền thị trấn vẽ tay, bố cục 2 cột (logo bên trái, khung đăng nhập bên phải). Có tên đăng nhập, tên trong game, mật khẩu có thanh độ mạnh, chọn linh vật 3D. Có nút chơi ngay bằng tài khoản khách.
-  - Tài khoản chỉ lưu trong trình duyệt này. Mật khẩu được băm PBKDF2 có salt, không lưu dạng chữ.
+  - Tài khoản thường chỉ lưu trong trình duyệt này. Mật khẩu được băm PBKDF2 có salt, không lưu dạng chữ.
   - Mỗi tài khoản có xu, vé, linh vật, nhiệm vụ riêng. Khách dùng dữ liệu cũ.
-  - Đây là bản offline, chưa có máy chủ. Muốn chơi online thật thì cần làm backend.
-- **Thị trấn:** quảng trường đài phun nước, vòng xuyến, 4 dãy phố, 23 cửa tiệm có biển hiệu, mái hiên sọc và đồ trang trí 3D xoay trên mái.
+  - Nút **Đăng nhập bằng Google** (bản web, sau khi bật Firebase): lưu tiến trình lên mây, đổi máy vẫn còn. Xem mục *Chơi online* bên dưới.
+- **Nhiệm vụ & cấp độ** (`js/hc-progress.js`, dùng chung cho mọi game):
+  - Mỗi ván, mỗi lượt cược, mỗi con cá bắn được đều cộng kinh nghiệm. Lên cấp có quà, có danh hiệu, cứ 2 cấp mở thêm avatar. Cấp VIP tính theo tổng xu đã cược.
+  - 3 nhiệm vụ ngày (dễ / vừa / khó, được đổi 1 lần), 4 nhiệm vụ tuần, rương thưởng khi xong hết, thành tựu 4 bậc, album cá Bắn Cá.
+  - **Lễ hội Heo Con:** mùa 14 ngày, 30 mốc quà, điểm lấy từ nhiệm vụ.
+  - **Vòng quay** (1 lượt free mỗi ngày), **Heo đất** (2% tiền cược nuôi heo, đập khi đủ 50K từ cấp 3), **Cứu trợ** 200K khi còn dưới 20K xu (3 lần/ngày).
+  - Bàn cao cấp mở theo cấp: Cao Thủ cấp 5, Đại Gia cấp 10, Hoàng Gia cấp 15.
+  - `node tests/progress.test.js` kiểm tra nhiệm vụ, cấp, thành tựu, lễ hội, vòng quay, heo đất.
+- **Thị trấn:** quảng trường đài phun nước, vòng xuyến, 4 dãy phố, 25 cửa tiệm có biển hiệu, mái hiên sọc và đồ trang trí 3D xoay trên mái.
   - Hàng trăm cây (có cây hoa anh đào, tím, vàng), đèn đường, ghế đá, hàng rào, nhà dân, sân chơi, cổng chào "HEO CON CLUB".
   - Xe hơi chạy vòng xuyến, người đi dạo có tên và biết nói, chim bồ câu bay khi bạn lại gần, mây trôi đổ bóng.
 - **Điều khiển:** chạm đất để đi, chạm cửa tiệm để tự đi tới cửa rồi vào game, W A S D để chạy, kéo để xoay, cuộn hoặc chụm 2 ngón để phóng to, bấm bản đồ nhỏ để đi tới chỗ đó.
 - **Giao diện:** cảnh 3D tràn kín cửa sổ ở mọi tỉ lệ. HUD nhỏ gọn bám theo các cạnh để chừa chỗ cho game. Popup to hơn HUD một chút cho dễ đọc và tự thu nhỏ khi cửa sổ hẹp.
-  - **Cài đặt → Cỡ giao diện:** Nhỏ / Vừa / Lớn, áp dụng cho thị trấn, bản đồ, máy đẩy xu và 16 game 3D.
+  - **Cài đặt → Cỡ giao diện:** Nhỏ / Vừa / Lớn, áp dụng cho thị trấn, bản đồ, máy đẩy xu và 18 game 3D.
 - **Sảnh 2D và Tiến Lên** có nút về thị trấn. Vào game từ thị trấn thì nút quay lại sẽ đưa bạn về thị trấn.
 
 ## Máy Đẩy Xu (`pusher.html`)
 
-- 3 máy: **Máy Hồng** (1.000 xu/lượt, máy mới), **Máy Vàng** (5.000, có người vừa chơi, vé sát mép), **Máy Kim Cương** (20.000, có Heo Vàng jackpot).
-- Khay đẩy chạy tới lui. Xu thả lúc khay lùi hết cỡ rơi ngay trước khay nên cú đẩy sau mạnh nhất. Thả lúc khay tiến thì xu rơi lên nóc khay và bị vách sau gạt xuống.
-- Rê chuột hoặc kéo để ngắm trái phải, chạm hoặc Space để thả, có chế độ tự thả. Thanh "Khay đẩy" sáng xanh khi tới lúc nên thả. Có ô may mắn di chuyển trên vách, thả trúng được thêm 2 xu.
-- Xu rớt mép trước là thắng, rớt vào khe hai góc là mất. Quà: cuộn vé +20 vé, thẻ bài +60 vé, ngôi sao 3 xu free, kim cương +5 💎, Heo Vàng +300 vé và mưa 12 xu.
-- Máy nhớ trạng thái khi bạn rời đi. Bỏ máy lâu thì "người khác" chơi tiếp, nên đống xu có thể đã dồn sát mép.
-- Vật lý nằm riêng trong `js/pusher-sim.js`, không phụ thuộc giao diện. `node tests/pusher.test.js` kiểm tra bảo toàn xu, tỉ lệ trả thưởng, thời điểm thả và chiến thuật ngắm góc.
+- 3 máy: **Máy Hồng** (1.000 xu/lượt, máy mới), **Máy Vàng** (5.000, có người vừa chơi, vé sát mép), **Máy Kim Cương** (20.000, có Heo Vàng).
+- Khay đẩy chạy tới lui. Xu thả lúc khay lùi hết cỡ rơi ngay trước khay nên cú đẩy sau mạnh nhất. Rê chuột hoặc kéo để ngắm, chạm hoặc Space để thả, có chế độ tự thả.
+- **Ô may mắn + vòng quay 3 ô:** cái cốc hồng chạy trên nóc khay; thả xu lọt vào là được 1 lượt quay (giữ tối đa 10). Ba hình giống nhau: Mưa xu, Thêm vé, Thẻ bài, **Tường chắn** 20 giây (che hai góc, không mất xu), **Đẩy mạnh** 20 giây, hoặc **Jackpot**. Hai ô đầu giống nhau thì ô cuối quay chậm kèm chữ REACH!
+- **Hũ Heo Vàng:** hũ jackpot riêng từng máy, lớn dần theo mỗi xu thả. Ba hình heo trên vòng quay ăn cả hũ.
+- **Bộ thẻ:** thẻ bài rơi ra là lá cụ thể. Gom đủ **Tứ Quý Át** (thưởng 25 lần cược) hoặc **Sảnh Cơ** 10-J-Q-K-A (35 lần). Thẻ trùng đổi thành vé.
+- **Fever:** mỗi lần trúng thắp 1 trong 6 đèn; đủ 6 đèn thì 10 giây xu vàng, mỗi xu rơi ra được nhân đôi.
+- Xu rớt mép trước là thắng, rớt vào khe hai góc là mất. Máy nhớ trạng thái khi bạn rời đi.
+- Vật lý và toàn bộ luật nằm trong `js/pusher-sim.js` (`PusherSim.Game`, có seed). `node tests/pusher.test.js` (55 phép kiểm) đo tỉ lệ trả thưởng khoảng 92–96% tuỳ cách chơi.
 
-## 16 game 3D (`play3d.html`)
+## 18 game 3D (`play3d.html`)
 
 - Mở từ cửa tiệm trong thị trấn, từ bản đồ, hoặc thẳng bằng link `play3d.html?game=bau-cua`.
-  - Key: phom, mau-binh, xi-dach, poker, bai-cao, sam-loc, lieng, bau-cua, xoc-dia, tai-xiu, co-tuong, co-ca-ngua, co-caro, bai-mau, lo-to, ban-ca.
+  - Key: phom, mau-binh, xi-dach, poker, bai-cao, sam-loc, lieng, bau-cua, xoc-dia, tai-xiu, co-tuong, co-ca-ngua, co-caro, bai-mau, lo-to, ban-ca, gap-thu, xuc-ve.
 - Bàn, bài, chip, xúc xắc, bát đĩa đều là 3D. Mỗi game có nút **?** xem luật, bot đánh cùng, xu dùng chung với thị trấn.
+- **Chọn bàn** (`js/t3-lobby.js`): mỗi game mở ra màn 5 hạng bàn Tập Sự, Bình Dân, Cao Thủ, Đại Gia, Hoàng Gia. Bàn quyết định mức cược và độ khó của bot; bàn cao cần đủ xu và đủ cấp.
+- **Chế độ chơi** (luật thật, có test): Phỏm có / không gửi bài, Sâm Lốc 4 người / Solo, Mậu Binh thường / có thưởng chi, Poker không giới hạn / giới hạn hũ, Liêng tố tự do / tối đa bằng hũ, Xì Dách nhà con / làm cái, Bài Cào nhà cái bot / xoay cái, Bầu Cua · Xóc Đĩa · Tài Xỉu thường 30 giây / nhanh 12 giây.
+- Link thẳng vào một bàn: `play3d.html?game=poker&room=binh-dan&mode=pl`.
 - **Bắn Cá:**
   - Nhấn hoặc giữ vào con cá để **khoá mục tiêu**; đạn tự đuổi theo nên bắn là trúng.
   - Mỗi con cá có thanh máu, cá to nhiều máu hơn nhưng thưởng lớn hơn.
   - Nút **TỰ BẮN** tự chọn con đáng bắn. Tính dài hạn trả lại khoảng 92–95% số xu bắn ra.
+- **Gắp Thú** (`gap-thu`): máy gắp thú bông 3D, 3 máy 1K / 5K / 20K một lượt.
+  - Đưa càng bằng nút mũi tên, phím mũi tên / WASD hoặc kéo trên màn hình, **GẮP!** (Space) để thả. Nút **Nhìn ngang** đổi góc để canh chiều sâu. Mỗi lượt 20 giây.
+  - Lực kẹp mỗi lượt ngẫu nhiên, thú hiếm nặng hơn: kẹp yếu thì tuột ngay, vừa vừa thì rơi giữa đường (nằm gần lỗ hơn), rơi trúng miệng lỗ vẫn được quà. Trượt 10 lần tặng 1 lượt miễn phí.
+  - 9 thú bông (vịt, cún, gấu của bộ KayKit và gà, heo, thỏ, mèo, gấu trúc, Heo Vàng dựng bằng khối), 4 độ hiếm trả xu, vé và 💎. Bảng "Đã gắp được" lưu bộ sưu tập.
+  - Luật thuần trong `js/games3d/rules/gap-thu.js`; `node tests/gap-thu.test.js` chơi hàng trăm nghìn lượt: dài hạn trả lại 85–95% (xu + vé × 500).
+- **Máy Xúc Vé** (`xuc-ve`): cánh tay đung đưa trên thùng cuộn vé, bấm **XÚC!** đúng lúc muỗng ở trên đống cao nhất.
+  - Muỗng đổ vé lên kệ đẩy (vật lý giống Máy Đẩy Xu). Cuộn rơi mép trước trả đúng giá in trên cuộn: 10K, 20K, 50K, 100K, 200K và Cuộn Vàng 500K. Rơi hai góc thì về thùng.
+  - 3 cỡ muỗng 30K / 60K / 120K (tối đa 2 / 4 / 8 cuộn). Vé còn trên kệ được giữ lại cho lần sau, máy nhớ trạng thái.
+  - Luật + vật lý trong `js/games3d/rules/xuc-ve.js`; `node tests/xuc-ve.test.js` mô phỏng hàng nghìn lượt xúc: canh giờ tốt trả lại 92–94%, người chơi thường 86–88%, bấm bừa khoảng 50%.
 - Link test: `&demo=1` cho máy tự chơi, `&selftest=1` ghi kết quả vào `body[data-selftest]`, `&shot=1` để chụp ảnh.
 - Muốn thêm game mới: xem `docs/GAME3D_GUIDE.md`.
 
@@ -71,7 +92,7 @@ python3 -m http.server 8765
 - Cột trái lọc theo loại game (bài, xúc xắc, cờ, vui khác, tiện ích), cột phải là danh sách tất cả game.
 - `lobby.html?sel=xoc-dia` mở sẵn thẻ thông tin của một game.
 
-## Tiến Lên Miền Nam (`tien-len.html`)
+## Tiến Lên (`tien-len.html`)
 
 `tien-len.html` mở trực tiếp bằng double-click được, không cần server.
 
@@ -85,6 +106,13 @@ python3 -m http.server 8765
 - Cóng, thối heo, thối hàng.
 - Tính xu theo mức cược: nhất +3, nhì +1, ba −1, bét −3. Heo đen 1, heo đỏ 2, 3 đôi thông 3, tứ quý 4, 4 đôi thông 5. Cóng phạt thêm 2, tới trắng mỗi người trả 4.
 
+**Chế độ:** Xếp hạng (luật trên), **Đếm lá** (có người hết bài là xong, trả 1 cược mỗi lá còn lại, cóng 26), **Nhất ăn tất** (người nhất ăn mỗi nhà 3 cược), **Miền Bắc** (chặn đồng chất, đôi cùng màu, sảnh đồng chất, không đôi thông, không tới trắng), **Solo 2 người**.
+
+**Chơi với bạn:** nút **Chơi với bạn** ở màn chọn bàn (cần đăng nhập Google trên bản web).
+- Mở phòng chọn chế độ và mức cược, được mã 6 số. Bạn bè nhập mã hoặc bấm link mời (`tien-len.html?join=123456`). Ghế trống có máy chơi thay.
+- Mọi người chạy cùng một ván: chủ phòng chia bài và xếp thứ tự nước đi, mỗi máy tự vẽ lại từ góc nhìn của mình (`js/tl-online.js`). Ai không đánh trong 28 giây thì chủ phòng đánh thay; chủ phòng thoát thì người khác tự lên làm chủ.
+- Thử trên máy không cần Firebase: mở 2 tab `tien-len.html?mockfb=1&mockuser=An` và `…&mockuser=Binh`, đăng nhập Google ở mỗi tab (bản giả lập).
+
 **Điều khiển:**
 - Bấm vào lá để chọn, hoặc kéo ngang qua nhiều lá. Nút Đánh sáng lên và ghi tên bộ khi bộ đang chọn đánh được.
 - Phím tắt: Space hoặc Enter để đánh, P bỏ lượt, H gợi ý (bấm nhiều lần để đổi gợi ý), S xếp bài theo số hoặc theo bộ, Esc bỏ chọn.
@@ -92,11 +120,12 @@ python3 -m http.server 8765
 
 **Code và test:**
 - `js/tienlen-engine.js`: toàn bộ luật, cách tính tiền và AI, không phụ thuộc giao diện. Dùng lại được cho Node, React, Cocos hay Phaser.
-- `node tests/tienlen.test.js`: 9.086 phép kiểm, gồm 3.000 ván máy tự đánh với nhau. Hiện tất cả đều qua.
+- `node tests/tienlen.test.js`: 9.133 phép kiểm, gồm hàng nghìn ván máy tự đánh ở mọi chế độ. Hiện tất cả đều qua.
+- `node tests/tl-online.test.js`: chơi chung bàn: mọi góc nhìn ra cùng kết quả, chủ phòng đánh thay người vắng, đổi chủ phòng giữa ván.
 - `node tests/auth.test.js` (tài khoản) và `node tests/pusher.test.js` (máy đẩy xu) cũng đều qua.
 - Tự kiểm giao diện: `index.html?selftest=1&screen=town&as=guest` và `pusher.html?machine=1&selftest=1` ghi kết quả vào `body[data-selftest]`.
 - `tien-len.html?room=1&uitest=6&speed=turbo`: script đóng vai người chơi, tự bấm qua 6 ván rồi ghi kết quả vào trang.
-- Link nhanh: `?room=0..3` vào thẳng một bàn, `?seed=N` chia bài cố định, `?auto=1` cho máy đánh thay bạn.
+- Link nhanh: `?room=0..4` vào thẳng một bàn, `?mode=dem-la|nhat-an-tat|mien-bac|solo`, `?seed=N` chia bài cố định, `?auto=1` cho máy đánh thay bạn.
 
 ## Giao diện 3D
 
@@ -175,6 +204,13 @@ Hoạt ảnh có sẵn cho nhân vật `adv_*`: Idle_A, Idle_B, Interact, Use_It
 
 Âm thanh gợi ý theo sự kiện nằm trong `manifest.recommended.sfx`.
 
+## Chơi online (Google)
+
+- Dùng Firebase gói miễn phí: đăng nhập Google, lưu xu / cấp / nhiệm vụ lên mây, bảng xếp hạng người thật (Giàu nhất, Cấp cao nhất, Thắng nhiều nhất, Đang online) và phòng Tiến Lên chơi với bạn.
+- Bật một lần theo `docs/ONLINE_SETUP.md` (tạo dự án Firebase, bật Google, tạo Firestore, dán `firestore.rules`, dán cấu hình vào `js/firebase-config.js`). Chưa bật thì game vẫn chơi offline như cũ; mở bằng file cũng luôn là offline.
+- Code: `js/hc-online.js` (đăng nhập, lưu mây, xếp hạng, phòng), `js/firebase-mock.js` (bản giả lập để thử: thêm `?mockfb=1&mockuser=Tên`).
+- Xu được tính trên máy người chơi, hợp chơi vui giữa bạn bè. Xu là xu ảo, không mua bán bằng tiền thật.
+
 ## Tự tạo ảnh bằng AI
 
 - Prompt sẵn sàng copy: `docs/PROMPTS.md` (hoặc trang có nút sao chép `docs/prompts.html`). 40 prompt phủ toàn bộ hình ảnh game: 30 ảnh bảng 16:9 chứa nhiều món (cá, bộ bài, phỉnh, icon, nút, khung, VIP, biểu cảm, avatar, quân cờ…) + 10 ảnh nguyên tấm (3 nền, 7 bàn Tiến Lên).
@@ -225,5 +261,6 @@ const laugh = 'assets/' + m.emoji.noto_animated.items['joy_1f602'].webp;
 - Chưa có bài Tứ Sắc / Tổ Tôm.
 - Câu hô, khung và nút là ảnh tĩnh. Hiệu ứng nảy, bay xu, confetti trong `lobby.html` làm bằng code, có thể chép sang game.
 - Mới có 6 nhân vật 3D người có xương. Gấu, cún, vịt của bộ Mini-Game không có xương nên chỉ nhún nhảy bằng code.
-- Tiến Lên vẫn là bàn 2D (có xu và linh vật 3D); 16 game còn lại đã là 3D.
-- Tài khoản là bản offline lưu trong trình duyệt, chưa có máy chủ, bảng xếp hạng và bạn bè là dữ liệu mẫu.
+- Tiến Lên vẫn là bàn 2D (có xu và linh vật 3D); 19 game còn lại đã là 3D.
+- Chơi chung bàn với người thật mới có ở Tiến Lên; các game khác vẫn chơi với bot.
+- Chơi online cần chủ game bật Firebase (`docs/ONLINE_SETUP.md`); khi chưa bật, bảng xếp hạng tab Thị trấn và bạn bè là dữ liệu mẫu.

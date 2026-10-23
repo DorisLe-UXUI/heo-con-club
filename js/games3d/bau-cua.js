@@ -14,7 +14,12 @@
     table: 'rect', theme: 'red', tex: ['bau-cua', 'chips'], models: ['hp_monstera', 'hp_yucca', 'hp_pothos', 'pp_lantern'], settle,
     rules: `<p>Chọn mệnh giá phỉnh bên trái, chạm vào ô con vật để đặt cược. Có thể đặt nhiều ô.</p>
       <p>Bấm <b>LẮC</b>: nhà cái úp bát, lắc 3 xúc xắc rồi mở.</p>
-      <ul><li>Mỗi xúc xắc ra đúng con bạn đặt: thắng <b>1 lần</b> tiền cược.</li><li>Ra 2 con: thắng <b>2 lần</b>, ra 3 con: thắng <b>3 lần</b>.</li><li>Không ra con nào: mất tiền cược ô đó.</li></ul>`,
+      <ul><li>Mỗi xúc xắc ra đúng con bạn đặt: thắng <b>1 lần</b> tiền cược.</li><li>Ra 2 con: thắng <b>2 lần</b>, ra 3 con: thắng <b>3 lần</b>.</li><li>Không ra con nào: mất tiền cược ô đó.</li></ul>
+      <p>Ở bàn chơi, đồng hồ trên cùng đếm ngược thời gian đặt cược; hết giờ nhà cái tự lắc (kể cả khi bạn chưa đặt). Đặt xong có thể bấm <b>LẮC</b> sớm.</p>`,
+    modes: [
+      { id: 'thuong', name: 'Thường', desc: 'Mỗi ván có 30 giây đặt cược. Đặt xong có thể bấm LẮC sớm.', rules: '30 giây đặt cược mỗi ván, hết giờ nhà cái tự lắc.' },
+      { id: 'nhanh', name: 'Nhanh', desc: 'Chỉ 12 giây đặt cược, hết giờ nhà cái tự lắc — ván nối ván liên tục.', rules: '12 giây đặt cược mỗi ván, mở bát xong là sang ván mới ngay.' },
+    ],
     async start(ctx) { await play(ctx, false); },
     async selftest(ctx) { return play(ctx, true); },
   });
@@ -46,7 +51,10 @@
     const drawHist = () => { histEl.innerHTML = '<div>Lịch sử</div>' + hist.slice(-6).reverse().map(r => `<div style="display:flex;gap:4px">${r.map(s => `<img src="${HC.A('games/bau-cua/dice-faces/' + s + '.png')}" style="width:44px;height:44px;border-radius:10px">`).join('')}</div>`).join(''); };
     drawHist();
     const chips = ctx.ui.chipPicker([1000, 5000, 10000, 50000, 100000, 500000], null, 2);
-    let bets = {}, last = {}, rolling = false, botBets = [];
+    let bets = {}, last = {}, rolling = false, botBets = [], clock = null;
+    // betting clock at a lobby table: Thường 30 s, Nhanh 12 s; when it runs out the dealer shakes anyway
+    const fast = ctx.mode && ctx.mode.id === 'nhanh', BET_SEC = ctx.room && !test ? (fast ? 12 : 30) : 0;
+    const startClock = () => { if (!BET_SEC) return; clock = ctx.ui.countdown(BET_SEC, () => { clock = null; if (!ctx.SHOT) round(null, true); }); };
     const total = () => Object.values(bets).reduce((a, b) => a + b, 0);
     const status = () => ctx.ui.status(rolling ? 'Nhà cái đang lắc…' : total() ? `Tổng cược <b>${HC.fmt(total())}</b> · bấm <b>LẮC</b>` : 'Chọn phỉnh rồi chạm vào con vật để đặt cược');
     function addChipVisual(s, amount, mine) {
@@ -65,20 +73,21 @@
     }
     function clearVisual() { SYM.forEach(s => { tiles[s].stacks.forEach(c => ctx.remove(c)); tiles[s].stacks = []; tiles[s].glow.material.opacity = 0; }); }
     const acts = ctx.ui.actions([
-      { id: 'clear', label: 'Xoá cược', cls: 'grey', onClick: () => { if (rolling) return; ctx.coins = ctx.coins + total(); bets = {}; clearVisual(); botBets.forEach(([s, a]) => addChipVisual(s, a, false)); status(); } },
+      { id: 'clear', label: 'Xoá cược', cls: 'grey', onClick: () => { if (rolling) return; const t0 = total(); ctx.coins = ctx.coins + t0; if (t0) { ctx.track('bet', { amount: -t0 }); ctx.roundBet = Math.max(0, ctx.roundBet - t0); } bets = {}; clearVisual(); botBets.forEach(([s, a]) => addChipVisual(s, a, false)); status(); } },
       { id: 'again', label: 'Đặt lại', cls: 'sky', onClick: () => { if (rolling) return; for (const [s, a] of Object.entries(last)) placeBet(s, a); } },
       { id: 'roll', label: 'LẮC!', cls: 'pink', icon: 'games/bau-cua/dice-faces/cua.png', onClick: () => round() },
     ]);
     acts.set('roll', { disabled: true });
     function botsBet() {
       botBets = [];
-      bots.forEach(b => { const n = 1 + Math.floor(Math.random() * 2); for (let i = 0; i < n; i++) { const s = ctx.pick(SYM), a = ctx.pick([5000, 10000, 50000]); botBets.push([s, a, b]); addChipVisual(s, a, false); } });
+      bots.forEach(b => { ctx.topUp(b, 60000, 500000); const n = 1 + Math.floor(Math.random() * 2); for (let i = 0; i < n; i++) { const s = ctx.pick(SYM), a = ctx.botStake([5000, 10000, 50000]); botBets.push([s, a, b]); addChipVisual(s, a, false); } });
       bots[Math.floor(Math.random() * bots.length)].say(ctx.pick(['Cua về đi cua ơi! 🦀', 'Bầu bầu bầu!', 'Nai ơi nai ơi 🦌', 'Hôm nay tôm đỏ 🦐']));
     }
-    async function round(forced) {
-      if (rolling || !total()) return;
+    async function round(forced, timeUp) {
+      if (rolling || (!total() && !timeUp)) return;
+      if (clock) { clock.stop(); clock = null; }
       rolling = true; acts.set('roll', { disabled: true }); acts.set('clear', { disabled: true }); acts.set('again', { disabled: true }); status();
-      last = Object.assign({}, bets);
+      if (total()) last = Object.assign({}, bets);
       const res = forced || [0, 1, 2].map(() => SYM[Math.floor(Math.random() * 6)]);
       // cover, shake, roll under the bowl, lift
       ctx.sfx('dice', .5);
@@ -108,12 +117,13 @@
       if (net > 0) { ctx.ui.callout(net >= total() * 2 ? 'ĂN ĐẬM!' : 'THẮNG!'); ctx.sfx('win', .5); if (net >= total() * 2) ctx.ui.confetti(); }
       else if (total()) { ctx.ui.toast(`Ván này ${back ? 'thu về ' + HC.fmt(back) : 'không trúng'} · ${res.map(r => NAME[r]).join(' · ')}`, 'games/bau-cua/dice-faces/' + res[0] + '.png'); }
       const result = { dice: res, bets: Object.assign({}, bets), back, net };
-      await ctx.wait(test ? 100 : 1600);
+      if (ctx.roundBet > 0) ctx.track('round', { net, bet: ctx.roundBet }); ctx.roundBet = 0;
+      await ctx.wait(test ? 100 : fast ? 900 : 1600);
       bets = {}; clearVisual(); rolling = false; acts.set('clear', { disabled: false }); acts.set('again', { disabled: !Object.keys(last).length });
-      botsBet(); status();
+      botsBet(); status(); startClock();
       return result;
     }
-    botsBet(); status();
+    botsBet(); status(); startClock();
     if (!test) return;
     // ---- self-test: bet, force a result, check the payout
     const c0 = ctx.coins;

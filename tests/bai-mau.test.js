@@ -213,5 +213,19 @@ t('3000 random bot games finish with cards conserved', () => {
   console.log(`  3000 games: avg ${(turns / 3000).toFixed(1)} turns, max ${maxT}, turn-limit endings ${limit}, UNO catches ${catches}`);
 });
 
+t('bot strength: easy bots only play legal cards and lose to the heuristic bots', () => {
+  const rng = R.rng32(77); let hardWins = 0, games = 0;
+  for (let g = 0; g < 600; g++) {
+    const st = R.newGame({ rng, players: 2, dealer: g % 2 });
+    while (!st.over) {
+      const p = st.turn, m = R.botMove(st, p, rng, p === 0 ? 0 : 3);
+      if (m) { assert.ok(R.legalMoves(st, p).some(c => c.id === m.id), 'legal'); if (R.canCallUno(st, p)) R.callUno(st, p); R.play(st, p, m.id, m.color); }
+      else { const d = R.drawTurn(st, p); if (d.playable) R.play(st, p, d.card.id, R.isWild(d.card) ? R.bestColor(st.hands[p], rng) : null); }
+    }
+    if (st.reason !== 'limit') { games++; if (st.winner === 1) hardWins++; }
+  }
+  assert.ok(hardWins / games > .5, `heuristic bots win ${hardWins} of ${games}`);
+});
+
 console.log(passed + ' passed, ' + failed + ' failed');
 if (failed) process.exit(1);

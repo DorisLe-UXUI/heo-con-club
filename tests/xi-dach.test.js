@@ -9,4 +9,24 @@ eq(R.settle(h('10 9 5'), h('10 9 4')), 0, 'both bust is a draw'); eq(R.settle(h(
 eq(R.settle(h('10 9'), h('10 8')), 1, 'higher wins'); eq(R.settle(h('10 8'), h('10 8')), 0, 'tie'); eq(R.settle(h('2 3 4 5 6'), h('10 9')), 2, 'ngũ linh beats 19');
 eq(R.settle(h('2 2 3 3 4'), h('2 3 4 5 6')), 2, 'smaller ngũ linh wins');
 for (let i = 0; i < 2000; i++) { const hand = h(['2', '3', 'A', 'K', '9'].slice(0, 2 + (i % 4)).join(' ')); const v = R.settle(hand, h('10 7')); assert.ok([-2, -1.5, -1, 0, 1, 1.5, 2].includes(v)); n++; }
+// ---- chế độ Làm cái: you are the bank
+{
+  const r = R.settleBank([h('A A'), h('10 8'), h('10 9 5')], [10000, 20000, 50000], h('10 9'));
+  eq(r.mult, [2, -1, -1], 'bank vs xì bàng / 18 / quắc');
+  eq(r.net, [20000, -20000, -50000], 'what each player wins or pays');
+  eq(r.dealerNet, 50000, 'the bank collects the rest');
+  const b = R.settleBank([h('A K'), h('2 3 4 5 6')], [10000, 10000], h('10 9 5'));
+  eq(b.dealerNet, -35000, 'busted bank pays xì dách 1.5× and ngũ linh 2×');
+  const rnd = (() => { let a = 7; return () => { a = (a * 16807) % 2147483647; return a / 2147483647; }; })(), R13 = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+  for (let t = 0; t < 3000; t++) {
+    const deal = k => Array.from({ length: k }, () => ({ r: R13[Math.floor(rnd() * 13)], s: 'hearts' }));
+    const hands = [deal(2 + (t % 3)), deal(2 + (t % 4)), deal(2)], bets = [5000, 10000, 50000], d = deal(2 + (t % 2)), s = R.settleBank(hands, bets, d);
+    assert.strictEqual(s.net.reduce((a, x) => a + x, 0) + s.dealerNet, 0, 'zero-sum'); n++;
+    assert.ok(s.net.every((x, i) => x <= bets[i] * 2 && x >= -bets[i] * 2)); n++;
+  }
+  eq(R.capBets([50000, 50000, 50000], 1e6, [5000, 10000, 50000]), [50000, 50000, 50000], 'rich bank: bets unchanged');
+  const c = R.capBets([50000, 50000, 10000], 150000, [5000, 10000, 50000]);
+  assert.ok(c.reduce((a, x) => a + x * 2, 0) <= 150000); n++;
+  eq(R.capBets([5000], 4000, [5000]), [0], 'a bank that cannot cover even the smallest stake takes no bet');
+}
 console.log(n + ' passed, 0 failed');

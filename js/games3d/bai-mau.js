@@ -410,7 +410,7 @@
     status('đang suy nghĩ…');
     s.anim('think');
     await ctx.wait(test ? 260 : 650 + ctx.rand() * 600);
-    let m = R.botMove(st, p, ctx.rand);
+    let m = R.botMove(st, p, ctx.rand, ctx.room ? ctx.aiLevel(1) : undefined);
     if (!m) {
       const d = R.drawTurn(st, p);
       await animDraw(p, d.card ? [d.card] : []);

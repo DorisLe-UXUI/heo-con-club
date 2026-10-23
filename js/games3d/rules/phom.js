@@ -12,6 +12,7 @@
  *    discarded. Being eaten costs the discarder 1 unit, or 4 units for the "chốt" (their 4th discard).
  *  - After everybody has discarded 4 times, everyone "hạ phỏm" (best arrangement suggested automatically),
  *    then "gửi bài": non-móm players lay off single cards onto other players' phỏm.
+ *    Chế độ "Không gửi bài" (opts.send = false): nobody lays off, the score is what is left after hạ phỏm.
  *  - Score = points left. Lowest wins (ties: earlier in turn order). "Móm" (no phỏm) ranks last.
  *    Nhất gets 1 / 2 / 3 units from Nhì / Ba / Bét; a móm player pays 4 instead.
  *  - "Ù": right after taking a card, if 9 or 10 of your cards fit in phỏm you win at once: 5 units from each.
@@ -126,10 +127,11 @@
 
   // ------------------------------------------------------------------ game
   class Game {
-    /** opts: { seed, starter = 0 } */
+    /** opts: { seed, starter = 0, send = true (gửi bài allowed), level = bot strength 0..3 (null = the tuned default) } */
     constructor(opts = {}) {
       this.rng = mulberry32(opts.seed != null ? opts.seed : (Math.random() * 2 ** 32) >>> 0);
       this.starter = opts.starter || 0;
+      this.send = opts.send !== false; this.level = opts.level != null ? opts.level : null;
       this.events = []; this.over = false; this.phase = 'deal';
     }
     emit(e) { this.events.push(e); return e; }
@@ -225,7 +227,7 @@
     }
     /** What p could lay off right now (preview for the player's GỬI BÀI button). */
     sendOptions(p) {
-      if (!this.laid || this.mom[p]) return [];
+      if (!this.laid || this.mom[p] || !this.send) return [];
       const laid = this.laid.map(ms => ms.map(m => [...m])), rest = [...this.rest[p]], out = [];
       for (;;) {
         let best = null;
@@ -241,7 +243,7 @@
       const { laid, rest, mom } = this, sent = [[], [], [], []], skip = opts.skip || {};
       // gửi bài: in turn order, each non-móm player lays off what fits onto the other players' phỏm (highest card first)
       for (const p of this.order()) {
-        if (mom[p] || skip[p]) continue;
+        if (mom[p] || skip[p] || !this.send) continue;
         for (;;) {
           let best = null;
           for (const c of rest[p]) for (let q = 0; q < 4; q++) { if (q === p) continue; laid[q].forEach((m, mi) => { if (fits(m, c) && (!best || pts(c) > pts(best.c))) best = { c, q, mi }; }); }
@@ -282,10 +284,11 @@
     // ---------------------------------------------------------------- bots
     /** Cards everybody can see out of play (discard piles + eaten cards). */
     visible() { return new Set([...this.discards.flat(), ...this.eaten.flat()]); }
-    aiTake(p) { return this.canEat(p) ? 'eat' : 'draw'; }
+    aiTake(p) { if (!this.canEat(p)) return 'draw'; return this.level === 0 && this.deck.length && this.rng() < .3 ? 'draw' : 'eat'; }   // easy bots miss some cards they could eat
     /** Choose a discard: keep phỏm, keep live "cạ" (two cards that wait for a third) early on, dump high cards. */
     aiDiscard(p) {
       const hand = this.hands[p], locked = this.locked[p], final = this.discCount[p] >= 3, vis = this.visible();
+      if (this.level === 0 && this.rng() < .4) { const ok = hand.filter(c => !locked.includes(c) && canDiscard(hand, locked, c)); if (ok.length) return ok[Math.floor(this.rng() * ok.length)]; }   // easy bots: careless discards
       const k = [.3, .3, .15, .05][this.discCount[p]] || 0;   // weights tuned by self-play
       let best = null;
       for (const c of hand) {
