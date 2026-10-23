@@ -92,7 +92,7 @@
   };
 
   // ------------------------------------------------------------------ small helpers
-  const A = p => (window.HC_ASSET_BASE || 'assets/') + p.split('/').map(encodeURIComponent).join('/');
+  const A = p => /^(data:|blob:|https?:)/.test(p) ? p : (window.HC_ASSET_BASE || 'assets/') + p.split('/').map(encodeURIComponent).join('/');
   const fmt = n => Math.round(n).toLocaleString('vi-VN');
   const short = n => n >= 1e9 ? (n / 1e9).toFixed(n % 1e9 ? 1 : 0).replace('.', ',') + 'B' : n >= 1e6 ? (n / 1e6).toFixed(n % 1e6 ? 1 : 0).replace('.', ',') + 'M' : n >= 1e3 ? Math.round(n / 1e3) + 'K' : String(n);
   const pick = a => a[Math.floor(Math.random() * a.length)];

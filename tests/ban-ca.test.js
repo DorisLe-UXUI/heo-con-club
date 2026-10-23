@@ -136,5 +136,27 @@ t('boss paths cross side to side', () => {
   const rng = R.rng32(9); for (const f of R.BOSSES) for (let i = 0; i < 50; i++) { const p = R.makePath(f, rng); const a = R.pathAt(p, 0), z = R.pathAt(p, p.len); assert.ok(Math.sign(a.x) === -Math.sign(z.x)); }
 });
 
+// ------------------------------------------------------------------ custom species (last: addFish changes the tables)
+t('addFish: custom species join the tables, clamped to their tier', () => {
+  const before = R.FISH.length, bosses = R.BOSSES.length;
+  const added = R.addFish([
+    { id: 'cus_ca_kiem', name: 'Cá Kiếm', tier: 'big', mult: 45, look: 'cus_ca_kiem', size: 1.2 },
+    { id: 'cus_rong_bien', name: 'Rồng Biển', tier: 'boss', mult: 999, look: 'cus_rong_bien', weight: 5 },
+    { id: 'cus_ca_nho', name: 'Cá Bé', tier: 'small', mult: 40, look: 'cus_ca_nho', school: [9, 0], faces: 'right' },
+    { id: 'ca_vang', name: 'trùng id', tier: 'small', mult: 2, look: 'x' },          // duplicate id
+    { id: 'cus_sai', name: 'Sai hạng', tier: 'huge', mult: 10, look: 'x' },           // unknown tier
+    { id: 'cus_khong_anh', name: 'Không ảnh', tier: 'small', mult: 3 },             // no look
+  ]);
+  assert.deepStrictEqual(added.map(f => f.id), ['cus_ca_kiem', 'cus_rong_bien', 'cus_ca_nho']);
+  assert.strictEqual(R.FISH.length, before + 3); assert.strictEqual(R.BOSSES.length, bosses + 1);
+  assert.strictEqual(R.BY_ID.cus_rong_bien.mult, 300); assert.strictEqual(R.BY_ID.cus_rong_bien.weight, 0);   // bosses are scheduled, never weighted
+  assert.strictEqual(R.BY_ID.cus_ca_nho.mult, 5); assert.deepStrictEqual(R.BY_ID.cus_ca_nho.school, [1, 8]); assert.strictEqual(R.BY_ID.cus_ca_nho.faces, 'right');
+  assert.ok(close(R.BY_ID.cus_ca_kiem.r, 1.62, 1e-9));
+  const rng = R.rng32(5); let sum = 0; for (let i = 0; i < 100000; i++) sum += R.drawHits(R.BY_ID.cus_ca_kiem, rng);
+  assert.ok(Math.abs(sum / 100000 / (45 / 0.95) - 1) < .01, 'custom fish keep the 95% HP model');
+  const seen = new Set(); const r2 = R.rng32(8); for (let i = 0; i < 20000; i++) seen.add(R.pickType(r2).id);
+  assert.ok(seen.has('cus_ca_kiem') && seen.has('cus_ca_nho') && !seen.has('cus_rong_bien'));
+});
+
 console.log(passed + ' passed, ' + failed + ' failed');
 if (failed) process.exit(1);

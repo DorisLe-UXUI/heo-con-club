@@ -1,0 +1,242 @@
+[
+ {
+  "file": "ca_bay_mau.png",
+  "id": "ca_bay_mau",
+  "name": "Cá Bảy Màu",
+  "tier": "small",
+  "mult": 2,
+  "size": 1.0,
+  "upright": false,
+  "faces": "left"
+ },
+ {
+  "file": "ca_neon.png",
+  "id": "ca_neon",
+  "name": "Cá Neon",
+  "tier": "small",
+  "mult": 3,
+  "size": 0.9,
+  "upright": false,
+  "faces": "left"
+ },
+ {
+  "file": "ca_ngua.png",
+  "id": "ca_ngua",
+  "name": "Cá Ngựa",
+  "tier": "small",
+  "mult": 4,
+  "size": 1.0,
+  "upright": true,
+  "faces": "left"
+ },
+ {
+  "file": "sao_bien.png",
+  "id": "sao_bien",
+  "name": "Sao Biển",
+  "tier": "small",
+  "mult": 3,
+  "size": 0.9,
+  "upright": true,
+  "faces": "left"
+ },
+ {
+  "file": "ca_mo_vet.png",
+  "id": "ca_mo_vet",
+  "name": "Cá Mỏ Vẹt",
+  "tier": "small",
+  "mult": 5,
+  "size": 1.1,
+  "upright": false,
+  "faces": "left"
+ },
+ {
+  "file": "ca_vang_dau_lan.png",
+  "id": "ca_vang_dau_lan",
+  "name": "Cá Vàng Đầu Lân",
+  "tier": "small",
+  "mult": 5,
+  "size": 1.1,
+  "upright": false,
+  "faces": "left"
+ },
+ {
+  "file": "ca_buom.png",
+  "id": "ca_buom",
+  "name": "Cá Bướm",
+  "tier": "medium",
+  "mult": 8,
+  "size": 1.0,
+  "upright": false,
+  "faces": "left"
+ },
+ {
+  "file": "oc_anh_vu.png",
+  "id": "oc_anh_vu",
+  "name": "Ốc Anh Vũ",
+  "tier": "medium",
+  "mult": 10,
+  "size": 1.0,
+  "upright": false,
+  "faces": "left"
+ },
+ {
+  "file": "ca_duoi.png",
+  "id": "ca_duoi",
+  "name": "Cá Đuối Ó",
+  "tier": "medium",
+  "mult": 12,
+  "size": 1.15,
+  "upright": false,
+  "faces": "left"
+ },
+ {
+  "file": "ca_long_den.png",
+  "id": "ca_long_den",
+  "name": "Cá Lồng Đèn",
+  "tier": "medium",
+  "mult": 16,
+  "size": 1.0,
+  "upright": false,
+  "faces": "left"
+ },
+ {
+  "file": "ca_mat_trang.png",
+  "id": "ca_mat_trang",
+  "name": "Cá Mặt Trăng",
+  "tier": "medium",
+  "mult": 18,
+  "size": 1.15,
+  "upright": false,
+  "faces": "left"
+ },
+ {
+  "file": "cua_hoang_de.png",
+  "id": "cua_hoang_de",
+  "name": "Cua Hoàng Đế",
+  "tier": "medium",
+  "mult": 20,
+  "size": 1.1,
+  "upright": true,
+  "faces": "left"
+ },
+ {
+  "file": "ca_chep_vang.png",
+  "id": "ca_chep_vang",
+  "name": "Cá Chép Vàng",
+  "tier": "big",
+  "mult": 30,
+  "size": 1.0,
+  "upright": false,
+  "faces": "left"
+ },
+ {
+  "file": "ca_kiem.png",
+  "id": "ca_kiem",
+  "name": "Cá Kiếm",
+  "tier": "big",
+  "mult": 40,
+  "size": 1.15,
+  "upright": false,
+  "faces": "left"
+ },
+ {
+  "file": "ky_lan_bien.png",
+  "id": "ky_lan_bien",
+  "name": "Kỳ Lân Biển",
+  "tier": "big",
+  "mult": 45,
+  "size": 1.1,
+  "upright": false,
+  "faces": "left"
+ },
+ {
+  "file": "ca_map_bua.png",
+  "id": "ca_map_bua",
+  "name": "Cá Mập Búa",
+  "tier": "big",
+  "mult": 50,
+  "size": 1.15,
+  "upright": false,
+  "faces": "left"
+ },
+ {
+  "file": "nang_tien_ca.png",
+  "id": "nang_tien_ca",
+  "name": "Nàng Tiên Cá",
+  "tier": "big",
+  "mult": 60,
+  "size": 1.1,
+  "upright": false,
+  "faces": "left"
+ },
+ {
+  "file": "rua_vang.png",
+  "id": "rua_vang",
+  "name": "Rùa Vàng Kho Báu",
+  "tier": "big",
+  "mult": 70,
+  "size": 1.1,
+  "upright": false,
+  "faces": "left"
+ },
+ {
+  "file": "heo_vang_dai_duong.png",
+  "id": "heo_vang_dai_duong",
+  "name": "Heo Vàng Đại Dương",
+  "tier": "boss",
+  "mult": 120,
+  "size": 1.0,
+  "upright": false,
+  "faces": "left"
+ },
+ {
+  "file": "tau_ngam_kho_bau.png",
+  "id": "tau_ngam_kho_bau",
+  "name": "Tàu Ngầm Kho Báu",
+  "tier": "boss",
+  "mult": 150,
+  "size": 1.05,
+  "upright": false,
+  "faces": "left"
+ },
+ {
+  "file": "rua_than_kim_quy.png",
+  "id": "rua_than_kim_quy",
+  "name": "Rùa Thần Kim Quy",
+  "tier": "boss",
+  "mult": 180,
+  "size": 1.1,
+  "upright": false,
+  "faces": "left"
+ },
+ {
+  "file": "kraken.png",
+  "id": "kraken",
+  "name": "Thủy Quái Kraken",
+  "tier": "boss",
+  "mult": 200,
+  "size": 1.1,
+  "upright": true,
+  "faces": "left"
+ },
+ {
+  "file": "long_vuong.png",
+  "id": "long_vuong",
+  "name": "Long Vương Biển",
+  "tier": "boss",
+  "mult": 250,
+  "size": 1.15,
+  "upright": false,
+  "faces": "left"
+ },
+ {
+  "file": "ca_voi_hoang_kim.png",
+  "id": "ca_voi_hoang_kim",
+  "name": "Cá Voi Hoàng Kim",
+  "tier": "boss",
+  "mult": 300,
+  "size": 1.2,
+  "upright": false,
+  "faces": "left"
+ }
+]

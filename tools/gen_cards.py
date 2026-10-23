@@ -1,11 +1,16 @@
 """Heo Con card deck (CC0, drawn in code) - replaces the Dani Maccari deck, whose license forbids redistributing it.
 52 cards + 2 backs + blank, drawn at 400x576 and saved at 300x432 (same 100:144 shape and file names as the old deck).
 Suit pips and J/Q/K faces are Fluent 3D emoji (MIT, see emoji-fluent-3d/LICENSE.txt); ranks use Grandstander Black (OFL).
+Your own art (optional, from an image generator, see docs/PROMPTS.md) goes in custom/cards/ and replaces the defaults:
+  suit_<hearts|diamonds|clubs|spades>.png, face_<J|Q|K>.png or face_<J|Q|K>_<suit>.png, ace_<suit>.png, back.png, back_dark.png
+Ranks and letters are always drawn by this script, so image generators never have to spell them.
 Usage: python3 -E tools/gen_cards.py assets
 """
 import sys, random
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
+sys.path.insert(0, str(Path(__file__).parent))
+from custom_img import load_art, fit_box
 
 A = Path(sys.argv[1] if len(sys.argv) > 1 else 'assets')
 OUT = A / 'cards-heocon' / 'cards'
@@ -20,6 +25,26 @@ FACES = {'J': 'characters/ninja.png', 'Q': 'characters/princess.png', 'K': 'char
 INK = {True: (229, 68, 109), False: (58, 45, 79)}
 HALO = {True: (255, 230, 239), False: (238, 233, 255)}
 _cache = {}
+CUSTOM = A.resolve().parent / 'custom' / 'cards'
+
+
+def custom(*names):
+    """First existing file among custom/cards/<name>.png."""
+    for n in names:
+        p = CUSTOM / f'{n}.png'
+        if p.exists(): return p
+    return None
+
+
+def art(path, size):
+    key = (str(path), size)
+    if key not in _cache: _cache[key] = fit_box(load_art(path), size, size)
+    return _cache[key]
+
+
+def suit_pic(suit, size):
+    p = custom(f'suit_{suit}')
+    return art(p, size) if p else emoji(f'game/{SUITS[suit]}.png', size)
 
 
 def emoji(rel, size):
@@ -63,7 +88,7 @@ def corner(label, suit, red):
     size = 92 if len(label) == 1 else 76
     f = ImageFont.truetype(str(FONT), size * S)
     d.text((55 * S, 52 * S), label, font=f, fill=INK[red] + (255,), anchor='mm', stroke_width=4 * S, stroke_fill=(255, 255, 255, 255))
-    paste_c(tile, emoji(f'game/{SUITS[suit]}.png', 50 * S), 55 * S, 128 * S)
+    paste_c(tile, suit_pic(suit, 50 * S), 55 * S, 128 * S)
     return tile
 
 
@@ -72,23 +97,34 @@ def card(suit, rk, label):
     im = shape((255, 255, 255), (255, 244, 249), (243, 193, 214), (255, 227, 238))
     d = ImageDraw.Draw(im)
     cx, cy = W * S // 2, H * S // 2
-    if label in FACES:
+    fp = custom(f'face_{label}_{suit}', f'face_{label}') if label in FACES else None
+    if fp:
+        # your own full-body character: a tall court-card panel so it can fill the card
+        pw, ph = 124 * S, 178 * S
+        d.rounded_rectangle((cx - pw, cy - ph, cx + pw, cy + ph), 34 * S, fill=HALO[red] + (255,), outline=(255, 255, 255, 255), width=8 * S)
+        face = fit_box(load_art(fp), 236 * S, 340 * S)
+        paste_c(im, shadowed(face, blur=8 * S, dy=6 * S), cx, cy + 2 * S)
+        paste_c(im, shadowed(suit_pic(suit, 64 * S), blur=5 * S, dy=4 * S), cx + pw - 14 * S, cy + ph - 18 * S)
+    elif label in FACES:
         r = 138 * S
         d.ellipse((cx - r, cy - r, cx + r, cy + r), fill=HALO[red] + (255,), outline=(255, 255, 255, 255), width=8 * S)
         paste_c(im, shadowed(emoji(FACES[label], 214 * S), blur=8 * S, dy=6 * S), cx, cy - 4 * S)
-        paste_c(im, shadowed(emoji(f'game/{SUITS[suit]}.png', 78 * S), blur=5 * S, dy=4 * S), cx + 108 * S, cy + 108 * S)
+        paste_c(im, shadowed(suit_pic(suit, 78 * S), blur=5 * S, dy=4 * S), cx + 108 * S, cy + 108 * S)
     else:
         r = 120 * S if label != 'A' else 140 * S
         d.ellipse((cx - r, cy - r, cx + r, cy + r), fill=HALO[red] + (255,))
         size = 150 if label != 'A' else 190
-        paste_c(im, shadowed(emoji(f'game/{SUITS[suit]}.png', size * S), blur=8 * S, dy=8 * S), cx, cy)
+        ap = custom(f'ace_{suit}') if label == 'A' else None
+        paste_c(im, shadowed(art(ap, 236 * S) if ap else suit_pic(suit, size * S), blur=8 * S, dy=8 * S), cx, cy)
     t = corner(label, suit, red)
     im.alpha_composite(t, (20 * S, 18 * S))
     im.alpha_composite(t.rotate(180), (W * S - t.width - 20 * S, H * S - t.height - 18 * S))
     return im.resize(OUT_SIZE, Image.LANCZOS)
 
 
-def back(top, bot, border, dot, ring):
+def back(top, bot, border, dot, ring, name='back'):
+    p = custom(name)
+    if p: return picture_back(p, border)
     im = shape(top, bot, border, (255, 255, 255, 200))
     d = ImageDraw.Draw(im, 'RGBA'); rnd = random.Random(7)
     for y in range(60, H - 40, 54):
@@ -101,13 +137,28 @@ def back(top, bot, border, dot, ring):
     return im.resize(OUT_SIZE, Image.LANCZOS)
 
 
+
+def picture_back(path, border):
+    """A full-bleed picture (cover-cropped to the card shape) with the deck's rounded corners and border."""
+    w, h = W * S, H * S
+    pic = Image.open(path).convert('RGBA'); k = max(w / pic.width, h / pic.height)
+    pic = pic.resize((round(pic.width * k), round(pic.height * k)), Image.LANCZOS)
+    pic = pic.crop(((pic.width - w) // 2, (pic.height - h) // 2, (pic.width - w) // 2 + w, (pic.height - h) // 2 + h))
+    mask = Image.new('L', (w, h), 0); ImageDraw.Draw(mask).rounded_rectangle((0, 0, w - 1, h - 1), 40 * S, fill=255)
+    im = Image.new('RGBA', (w, h), (0, 0, 0, 0)); im.paste(pic, (0, 0), mask)
+    d = ImageDraw.Draw(im)
+    d.rounded_rectangle((3 * S, 3 * S, w - 1 - 3 * S, h - 1 - 3 * S), 37 * S, outline=border, width=8 * S)
+    d.rounded_rectangle((22 * S, 22 * S, w - 1 - 22 * S, h - 1 - 22 * S), 20 * S, outline=(255, 255, 255, 200), width=3 * S)
+    return im.resize(OUT_SIZE, Image.LANCZOS)
+
+
 OUT.mkdir(parents=True, exist_ok=True)
 n = 0
 for suit in SUITS:
     for rk, label in RANKS:
         card(suit, rk, label).save(OUT / f'card_{suit}_{rk}.png', optimize=True); n += 1
 back((255, 156, 196), (255, 111, 168), (231, 79, 140), (255, 255, 255, 70), (255, 214, 232, 255)).save(OUT / 'card_back_pink.png', optimize=True)
-back((92, 72, 134), (46, 36, 71), (255, 210, 90), (255, 210, 90, 60), (120, 98, 168, 255)).save(OUT / 'card_back_black.png', optimize=True)
+back((92, 72, 134), (46, 36, 71), (255, 210, 90), (255, 210, 90, 60), (120, 98, 168, 255), 'back_dark').save(OUT / 'card_back_black.png', optimize=True)
 shape((255, 255, 255), (255, 244, 249), (243, 193, 214), (255, 227, 238)).resize(OUT_SIZE, Image.LANCZOS).save(OUT / 'card_blank.png', optimize=True)
 # contact sheet for review
 names = [f'card_{s}_{r}.png' for s in SUITS for r, _ in RANKS] + ['card_back_pink.png', 'card_back_black.png', 'card_blank.png']

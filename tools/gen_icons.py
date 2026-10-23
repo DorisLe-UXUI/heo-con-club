@@ -1,11 +1,12 @@
 """Lobby game icons (512x512) for 18 games, composed from the kit.
 Usage: python3 -E gen_icons.py <assets_dir> [only-key ...]
 """
-import sys, random
+import sys, random, zlib
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageFilter
 sys.path.insert(0, str(Path(__file__).parent))
 from gfx import *
+from custom_img import load_art, fit_box
 
 A = Path(sys.argv[1])
 G = A / 'games'
@@ -36,7 +37,7 @@ def icon_base(color, accent=None):
     im = candy_rr(512, 512, color, radius=118, depth=20, dot=False)
     bok = new(512, 512)
     d = ImageDraw.Draw(bok)
-    rnd = random.Random(hash(color) & 0xffff)
+    rnd = random.Random(zlib.crc32(str(color).encode()) & 0xffff)   # stable across runs (hash() is salted per process)
     for _ in range(9):
         r = rnd.uniform(18, 60); x, y = rnd.uniform(30, 480), rnd.uniform(30, 380)
         d.ellipse((x - r, y - r, x + r, y + r), fill=(255, 255, 255, rnd.randint(25, 55)))
@@ -78,7 +79,12 @@ def make(key, label, color, draw, hot=None):
         ICONS[key] = label
         return
     im = icon_base(color)
-    draw(im)
+    art = A.parent / 'custom' / 'icons' / f'{key}.png'          # your own illustration (no text): the title is added here
+    if art.exists():
+        pic = fit_box(load_art(art), 410, 330)
+        put(im, with_shadow(pic, blur=8, alpha=0.28, dy=6), 256, 215)
+    else:
+        draw(im)
     title(im, label, color)
     if hot:
         tag(im, hot)

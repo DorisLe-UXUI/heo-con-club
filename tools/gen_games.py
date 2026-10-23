@@ -170,8 +170,10 @@ def gourd(size=256):
 BC = [('bau', 'BẦU', None, 'mint'), ('cua', 'CUA', 'game-items/crab.png', 'red'), ('tom', 'TÔM', 'game-items/shrimp.png', 'peach'),
       ('ca', 'CÁ', 'game-items/fish.png', 'sky'), ('ga', 'GÀ', 'game-items/rooster.png', 'lemon'), ('nai', 'NAI', 'game-items/deer.png', 'lavender')]
 sym = {}
+from custom_img import load_art, fit_square
 for key, label, src, col in BC:
-    im = gourd(256) if src is None else load(FL / src, 256)
+    art = A.parent / 'custom' / 'bau-cua' / f'{key}.png'     # your own mascot art (no text): frame and label are added here
+    im = fit_square(load_art(art), 256) if art.exists() else gourd(256) if src is None else load(FL / src, 256)
     sym[key] = S(im, f'bau-cua/symbols/{key}.png')
 fl = font(CB, 52)
 for key, label, src, col in BC:
@@ -262,9 +264,20 @@ DEN = [('1K', ('#ffffff', '#f4f1f8', '#a59cb5'), '#ff6fa8'), ('5K', PAL['pink'],
        ('100K', PAL['lemon'], '#ffffff'), ('500K', PAL['lavender'], '#ffffff'), ('1M', ('#fff1b8', '#ffb92e', '#a86c00'), '#ffffff'), ('10M', ('#4a4060', '#2c2540', '#ffcf4a'), '#ffcf4a')]
 
 
-def chip(label, pal, stripe, d=150):
+def chip(label, pal, stripe, d=150, art=None):
     D = d * SS
     im = new(D, D)
+    if art is not None:                                   # your own blank chip (custom/chips): only the value is written here
+        im = fit_square(load_art(art), d, pad=.01)
+        a = np.array(im.convert('RGB')).reshape(-1, 3); yy, xx = np.divmod(np.arange(d * d), d); rr = np.hypot(xx - d / 2, yy - d / 2)
+        plate = tuple(int(v) for v in np.median(a[(rr > d * .27) & (rr < d * .31)], axis=0))   # cover a face or picture in the middle
+        cv = new(d * SS, d * SS); cd = ImageDraw.Draw(cv); R0 = d * SS * .29
+        cd.ellipse((d * SS / 2 - R0, d * SS / 2 - R0, d * SS / 2 + R0, d * SS / 2 + R0), fill=plate + (255,))
+        cd.ellipse((d * SS / 2 - R0 * .8, d * SS / 2 - R0 * .92, d * SS / 2 + R0 * .8, d * SS / 2 - R0 * .1), fill=(255, 255, 255, 60))
+        im.alpha_composite(down(cv, d, d))
+        f = font(COINY, int(d * (0.3 if len(label) <= 3 else 0.24)))
+        ImageDraw.Draw(im).text((d / 2, d * 0.48), label, font=f, fill='white', anchor='mm', stroke_width=5, stroke_fill=rgb(pal[2]))
+        return im
     light, base, dark = (rgb(c) for c in pal)
     fill_mask(im, solid(D, D, dark), mask_ellipse(D, D, (0, D * 0.06, D - 1, D - 1)))
     fill_mask(im, rad_grad(D, D, light, base, 0.4, 0.3, 0.8, 0.8), mask_ellipse(D, D, (0, 0, D - 1, D * 0.94)))
@@ -314,7 +327,8 @@ def chip_stack(top_chip, pal, n=5, d=150):
 
 
 for lab, pal, stripe in DEN:
-    c = chip(lab, pal, stripe)
+    art = A.parent / 'custom' / 'chips' / f'chip_{lab.lower()}.png'
+    c = chip(lab, pal, stripe, art=art if art.exists() else None)
     S(c, f'card-shared/chips/chip_{lab.lower()}.png')
     S(chip_stack(c, pal), f'card-shared/chips/stack_{lab.lower()}.png')
 for lab, pal, stripe in (('D', ('#ffffff', '#f4f1f8', '#8a8496'), '#ff6fa8'), ('SB', PAL['sky'], '#ffffff'), ('BB', PAL['peach'], '#ffffff')):

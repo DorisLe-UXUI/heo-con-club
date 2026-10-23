@@ -23,3 +23,8 @@ dist/
 .DS_Store
 __pycache__/
 *.pyc
+
+# bản gốc của các file assets/ bị thay bằng ảnh tự tạo (tools/apply_custom.py tự quản lý)
+custom/.goc/
+custom/sheets/_kiem_tra/
+custom/sheets/_bo_qua/

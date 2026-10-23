@@ -44,6 +44,31 @@
   ];
   const BY_ID = Object.fromEntries(FISH.map(f => [f.id, f]));
   const BOSSES = FISH.filter(f => f.tier === 'boss');
+
+  /** Defaults and allowed multipliers per tier for species added from outside (keeps small fish at 1–5 hits). */
+  const TIER_DEF = {
+    small: { r: .6, speed: 2.8, weight: 6, school: [2, 4], mult: [2, 5] },
+    medium: { r: .9, speed: 1.7, weight: 3.5, school: [1, 2], mult: [6, 20] },
+    big: { r: 1.35, speed: 1.25, weight: 1.4, school: [1, 1], mult: [20, 70] },
+    boss: { r: 2.2, speed: .8, weight: 0, school: [1, 1], mult: [60, 300] },
+  };
+  /** Add species made outside the game (custom art packed by tools/apply_custom.py into window.HC_CUSTOM_FISH).
+   *  def: { id, name, tier, mult, look, size?: 0.5–2 (× the tier's size), speed?, weight?, school?: [min,max], upright?, faces?: 'left'|'right' }.
+   *  Entries with a missing look, an unknown tier or a duplicate id are skipped. Returns the species that were added. */
+  function addFish(defs) {
+    const added = [];
+    for (const d of defs || []) {
+      if (!d || typeof d.id !== 'string' || !d.id || BY_ID[d.id] || !TIER_DEF[d.tier] || !d.look) continue;
+      const base = TIER_DEF[d.tier], num = (v, lo, hi, dflt) => { v = +v; return Number.isFinite(v) ? Math.max(lo, Math.min(hi, v)) : dflt; };
+      const k = num(d.size, .5, 2, 1);
+      const school = Array.isArray(d.school) && d.school.length === 2 ? [num(d.school[0], 1, 8, 1), num(d.school[1], 1, 8, 1)].map(Math.round).sort((a, b) => a - b) : base.school.slice();
+      const f = { id: d.id, name: String(d.name || d.id).slice(0, 40), tier: d.tier, mult: Math.round(num(d.mult, base.mult[0], base.mult[1], base.mult[0])),
+        r: +(base.r * k).toFixed(2), speed: num(d.speed, .3, 5, base.speed), weight: d.tier === 'boss' ? 0 : num(d.weight, 0, 30, base.weight),
+        school: d.tier === 'boss' ? [1, 1] : school, look: String(d.look), upright: !!d.upright, faces: d.faces === 'right' ? 'right' : 'left', custom: true };
+      FISH.push(f); BY_ID[f.id] = f; if (f.tier === 'boss') BOSSES.push(f); added.push(f);
+    }
+    return added;
+  }
   const DEFAULT_BOUNDS = { x0: -12, x1: 12, z0: -6.5, z1: 6.5 };
 
   function rng32(seed) { let a = seed >>> 0; return function () { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
@@ -176,6 +201,6 @@
     return { shots: fired, spent, back, rtp: back / spent, kills, refunds, escapedHits, escapeShare: escapedHits / fired, seconds: Math.round(t) };
   }
 
-  return { RTP, BETS, TIERS, SPREAD, STUN, SLOW, FISH, BY_ID, BOSSES, DEFAULT_BOUNDS, rng32, betOf, hp, drawHits, newTarget, applyHit, prizeFor,
+  return { RTP, BETS, TIERS, SPREAD, STUN, SLOW, FISH, BY_ID, BOSSES, TIER_DEF, addFish, DEFAULT_BOUNDS, rng32, betOf, hp, drawHits, newTarget, applyHit, prizeFor,
     pickType, pickBoss, nextBossDelay, schoolSize, margin, schoolSpread, makePath, pathAt, bez, inside, speedFactor, timeLeft, worthLocking, needed, simulateWorld };
 });

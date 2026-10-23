@@ -17,16 +17,21 @@
 
   T3.register('ban-ca', {
     title: 'Bắn Cá', sub: 'Nhấn giữ vào cá để khoá mục tiêu · cá to nhiều máu, thưởng lớn · trùm xuất hiện mỗi phút',
-    table: 'none', theme: 'sky', tex: ['ban-ca'], scripts: ['js/games3d/rules/ban-ca.js'],
+    table: 'none', theme: 'sky', tex: ['ban-ca', 'custom-fish'], scripts: ['js/games3d/rules/ban-ca.js'],   // custom-fish: your own fish art (tools/apply_custom.py)
     cam: { pos: [0, 22, 13], look: [0, PY, 0] },
     rules: '<p>Đang tải bảng cá…</p>',
     async start(ctx) { await setup(ctx, {}); },
     async selftest(ctx) { return selftest(ctx); },
   });
 
+  /** Picture of a species for HTML (rules table, toasts): custom art lives in HC_TEX as a data URI. */
+  function iconOf(f) {
+    if (f.custom) return (window.HC_TEX || {})[f.look] || 'emoji-fluent-3d/sea/fish.png';
+    return f.look.startsWith('proc:') ? 'emoji-fluent-3d/sea/tropical_fish.png' : 'emoji-fluent-3d/sea/' + f.look.slice(4) + '.png';
+  }
   function hpRange(f) { const s = R.SPREAD[f.tier], m = R.hp(f.mult); return f.tier === 'small' ? `${Math.max(1, Math.floor(m * (1 - s)))}–${Math.min(5, Math.ceil(m * (1 + s)))}` : `${Math.floor(m * (1 - s))}–${Math.ceil(m * (1 + s))}`; }
   function rulesHtml() {
-    const img = f => f.look.startsWith('proc:') ? HC.A('emoji-fluent-3d/sea/tropical_fish.png') : HC.A('emoji-fluent-3d/sea/' + f.look.slice(4) + '.png');
+    const img = f => HC.A(iconOf(f));
     const rows = R.FISH.map(f => `<tr><td><img src="${img(f)}" style="width:44px;vertical-align:middle;${f.look.startsWith('proc:') ? 'filter:hue-rotate(' + ({ 'proc:gold': 150, 'proc:pink': 260, 'proc:clown': 140, 'proc:dragon': 160 }[f.look]) + 'deg)' : ''}"> ${f.name}</td><td><b>×${f.mult}</b></td><td>${hpRange(f)}</td><td>${R.TIERS[f.tier]}</td></tr>`).join('');
     return `<p><b>Nhấn vào một con cá</b> (hoặc gần nó) để <b>khoá mục tiêu</b>: vòng ngắm hiện trên con cá và đạn sẽ <b>bay đuổi theo nó</b>, trúng chắc chắn. Giữ chuột (hoặc giữ tay) để bắn liên tục. Nhấn vào chỗ không có cá thì đạn bay thẳng, nảy khi chạm thành và trúng con nào thì tính con đó. Bật <b>TỰ BẮN</b> để súng tự chọn cá và bám theo.</p>
       <ul><li>Mỗi viên đạn tốn đúng mức cược của súng: cấp 1–5 = <b>1K · 2K · 5K · 10K · 50K</b> (nút − / +).</li>
@@ -34,18 +39,25 @@
       <li><b>Cá càng to càng nhiều máu nhưng thưởng càng lớn</b>: cá nhỏ chỉ cần 1–5 phát, trùm cần cả trăm phát. Trung bình mỗi phát trúng trả lại <b>95%</b> tiền đạn, cá nhỏ hay cá to đều như nhau.</li>
       <li>Cá trúng lưới sẽ bơi chậm lại một chút. Cá bơi khỏi màn hình thì mang theo vết thương, số đạn đã bắn vào nó coi như mất.</li>
       <li>Nếu bạn và bot cùng bắn một con, khi cá bị bắt thì <b>ai góp đạn cũng được chia thưởng</b> theo số xu đã bắn vào nó. Bot không bao giờ lấy xu của bạn. Đạn lạc không trúng con nào được hoàn xu.</li>
-      <li>Khoảng mỗi phút có một <b>trùm</b> (Bạch Tuộc, Cá Mập, Cá Voi) bơi ngang, hệ số ×80 đến ×150.</li></ul>
+      <li>Khoảng mỗi phút có một <b>trùm</b> (${R.BOSSES.map(b => b.name).join(', ')}) bơi ngang, hệ số ×${Math.min(...R.BOSSES.map(b => b.mult))} đến ×${Math.max(...R.BOSSES.map(b => b.mult))}.</li></ul>
       <table style="width:100%;border-collapse:collapse;font-size:24px"><tr style="color:#c2407a"><th style="text-align:left">Cá</th><th>Hệ số</th><th>Máu (số phát)</th><th>Loại</th></tr>${rows}</table>`;
   }
 
   // ==================================================================== setup
   async function setup(ctx, opts) {
     const T = ctx.THREE; R = window.Rules['ban-ca'];
+    if (!R.customAdded) {                                                // species from custom/ban-ca, new art for built-in ones from custom/ban-ca/thay
+      R.customAdded = R.addFish(window.HC_CUSTOM_FISH || []).length || true;
+      const looks = window.HC_CUSTOM_LOOKS || {};
+      for (const id in looks) if (R.BY_ID[id] && (window.HC_TEX || {})[looks[id]]) Object.assign(R.BY_ID[id], { look: looks[id], custom: true });
+    }
     T3.modules['ban-ca'].rules = rulesHtml();
     G = { ctx, T, fish: [], bullets: [], nets: [], coins: [], fx: [], own: new Set(), level: opts.test ? 3 : ctx.Q.has('demo') ? 1 : 2, auto: false, firing: false,
       aim: new T.Vector3(0, PY, -2), lastShot: -9, t: 0, spent: 0, won: 0, shots: 0, caught: 0, myInFlight: 0, test: !!opts.test, demo: ctx.Q.has('demo') && !opts.test,
       log: [], spawnT: 0, bossT: 0, bounds: Object.assign({}, R.DEFAULT_BOUNDS), camKey: '', lock: null, pointer: null, safe: { top: .13, bottom: .15 } };
     G.bossT = G.demo ? 2.5 : 38;
+    G.preview = R.BY_ID[ctx.Q.get('fish')] || null;   // ?fish=<id> keeps sending that species (to look at your own fish art)
+    if (G.preview && G.preview.tier === 'boss') G.bossT = 1.5;
     ctx.music('sea');
     // the 'none' table still gets the room floor/rug and async potted plants: sweep everything that is not ours
     G.own.add(ctx.keyLight.target); ctx.scene.children.filter(o => !o.isLight && o !== ctx.keyLight.target).forEach(o => ctx.scene.remove(o));
@@ -281,16 +293,16 @@
     return f;
   }
   function spawnSchool(type, progress) {
-    type = type || R.pickType(Math.random);
+    type = type || (G.preview && G.preview.tier !== 'boss' && Math.random() < .5 ? G.preview : R.pickType(Math.random));
     const n = R.schoolSize(type, Math.random), path = R.makePath(type, Math.random, G.bounds), spread = R.schoolSpread(type);
     const base = progress != null ? path.len * progress : 0;
     for (let i = 0; i < n && G.fish.length < MAX_FISH; i++) makeFish(type, path, base - i * type.r * 1.6 - Math.random() * .4, n === 1 ? 0 : (Math.random() * 2 - 1) * spread);
   }
   function spawnBoss() {
-    const b = R.pickBoss(Math.random), path = R.makePath(b, Math.random, G.bounds);
+    const b = G.preview && G.preview.tier === 'boss' ? G.preview : R.pickBoss(Math.random), path = R.makePath(b, Math.random, G.bounds);
     makeFish(b, path, 0, 0);
     G.ctx.ui.callout(b.name.toUpperCase() + '!', '#1f6fc0');
-    G.ctx.ui.toast(`${b.name} ×${b.mult} xuất hiện! Bắn mau!`, 'emoji-fluent-3d/sea/' + b.look.slice(4) + '.png');
+    G.ctx.ui.toast(`${b.name} ×${b.mult} xuất hiện! Bắn mau!`, iconOf(b));
     G.ctx.sfx('power', .5); G.ctx.sfx('turn', .35);
   }
   function placeFish(f, dt) {
@@ -304,7 +316,7 @@
       const cam = G.ctx.camera; o.quaternion.copy(cam.quaternion);
       const e = cam.matrixWorld.elements, sx = q.dx * e[0] + q.dz * e[2], sy = q.dx * e[4] + q.dz * e[6];
       let rz = 0, flip = 1;
-      if (!f.type.upright) { flip = sx > 0 ? -1 : 1; rz = sx >= 0 ? Math.atan2(sy, sx) : -Math.atan2(sy, -sx); rz = Math.max(-.5, Math.min(.5, rz)); }
+      if (!f.type.upright) { flip = (sx > 0 ? -1 : 1) * (f.type.faces === 'right' ? -1 : 1); rz = sx >= 0 ? Math.atan2(sy, sx) : -Math.atan2(sy, -sx); rz = Math.max(-.5, Math.min(.5, rz)); }
       rz += Math.sin(G.t * (f.type.upright ? 2 : 5) + f.ph) * (f.type.upright ? .08 : .06);
       o.rotateZ(rz);
       const sq = f.type.upright ? 1 + Math.sin(G.t * 3 + f.ph) * .04 : 1;
@@ -636,7 +648,7 @@
       const target = Math.min(MAX_FISH - 1, 18 + Math.round(b.x1 * .7));
       if (G.spawnT <= 0 && G.fish.length < target) { spawnSchool(null, null); G.spawnT = .4 + Math.random() * .8; }
       G.bossT -= dt;
-      if (G.bossT <= 0 && !G.fish.some(f => f.type.tier === 'boss' && f.alive)) { spawnBoss(); G.bossT = G.demo ? 18 : R.nextBossDelay(Math.random); }
+      if (G.bossT <= 0 && !G.fish.some(f => f.type.tier === 'boss' && f.alive)) { spawnBoss(); G.bossT = G.preview ? 4 : G.demo ? 18 : R.nextBossDelay(Math.random); }
     }
     // ---- fish
     for (const f of [...G.fish]) {

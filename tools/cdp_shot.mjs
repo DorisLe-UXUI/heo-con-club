@@ -3,6 +3,7 @@
 // usage: node tools/cdp_shot.mjs "<page.html?query>" <out.png> [W,H] [--title=POSED] [--wait=1500] [--max=60000]
 //   --title  wait until document.title equals this value (the page signals that it reached the pose)
 //   --wait   extra milliseconds before the capture;  --max  give up waiting for the title after this long
+//   --eval   a JS expression evaluated just before the capture; its JSON value is printed (for debugging)
 import { spawn } from 'node:child_process';
 import { mkdtempSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -12,7 +13,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const [page, out, size = '1920,1080', ...rest] = process.argv.slice(2);
 if (!page || !out) { console.error('usage: node tools/cdp_shot.mjs "<page.html?query>" <out.png> [W,H] [--title=X] [--wait=ms] [--max=ms]'); process.exit(1); }
-const opt = Object.fromEntries(rest.map(a => a.replace(/^--/, '').split('=')));
+const opt = Object.fromEntries(rest.map(a => { const i = a.indexOf('='); return i < 0 ? [a.replace(/^--/, ''), true] : [a.slice(0, i).replace(/^--/, ''), a.slice(i + 1)]; }));
 const [w, h] = size.split(',').map(Number);
 const [file, query = ''] = page.split('?');
 const url = pathToFileURL(path.join(ROOT, file)).href + (query ? '?' + query : '');
@@ -43,6 +44,10 @@ while (!reached && Date.now() - t0 < max) {
   if (r.result && r.result.value === opt.title) reached = true; else await sleep(250);
 }
 await sleep(+(opt.wait || 1500));
+if (opt.eval) {
+  const r = await send('Runtime.evaluate', { expression: opt.eval, returnByValue: true, awaitPromise: true });
+  console.log('eval:', JSON.stringify(r.result ? r.result.value : r));
+}
 const shot = await send('Page.captureScreenshot', { format: 'png' });
 writeFileSync(out, Buffer.from(shot.data, 'base64'));
 console.log(`${out}  ${Math.round((Date.now() - t0) / 1000)}s${opt.title ? (reached ? '  (pose reached)' : '  (title NOT reached)') : ''}`);

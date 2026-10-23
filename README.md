@@ -175,6 +175,13 @@ Hoạt ảnh có sẵn cho nhân vật `adv_*`: Idle_A, Idle_B, Interact, Use_It
 
 Âm thanh gợi ý theo sự kiện nằm trong `manifest.recommended.sfx`.
 
+## Tự tạo ảnh bằng AI
+
+- Prompt sẵn sàng copy: `docs/PROMPTS.md` (hoặc trang có nút sao chép `docs/prompts.html`). 40 prompt phủ toàn bộ hình ảnh game: 30 ảnh bảng 16:9 chứa nhiều món (cá, bộ bài, phỉnh, icon, nút, khung, VIP, biểu cảm, avatar, quân cờ…) + 10 ảnh nguyên tấm (3 nền, 7 bàn Tiến Lên).
+- Lưu ảnh bảng vào `custom/sheets/` đúng tên, rồi chạy `python3 -E tools/apply_custom.py`. Script tự xoá nền trắng, cắt ra từng món theo thứ tự hàng từ trái sang phải, ghép lá bài, icon, phỉnh, VIP, quà ngày (chữ số và chữ do script vẽ), xoá dấu ✦ của Gemini trên ảnh nền, đóng gói texture 3D và vẽ lại bản đồ. Kết quả cắt xem trong `custom/sheets/_kiem_tra/`.
+- Bắn Cá có sẵn 24 loài mới (6 trùm) trong `custom/ban-ca/ca.json`, chỉ chờ ảnh. Máu cá tính theo hệ số nên tỉ lệ trả thưởng 95% giữ nguyên. Xem riêng một loài: `play3d.html?game=ban-ca&fish=cus_kraken`.
+- Xoá ảnh trong `custom/` rồi chạy lại lệnh là game quay về ảnh mặc định. Chi tiết: `custom/README.md`.
+
 ## Đăng lên web
 
 - GitHub: https://github.com/DorisLe-UXUI/heo-con-club, GitHub Pages phát thẳng nhánh `main` (file `.nojekyll` tắt Jekyll). Mỗi lần `git push` là trang tự cập nhật sau vài phút.

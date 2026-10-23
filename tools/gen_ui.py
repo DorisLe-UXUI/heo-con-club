@@ -7,6 +7,8 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFilter
 sys.path.insert(0, str(Path(__file__).parent))
 from gfx import *
+from custom_img import load_art, fit_box
+CUSTOM = Path(sys.argv[1]).resolve().parent / 'custom'
 
 A = Path(sys.argv[1])
 OUT = A / 'ui-premium-generated'
@@ -156,6 +158,13 @@ for k in ('pink', 'mint', 'sky', 'gold', 'silver', 'lavender', 'tet', 'rainbow')
 # ---------------------------------------------------------------- VIP & level badges
 def shield(n, colors, label='VIP'):
     w, h = 220, 250
+    art = CUSTOM / 'vip' / f'vip_{n}.png'
+    if art.exists():                                      # your own blank badge (custom/vip): VIP and the level are written here
+        pic = fit_box(load_art(art), w, h); im = new(w, h); im.alpha_composite(pic, ((w - pic.width) // 2, (h - pic.height) // 2))
+        d = ImageDraw.Draw(im)
+        d.text((w / 2, h * 0.38), label, font=font(CB, 46), fill='white', anchor='mm', stroke_width=5, stroke_fill=rgb(colors[2]))
+        d.text((w / 2, h * 0.63), str(n), font=font(COINY, 78), fill='white', anchor='mm', stroke_width=6, stroke_fill=rgb(colors[2]))
+        return im
     W, H = w * SS, h * SS
     im = new(W, H)
     pts = [(W * 0.5, H * 0.02), (W * 0.95, H * 0.15), (W * 0.9, H * 0.6), (W * 0.5, H * 0.97), (W * 0.1, H * 0.6), (W * 0.05, H * 0.15)]
@@ -308,7 +317,8 @@ for day in range(1, 8):
     inner = candy_rr(180, 150, ('#ffffff', '#fffaf5', '#ead9e2'), radius=30, depth=0, gloss=False, dot=False)
     card.alpha_composite(inner, (20, 62))
     icon = {1: 'coin', 2: 'coin', 3: 'money_bag', 4: 'gem_stone', 5: 'wrapped_gift', 6: 'money_bag', 7: 'crown'}[day]
-    paste_c(card, load(FL / 'game' / f'{icon}.png', 120), 110, 136)
+    art = CUSTOM / 'daily' / f'day_{day}.png'             # your own reward picture (custom/daily)
+    paste_c(card, fit_box(load_art(art), 150, 128) if art.exists() else load(FL / 'game' / f'{icon}.png', 120), 110, 136)
     d = ImageDraw.Draw(card)
     d.text((110, 34), f'Ngày {day}', font=font(CB, 34), fill='white', anchor='mm', stroke_width=3, stroke_fill=rgb(PAL[c][2]))
     d.text((110, 240), ['1K', '2K', '5K', '10', 'Quà', '50K', 'VIP'][day - 1], font=font(CB, 38), fill='white', anchor='mm', stroke_width=3, stroke_fill=rgb(PAL[c][2]))
