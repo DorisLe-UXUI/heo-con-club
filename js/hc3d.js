@@ -22,7 +22,7 @@
     if (window.HC_MODELS && window.HC_MODELS[key]) return Promise.resolve();
     if (!scriptCache[key]) scriptCache[key] = new Promise((res, rej) => {
       const s = document.createElement('script');
-      s.src = BASE + key + '.js'; s.onload = () => res(); s.onerror = () => rej(new Error('model ' + key));
+      s.src = BASE + key + '.js' + (window.HC && HC.V ? '?' + HC.V : ''); s.onload = () => res(); s.onerror = () => rej(new Error('model ' + key));
       document.head.appendChild(s);
     });
     return scriptCache[key];

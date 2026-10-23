@@ -464,7 +464,7 @@
     }
   }
 
-  function loadScript(src) { return new Promise((res, rej) => { const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = () => rej(new Error('load ' + src)); document.head.appendChild(s); }); }
+  function loadScript(src) { return new Promise((res, rej) => { const s = document.createElement('script'); s.src = src + (window.HC && HC.V ? '?' + HC.V : ''); s.onload = res; s.onerror = () => rej(new Error('load ' + src)); document.head.appendChild(s); }); }
   T3.loadScript = loadScript;
   T3.Ctx = Ctx;
 })();

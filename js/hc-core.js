@@ -92,7 +92,9 @@
   };
 
   // ------------------------------------------------------------------ small helpers
-  const A = p => /^(data:|blob:|https?:)/.test(p) ? p : (window.HC_ASSET_BASE || 'assets/') + p.split('/').map(encodeURIComponent).join('/');
+  /** Release stamp added to asset URLs so browsers fetch new pictures after an update (tools/bump_version.py changes it). */
+  const V = 'v=2026102301';
+  const A = p => /^(data:|blob:|https?:)/.test(p) ? p : (window.HC_ASSET_BASE || 'assets/') + p.split('/').map(encodeURIComponent).join('/') + '?' + V;
   const fmt = n => Math.round(n).toLocaleString('vi-VN');
   const short = n => n >= 1e9 ? (n / 1e9).toFixed(n % 1e9 ? 1 : 0).replace('.', ',') + 'B' : n >= 1e6 ? (n / 1e6).toFixed(n % 1e6 ? 1 : 0).replace('.', ',') + 'M' : n >= 1e3 ? Math.round(n / 1e3) + 'K' : String(n);
   const pick = a => a[Math.floor(Math.random() * a.length)];
@@ -175,5 +177,5 @@
   function rememberFrom() { const f = new URLSearchParams(location.search).get('from'); if (f) raw.set('heocon_from', f, SS); }
   rememberFrom();
 
-  window.HC = { raw, store, key, auth, settings, saveSettings, uiScale, UIZ, sfx, music, stopMusic, veil, goto, arrive, from, A, fmt, short, pick, LS: !!LS, _sha256: sha256 };
+  window.HC = { V, raw, store, key, auth, settings, saveSettings, uiScale, UIZ, sfx, music, stopMusic, veil, goto, arrive, from, A, fmt, short, pick, LS: !!LS, _sha256: sha256 };
 })();

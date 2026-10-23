@@ -29,8 +29,8 @@ for f in files:
         for a, b in pairs: s = s.replace(a, b)
         if f.endswith('.html') or f.startswith('js/'): s = s.replace('index.html', 'home.html')
         if f == 'js/hc-core.js':
-            old = "const A = p => /^(data:|blob:|https?:)/.test(p) ? p : (window.HC_ASSET_BASE || 'assets/') + p.split('/').map(encodeURIComponent).join('/');"
-            assert old in s; s = s.replace(old, "const A = p => /^(data:|blob:|https?:)/.test(p) ? p : (window.HC_PACK && window.HC_PACK[p]) || (window.HC_ASSET_BASE || 'assets/') + p.split('/').map(encodeURIComponent).join('/');")
+            old = "const A = p => /^(data:|blob:|https?:)/.test(p) ? p : (window.HC_ASSET_BASE || 'assets/') + p.split('/').map(encodeURIComponent).join('/') + '?' + V;"
+            assert old in s; s = s.replace(old, "const A = p => /^(data:|blob:|https?:)/.test(p) ? p : (window.HC_PACK && window.HC_PACK[p]) || (window.HC_ASSET_BASE || 'assets/') + p.split('/').map(encodeURIComponent).join('/') + '?' + V;")
         if f == 'tien-len.html':
             old = "const A = p => 'assets/' + p.split('/').map(encodeURIComponent).join('/');"
             assert old in s; s = s.replace(old, "const A = p => (window.HC_PACK && window.HC_PACK[p]) || 'assets/' + p.split('/').map(encodeURIComponent).join('/');")

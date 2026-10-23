@@ -47,7 +47,7 @@ img{-webkit-user-drag:none}
 .bubble.me::after{border-top-color:#fff7d6}
 
 /* ---------------- loading */
-#loading{position:absolute;inset:0;z-index:50;overflow:hidden;background:#f6d9f3 url(assets/ui-premium-generated/lobby-backgrounds/bg_loading.jpg) center/cover;transition:opacity .6s ease}
+#loading{position:absolute;inset:0;z-index:50;overflow:hidden;background:#f6d9f3 url(assets/ui-premium-generated/lobby-backgrounds/bg_loading.jpg?v=2026102301) center/cover;transition:opacity .6s ease}
 #loading.out{opacity:0;pointer-events:none}
 @keyframes spin{to{transform:rotate(360deg)}}
 .logoimg{position:absolute;left:50%;filter:drop-shadow(0 14px 18px rgba(120,30,80,.3));animation:logoBob 2.4s ease-in-out infinite alternate}
@@ -68,7 +68,7 @@ img{-webkit-user-drag:none}
 #lcred{position:absolute;left:24px;bottom:14px;font:800 16px "Baloo 2";color:rgba(110,60,110,.65)}
 
 /* ---------------- auth */
-#auth{position:absolute;inset:0;z-index:40;background:#f6d9f3 url(assets/ui-premium-generated/lobby-backgrounds/bg_login.jpg) center/cover;transition:opacity .5s}
+#auth{position:absolute;inset:0;z-index:40;background:#f6d9f3 url(assets/ui-premium-generated/lobby-backgrounds/bg_login.jpg?v=2026102301) center/cover;transition:opacity .5s}
 #auth::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 50% 50%,rgba(255,240,248,.32) 0,rgba(255,240,248,.12) 45%,rgba(70,20,70,.22) 100%);pointer-events:none}
 #auth.out{opacity:0;pointer-events:none}
 #brand{position:absolute;left:284px;top:0;width:700px;height:1080px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px}
@@ -315,7 +315,7 @@ img{-webkit-user-drag:none}
 
   <div id="auth" class="hide"><div class="frame">
     <div id="brand">
-      <img class="lg" src="assets/ui-premium-generated/logo_heo_con_club.png" alt="Heo Con Club">
+      <img class="lg" src="assets/ui-premium-generated/logo_heo_con_club.png?v=2026102301" alt="Heo Con Club">
       <div class="tag">Game bài & game dân gian siêu dễ thương</div>
       <div class="feats">
         <div><img src="assets/emoji-fluent-3d/game/joystick.png">18 trò chơi</div>
@@ -351,7 +351,7 @@ img{-webkit-user-drag:none}
 
   <div id="loading">
     <div class="frame">
-      <img class="logoimg" src="assets/ui-premium-generated/logo_heo_con_club.png" alt="Heo Con Club">
+      <img class="logoimg" src="assets/ui-premium-generated/logo_heo_con_club.png?v=2026102301" alt="Heo Con Club">
       <div id="lbox">
         <div id="lbar"><div id="lfill"></div><img id="lpig" src="assets/emoji-fluent-3d/animals/pig.png" style="left:4px"></div>
         <div id="lrow"><div id="ltext">Đang mở cửa thị trấn…</div><div id="lpct">0%</div></div>
@@ -489,7 +489,7 @@ function setLoad(p) {
 function startLoadingFx() {
   let k = 0; const tip = () => { $('#ltip').innerHTML = TIPS[k++ % TIPS.length]; }; tip(); return setInterval(tip, 3200);
 }
-function loadScript(src) { return new Promise((res, rej) => { const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = () => rej(new Error(src)); document.head.appendChild(s); }); }
+function loadScript(src) { return new Promise((res, rej) => { const s = document.createElement('script'); s.src = src + (window.HC && HC.V ? '?' + HC.V : ''); s.onload = res; s.onerror = () => rej(new Error(src)); document.head.appendChild(s); }); }
 
 // ------------------------------------------------------------------ auth screen
 let authTab = 'login', regMascot = 0;
