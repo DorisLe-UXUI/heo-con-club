@@ -22,6 +22,8 @@ for k, f in [('hA', 'hearts_A'), ('sK', 'spades_K'), ('hQ', 'hearts_Q'), ('sA', 
 SUITS = ['spades', 'clubs', 'diamonds', 'hearts']
 RANKS = ['A', '02', '03', '04', '05', '06', '07', '08', '09', '10', 'J', 'Q', 'K']
 BUNDLES = {'town': items}
+if (A / 'games/lobby-icons-en').exists():      # English sign icons, loaded after tex_town.js when the game runs in English
+    BUNDLES['town-en'] = {f'icon_{g}': (f'games/lobby-icons-en/{g}.png', 256, 'smooth') for g in GAMES}
 BUNDLES['cards'] = {f'c_{s}_{r.lstrip("0")}': (f'cards-heocon/cards/card_{s}_{r}.png', 432, 'smooth') for s in SUITS for r in RANKS}
 BUNDLES['cards'].update({'c_back': ('cards-heocon/cards/card_back_pink.png', 432, 'smooth'), 'c_back_black': ('cards-heocon/cards/card_back_black.png', 432, 'smooth')})
 BUNDLES['chips'] = {f'chip_{v}': (f'games/card-shared/chips/chip_{v}.png', 160, 'smooth') for v in ['1k', '5k', '10k', '50k', '100k', '500k', '1m', '10m']}

@@ -49,6 +49,7 @@ python3 -m http.server 8765
 - **Điều khiển:** chạm đất để đi, chạm cửa tiệm để tự đi tới cửa rồi vào game, W A S D để chạy, kéo để xoay, cuộn hoặc chụm 2 ngón để phóng to, bấm bản đồ nhỏ để đi tới chỗ đó.
 - **Giao diện:** cảnh 3D tràn kín cửa sổ ở mọi tỉ lệ. HUD nhỏ gọn bám theo các cạnh để chừa chỗ cho game. Popup to hơn HUD một chút cho dễ đọc và tự thu nhỏ khi cửa sổ hẹp.
   - **Cài đặt → Cỡ giao diện:** Nhỏ / Vừa / Lớn, áp dụng cho thị trấn, bản đồ, máy đẩy xu và 18 game 3D.
+- **Tiếng Anh:** Cài đặt → 🌐 Ngôn ngữ (Tiếng Việt / English), hoặc thêm `?lang=en` vào link. `js/hc-i18n.js` dịch chữ trên trang, chữ vẽ trên canvas và biển hiệu 3D theo từ điển `js/i18n-en.js`; icon game có bản chữ tiếng Anh trong `games/lobby-icons-en/` (`HC_ICON_LANG=en python3 -E tools/gen_icons.py assets`, rồi `python3 tools/pack_tex.py assets town-en`). Mở trang với `&i18nlog=1` rồi đọc `window.__i18nMiss` để xem câu nào chưa có bản dịch.
 - **Sảnh 2D và Tiến Lên** có nút về thị trấn. Vào game từ thị trấn thì nút quay lại sẽ đưa bạn về thị trấn.
 
 ## Máy Đẩy Xu (`pusher.html`)

@@ -47,7 +47,7 @@ img{-webkit-user-drag:none}
 .bubble.me::after{border-top-color:#fff7d6}
 
 /* ---------------- loading */
-#loading{position:absolute;inset:0;z-index:50;overflow:hidden;background:#f6d9f3 url(assets/ui-premium-generated/lobby-backgrounds/bg_loading.jpg?v=202610231911) center/cover;transition:opacity .6s ease}
+#loading{position:absolute;inset:0;z-index:50;overflow:hidden;background:#f6d9f3 url(assets/ui-premium-generated/lobby-backgrounds/bg_loading.jpg?v=202610281646) center/cover;transition:opacity .6s ease}
 #loading.out{opacity:0;pointer-events:none}
 @keyframes spin{to{transform:rotate(360deg)}}
 .logoimg{position:absolute;left:50%;filter:drop-shadow(0 14px 18px rgba(120,30,80,.3));animation:logoBob 2.4s ease-in-out infinite alternate}
@@ -68,7 +68,7 @@ img{-webkit-user-drag:none}
 #lcred{position:absolute;left:24px;bottom:14px;font:800 16px "Baloo 2";color:rgba(110,60,110,.65)}
 
 /* ---------------- auth */
-#auth{position:absolute;inset:0;z-index:40;background:#f6d9f3 url(assets/ui-premium-generated/lobby-backgrounds/bg_login.jpg?v=202610231911) center/cover;transition:opacity .5s}
+#auth{position:absolute;inset:0;z-index:40;background:#f6d9f3 url(assets/ui-premium-generated/lobby-backgrounds/bg_login.jpg?v=202610281646) center/cover;transition:opacity .5s}
 #auth::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 50% 50%,rgba(255,240,248,.32) 0,rgba(255,240,248,.12) 45%,rgba(70,20,70,.22) 100%);pointer-events:none}
 #auth.out{opacity:0;pointer-events:none}
 #brand{position:absolute;left:284px;top:0;width:700px;height:1080px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px}
@@ -342,57 +342,57 @@ img{-webkit-user-drag:none}
       <div class="lv"><i id="meLvBar" style="width:60%"></i><b id="meLv">Lv 1</b></div>
     </div>
     <div id="money">
-      <div class="pill"><img class="ic" src="assets/emoji-fluent-3d/game/coin.png?v=202610231911"><span class="coinTxt" id="coinTxt">0</span><img class="plus btn" data-open="shop" src="assets/ui-jelly-pzuh/buttons-pastel/mint/icon_plus_mint.png?v=202610231911"></div>
-      <div class="pill gem"><img class="ic" src="assets/emoji-fluent-3d/game/gem_stone.png?v=202610231911"><span id="gemTxt">2.480</span><img class="plus btn" data-open="shop" src="assets/ui-jelly-pzuh/buttons-pastel/mint/icon_plus_mint.png?v=202610231911"></div>
+      <div class="pill"><img class="ic" src="assets/emoji-fluent-3d/game/coin.png?v=202610281646"><span class="coinTxt" id="coinTxt">0</span><img class="plus btn" data-open="shop" src="assets/ui-jelly-pzuh/buttons-pastel/mint/icon_plus_mint.png?v=202610281646"></div>
+      <div class="pill gem"><img class="ic" src="assets/emoji-fluent-3d/game/gem_stone.png?v=202610281646"><span id="gemTxt">2.480</span><img class="plus btn" data-open="shop" src="assets/ui-jelly-pzuh/buttons-pastel/mint/icon_plus_mint.png?v=202610281646"></div>
     </div>
-    <div id="ticker"><img src="assets/emoji-fluent-3d/game/loudspeaker.png?v=202610231911"><span id="tickTxt"></span></div>
+    <div id="ticker"><img src="assets/emoji-fluent-3d/game/loudspeaker.png?v=202610281646"><span id="tickTxt"></span></div>
     <div id="topR">
-      <div class="rbtn btn" data-open="mail" title="Hộp thư"><img src="assets/ui-jelly-pzuh/buttons-pastel/purple/icon_mail_purple.png?v=202610231911"><div class="dot" id="mailDot">2</div></div>
-      <div class="rbtn btn" id="mapBtn" title="Bản đồ"><img src="assets/ui-jelly-pzuh/buttons-pastel/mint/icon_home_mint.png?v=202610231911"></div>
-      <div class="rbtn btn" data-open="games" title="Danh sách game"><img src="assets/ui-jelly-pzuh/buttons-pastel/yellow/icon_grid_yellow.png?v=202610231911"></div>
-      <div class="rbtn btn" data-open="settings" title="Cài đặt"><img src="assets/ui-jelly-pzuh/buttons-pastel/pink/icon_settings_pink.png?v=202610231911"></div>
+      <div class="rbtn btn" data-open="mail" title="Hộp thư"><img src="assets/ui-jelly-pzuh/buttons-pastel/purple/icon_mail_purple.png?v=202610281646"><div class="dot" id="mailDot">2</div></div>
+      <div class="rbtn btn" id="mapBtn" title="Bản đồ"><img src="assets/ui-jelly-pzuh/buttons-pastel/mint/icon_home_mint.png?v=202610281646"></div>
+      <div class="rbtn btn" data-open="games" title="Danh sách game"><img src="assets/ui-jelly-pzuh/buttons-pastel/yellow/icon_grid_yellow.png?v=202610281646"></div>
+      <div class="rbtn btn" data-open="settings" title="Cài đặt"><img src="assets/ui-jelly-pzuh/buttons-pastel/pink/icon_settings_pink.png?v=202610281646"></div>
     </div>
-    <div id="evcard" data-open="season"><img src="assets/emoji-fluent-3d/game/party_popper.png?v=202610231911"><b>Lễ hội Heo Con</b><span id="evTime">Còn 6 ngày 12 giờ</span></div>
-    <div id="qcard" class="card" data-open="event"><div class="h"><img src="assets/emoji-fluent-3d/game/scroll.png?v=202610231911">Nhiệm vụ ngày</div><div id="qbody"></div></div>
-    <div id="sideBtns"><div class="sb" data-open="wheel"><img src="assets/emoji-fluent-3d/game/bullseye.png?v=202610231911"><b>Vòng quay</b><i class="dot hide" id="wheelDot">1</i></div><div class="sb" data-open="piggy"><img src="assets/emoji-fluent-3d/animals/pig.png?v=202610231911"><b>Heo đất</b><i class="dot hide" id="piggyDot">!</i></div></div>
+    <div id="evcard" data-open="season"><img src="assets/emoji-fluent-3d/game/party_popper.png?v=202610281646"><b>Lễ hội Heo Con</b><span id="evTime">Còn 6 ngày 12 giờ</span></div>
+    <div id="qcard" class="card" data-open="event"><div class="h"><img src="assets/emoji-fluent-3d/game/scroll.png?v=202610281646">Nhiệm vụ ngày</div><div id="qbody"></div></div>
+    <div id="sideBtns"><div class="sb" data-open="wheel"><img src="assets/emoji-fluent-3d/game/bullseye.png?v=202610281646"><b>Vòng quay</b><i class="dot hide" id="wheelDot">1</i></div><div class="sb" data-open="piggy"><img src="assets/emoji-fluent-3d/animals/pig.png?v=202610281646"><b>Heo đất</b><i class="dot hide" id="piggyDot">!</i></div></div>
     <div id="mini"><canvas id="miniCv" width="280" height="280"></canvas><div class="n">B</div><div class="cap">Thị trấn Heo Con</div></div>
     <div id="dock">
-      <div class="dk" data-open="daily" style="--d:#c2407a"><div class="sq" style="background:linear-gradient(#ffc6dd,#ff7eb3)"><img src="assets/emoji-fluent-3d/game/wrapped_gift.png?v=202610231911"></div><b>Quà ngày</b><div class="dot hide" id="dailyDot">!</div></div>
-      <div class="dk" data-open="event" style="--d:#5f3fc9"><div class="sq" style="background:linear-gradient(#e2d6ff,#a98bff)"><img src="assets/emoji-fluent-3d/game/scroll.png?v=202610231911"></div><b>Nhiệm vụ</b><div class="dot hide" id="questDot">!</div></div>
-      <div class="dk main" data-open="games" style="--d:#b07800"><div class="sq" style="background:linear-gradient(#fff2b0,#ffc93c)"><img src="assets/emoji-fluent-3d/game/joystick.png?v=202610231911"></div><b>Chọn game</b></div>
-      <div class="dk" data-open="shop" style="--d:#1f9a70"><div class="sq" style="background:linear-gradient(#c9f6e6,#4fd9a6)"><img src="assets/emoji-fluent-3d/game/shopping_bags.png?v=202610231911"></div><b>Cửa hàng</b></div>
-      <div class="dk" data-open="rank" style="--d:#2a7fd0"><div class="sq" style="background:linear-gradient(#d3ecff,#6fbfff)"><img src="assets/emoji-fluent-3d/game/trophy.png?v=202610231911"></div><b>Xếp hạng</b></div>
+      <div class="dk" data-open="daily" style="--d:#c2407a"><div class="sq" style="background:linear-gradient(#ffc6dd,#ff7eb3)"><img src="assets/emoji-fluent-3d/game/wrapped_gift.png?v=202610281646"></div><b>Quà ngày</b><div class="dot hide" id="dailyDot">!</div></div>
+      <div class="dk" data-open="event" style="--d:#5f3fc9"><div class="sq" style="background:linear-gradient(#e2d6ff,#a98bff)"><img src="assets/emoji-fluent-3d/game/scroll.png?v=202610281646"></div><b>Nhiệm vụ</b><div class="dot hide" id="questDot">!</div></div>
+      <div class="dk main" data-open="games" style="--d:#b07800"><div class="sq" style="background:linear-gradient(#fff2b0,#ffc93c)"><img src="assets/emoji-fluent-3d/game/joystick.png?v=202610281646"></div><b>Chọn game</b></div>
+      <div class="dk" data-open="shop" style="--d:#1f9a70"><div class="sq" style="background:linear-gradient(#c9f6e6,#4fd9a6)"><img src="assets/emoji-fluent-3d/game/shopping_bags.png?v=202610281646"></div><b>Cửa hàng</b></div>
+      <div class="dk" data-open="rank" style="--d:#2a7fd0"><div class="sq" style="background:linear-gradient(#d3ecff,#6fbfff)"><img src="assets/emoji-fluent-3d/game/trophy.png?v=202610281646"></div><b>Xếp hạng</b></div>
     </div>
-    <div id="emoteBtn" title="Biểu cảm"><img src="assets/emoji-fluent-3d/reactions/grinning_squinting_face.png?v=202610231911"></div>
+    <div id="emoteBtn" title="Biểu cảm"><img src="assets/emoji-fluent-3d/reactions/grinning_squinting_face.png?v=202610281646"></div>
     <div id="emotes"></div>
-    <div class="big rainbow" id="playnow"><img src="assets/3d/renders/icons/bgb_d6_red.png?v=202610231911">CHƠI NGAY</div>
+    <div class="big rainbow" id="playnow"><img src="assets/3d/renders/icons/bgb_d6_red.png?v=202610281646">CHƠI NGAY</div>
     <div id="near"><img id="nearImg"><b id="nearTxt"></b><kbd>E</kbd></div>
   </div>
 
   <div id="auth" class="hide"><div class="frame">
     <div id="brand">
-      <img class="lg" src="assets/ui-premium-generated/logo_heo_con_club.png?v=202610231911" alt="Heo Con Club">
+      <img class="lg" src="assets/ui-premium-generated/logo_heo_con_club.png?v=202610281646" alt="Heo Con Club">
       <div class="tag">Game bài & game dân gian siêu dễ thương</div>
       <div class="feats">
-        <div><img src="assets/emoji-fluent-3d/game/joystick.png?v=202610231911">20 trò chơi</div>
-        <div><img src="assets/emoji-fluent-3d/game/wrapped_gift.png?v=202610231911">Quà mỗi ngày</div>
-        <div><img src="assets/emoji-fluent-3d/game/locked.png?v=202610231911">Lưu trên máy</div>
+        <div><img src="assets/emoji-fluent-3d/game/joystick.png?v=202610281646">20 trò chơi</div>
+        <div><img src="assets/emoji-fluent-3d/game/wrapped_gift.png?v=202610281646">Quà mỗi ngày</div>
+        <div><img src="assets/emoji-fluent-3d/game/locked.png?v=202610281646">Lưu trên máy</div>
       </div>
     </div>
     <div id="pwrap"><div id="panel">
       <div id="atabs"><div data-t="login" class="on">Đăng nhập</div><div data-t="reg">Đăng ký</div></div>
       <form id="flogin" autocomplete="on" onsubmit="return false">
-        <div class="field"><img class="ic" src="assets/emoji-fluent-3d/reactions/smiling_face_with_halo.png?v=202610231911"><input id="lu" name="username" autocomplete="username" placeholder="Tên đăng nhập" maxlength="16" autocapitalize="off" spellcheck="false"></div>
-        <div class="field"><img class="ic" src="assets/emoji-fluent-3d/game/key.png?v=202610231911"><input id="lp" name="password" type="password" autocomplete="current-password" placeholder="Mật khẩu" maxlength="64"><div class="eye" data-for="lp">🙈</div></div>
+        <div class="field"><img class="ic" src="assets/emoji-fluent-3d/reactions/smiling_face_with_halo.png?v=202610281646"><input id="lu" name="username" autocomplete="username" placeholder="Tên đăng nhập" maxlength="16" autocapitalize="off" spellcheck="false"></div>
+        <div class="field"><img class="ic" src="assets/emoji-fluent-3d/game/key.png?v=202610281646"><input id="lp" name="password" type="password" autocomplete="current-password" placeholder="Mật khẩu" maxlength="64"><div class="eye" data-for="lp">🙈</div></div>
         <div class="row2"><div class="tog on" id="remember"><i></i>Ghi nhớ</div><a id="forgot">Quên mật khẩu?</a></div>
         <div class="big pink" id="btnLogin">ĐĂNG NHẬP</div>
       </form>
       <form id="freg" class="hide" autocomplete="on" onsubmit="return false">
-        <div class="field"><img class="ic" src="assets/emoji-fluent-3d/reactions/smiling_face_with_halo.png?v=202610231911"><input id="ru" name="username" autocomplete="username" placeholder="Tên đăng nhập (a-z, 0-9)" maxlength="16" autocapitalize="off" spellcheck="false"><div class="hint" id="ruHint"></div></div>
-        <div class="field"><img class="ic" src="assets/emoji-fluent-3d/game/crown.png?v=202610231911"><input id="rn" placeholder="Tên trong game" maxlength="14"><div class="hint" id="rnHint" style="color:#c9a2b6">0/14</div></div>
-        <div class="field"><img class="ic" src="assets/emoji-fluent-3d/game/key.png?v=202610231911"><input id="rp" type="password" autocomplete="new-password" placeholder="Mật khẩu (ít nhất 6 ký tự)" maxlength="64"><div class="eye" data-for="rp">🙈</div></div>
+        <div class="field"><img class="ic" src="assets/emoji-fluent-3d/reactions/smiling_face_with_halo.png?v=202610281646"><input id="ru" name="username" autocomplete="username" placeholder="Tên đăng nhập (a-z, 0-9)" maxlength="16" autocapitalize="off" spellcheck="false"><div class="hint" id="ruHint"></div></div>
+        <div class="field"><img class="ic" src="assets/emoji-fluent-3d/game/crown.png?v=202610281646"><input id="rn" placeholder="Tên trong game" maxlength="14"><div class="hint" id="rnHint" style="color:#c9a2b6">0/14</div></div>
+        <div class="field"><img class="ic" src="assets/emoji-fluent-3d/game/key.png?v=202610281646"><input id="rp" type="password" autocomplete="new-password" placeholder="Mật khẩu (ít nhất 6 ký tự)" maxlength="64"><div class="eye" data-for="rp">🙈</div></div>
         <div id="strength"><i></i></div>
-        <div class="field"><img class="ic" src="assets/emoji-fluent-3d/game/locked.png?v=202610231911"><input id="rp2" type="password" autocomplete="new-password" placeholder="Nhập lại mật khẩu" maxlength="64"><div class="hint" id="rp2Hint"></div></div>
+        <div class="field"><img class="ic" src="assets/emoji-fluent-3d/game/locked.png?v=202610281646"><input id="rp2" type="password" autocomplete="new-password" placeholder="Nhập lại mật khẩu" maxlength="64"><div class="hint" id="rp2Hint"></div></div>
         <div class="lbl">Chọn linh vật 3D</div>
         <div id="mpick"></div>
         <div class="big pink" id="btnReg">TẠO TÀI KHOẢN</div>
@@ -401,7 +401,7 @@ img{-webkit-user-drag:none}
       <div class="or">hoặc</div>
       <div class="big google hide" id="btnGoogle"><svg viewBox="0 0 48 48" width="44" height="44" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>Đăng nhập bằng Google</div>
       <div class="note hide" id="onlineNote"></div>
-      <div class="big mint" id="btnGuest"><img src="assets/emoji-fluent-3d/hands/waving_hand.png?v=202610231911" style="width:52px">Chơi ngay không cần tài khoản</div>
+      <div class="big mint" id="btnGuest"><img src="assets/emoji-fluent-3d/hands/waving_hand.png?v=202610281646" style="width:52px">Chơi ngay không cần tài khoản</div>
       <div class="note">Tài khoản lưu ngay trên máy này, không gửi đi đâu.</div>
       <div class="back" id="toLoginTab">Đã có tài khoản? Đăng nhập</div></div>
     </div>
@@ -409,9 +409,9 @@ img{-webkit-user-drag:none}
 
   <div id="loading">
     <div class="frame">
-      <img class="logoimg" src="assets/ui-premium-generated/logo_heo_con_club.png?v=202610231911" alt="Heo Con Club">
+      <img class="logoimg" src="assets/ui-premium-generated/logo_heo_con_club.png?v=202610281646" alt="Heo Con Club">
       <div id="lbox">
-        <div id="lbar"><div id="lfill"></div><img id="lpig" src="assets/emoji-fluent-3d/animals/pig.png?v=202610231911" style="left:4px"></div>
+        <div id="lbar"><div id="lfill"></div><img id="lpig" src="assets/emoji-fluent-3d/animals/pig.png?v=202610281646" style="left:4px"></div>
         <div id="lrow"><div id="ltext">Đang mở cửa thị trấn…</div><div id="lpct">0%</div></div>
       </div>
     </div>
@@ -423,15 +423,15 @@ img{-webkit-user-drag:none}
   <div id="tut" class="hide"><div class="box">
     <h2>Cách chơi trong thị trấn</h2>
     <div class="steps">
-      <div class="st"><img src="assets/emoji-fluent-3d/hands/waving_hand.png?v=202610231911"><b>Chạm để đi</b><span>Chạm xuống đường hoặc vỉa hè, nhân vật sẽ chạy tới đó.</span></div>
-      <div class="st"><img src="assets/emoji-fluent-3d/game/house.png?v=202610231911"><b>Chạm cửa hàng</b><span>Mỗi cửa hàng là một game. Chạm vào để đi tới cửa và vào chơi.</span></div>
-      <div class="st"><img src="assets/emoji-fluent-3d/game/joystick.png?v=202610231911"><b>Xoay & phóng to</b><span>Kéo để xoay camera. Cuộn chuột hoặc chụm 2 ngón để phóng to.</span></div>
+      <div class="st"><img src="assets/emoji-fluent-3d/hands/waving_hand.png?v=202610281646"><b>Chạm để đi</b><span>Chạm xuống đường hoặc vỉa hè, nhân vật sẽ chạy tới đó.</span></div>
+      <div class="st"><img src="assets/emoji-fluent-3d/game/house.png?v=202610281646"><b>Chạm cửa hàng</b><span>Mỗi cửa hàng là một game. Chạm vào để đi tới cửa và vào chơi.</span></div>
+      <div class="st"><img src="assets/emoji-fluent-3d/game/joystick.png?v=202610281646"><b>Xoay & phóng to</b><span>Kéo để xoay camera. Cuộn chuột hoặc chụm 2 ngón để phóng to.</span></div>
     </div>
     <div class="big pink" id="tutOk">HIỂU RỒI!</div>
   </div></div>
 
   <div id="modal"></div>
-  <div id="toast"><img id="toastImg" src="assets/emoji-fluent-3d/game/party_popper.png?v=202610231911"><span id="toastTxt"></span></div>
+  <div id="toast"><img id="toastImg" src="assets/emoji-fluent-3d/game/party_popper.png?v=202610281646"><span id="toastTxt"></span></div>
   <div id="fx"></div>
 </div>
 
@@ -440,6 +440,8 @@ img{-webkit-user-drag:none}
 <script src="js/vendor/SkeletonUtils.js"></script>
 <script src="js/hc3d.js"></script>
 <script src="js/hc-core.js"></script>
+<script src="js/i18n-en.js"></script>
+<script src="js/hc-i18n.js"></script>
 <script src="js/hc-progress.js"></script>
 <script src="js/firebase-config.js"></script>
 <script src="js/hc-online.js"></script>
@@ -1032,6 +1034,8 @@ function openModal(kind, arg) {
     [['cao', 'Đẹp'], ['vua', 'Vừa'], ['thap', 'Nhẹ']].forEach(([k, l]) => { const s = el('span', { text: l, class: (S.gfx || 'cao') === k ? 'on' : '' }, seg); s.onclick = () => { S.gfx = k; HC.saveSettings(); $$('span', seg).forEach(x => x.classList.toggle('on', x === s)); town.resizePixelRatio(pixelRatio()); town.st.renderer.shadowMap.enabled = k !== 'thap'; town.st.scene.traverse(o => { if (o.material) o.material.needsUpdate = true; }); }; });
     const z = el('div', { class: 'srow' }, inner); el('span', { text: '🔍 Cỡ giao diện' }, z); const zs = el('div', { class: 'seg' }, z);
     [['nho', 'Nhỏ'], ['vua', 'Vừa'], ['lon', 'Lớn']].forEach(([k, l]) => { const s = el('span', { text: l, class: (S.ui || 'vua') === k ? 'on' : '' }, zs); s.onclick = () => { S.ui = k; HC.saveSettings(); $$('span', zs).forEach(x => x.classList.toggle('on', x === s)); fit(); }; });
+    const lg = el('div', { class: 'srow' }, inner); el('span', { text: '🌐 Ngôn ngữ' }, lg); const ls = el('div', { class: 'seg' }, lg);
+    [['vi', 'Tiếng Việt'], ['en', 'English']].forEach(([k, l]) => { const s = el('span', { text: l, class: (HC.lang || 'vi') === k ? 'on' : '' }, ls); s.onclick = () => { if (HC.lang === k) return; sfx('click'); HC.veil(k === 'en' ? 'Switching to English…' : 'Đang chuyển sang tiếng Việt…'); setTimeout(() => HC.setLang(k), 300); }; });
     const acc = el('div', { class: 'srow' }, inner); const gu = HC.online && HC.online.user(); el('span', { text: me.guest ? '👤 Đang chơi: Khách' : gu ? `🌐 Google: ${gu.name} · lưu trên mây` : `👤 Tài khoản: ${me.user}` }, acc);
     const bs = el('div', { class: 'mbtns' }, p);
     bigBtn(bs, 'Đăng xuất', 'grey', async () => { if (HC.online && HC.online.isGoogle()) await HC.online.signOut().catch(() => {}); HC.auth.logout(); HC.goto('index.html', 'Hẹn gặp lại nha!'); });
@@ -1076,7 +1080,7 @@ async function boot() {
     $('#ltext').textContent = 'Máy chưa bật WebGL nên không vẽ được thị trấn 3D. Đang mở bản đồ thay thế…';
     setTimeout(() => location.href = 'lobby.html', 2500); return;
   }
-  await loadScript('assets/3d/js/tex_town.js'); setLoad(.08);
+  await loadScript('assets/3d/js/tex_town.js'); if (HC.lang === 'en') await loadScript('assets/3d/js/tex_town-en.js'); setLoad(.08);
   town = window.town = new HCTown.Town($('#town'), { labels: $('#labels'), pixelRatio: pixelRatio(), instant: SHOT, width: innerWidth, height: innerHeight });
   town.uiScale = uiS;
   town.on('enter', b => { $('#near').classList.remove('on'); openBuilding(b); });

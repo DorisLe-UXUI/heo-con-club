@@ -28,3 +28,6 @@ __pycache__/
 custom/.goc/
 custom/sheets/_kiem_tra/
 custom/sheets/_bo_qua/
+
+# intro videos (large, shared separately)
+video/

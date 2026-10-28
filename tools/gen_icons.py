@@ -1,5 +1,6 @@
 """Lobby game icons (512x512) for 20 games, composed from the kit.
 Usage: python3 -E gen_icons.py <assets_dir> [only-key ...]
+English titles (games/lobby-icons-en, used when the game runs with ?lang=en): HC_ICON_LANG=en python3 -E gen_icons.py <assets_dir>
 """
 import sys, random, zlib
 from pathlib import Path
@@ -11,6 +12,14 @@ from custom_img import load_art, fit_box
 A = Path(sys.argv[1])
 G = A / 'games'
 OUT = G / 'lobby-icons'
+import os
+LANG = os.environ.get('HC_ICON_LANG', 'vi')
+EN = {'tien-len': 'Tien Len', 'phom': 'Phom', 'mau-binh': 'Chinese Poker', 'xi-dach': 'Blackjack', 'poker': 'Poker', 'bai-cao': 'Three Cards', 'sam-loc': 'Sam Loc',
+      'lieng': 'Lieng', 'bau-cua': 'Bau Cua', 'xoc-dia': 'Xoc Dia', 'tai-xiu': 'Sic Bo', 'co-tuong': 'Chinese Chess', 'co-ca-ngua': 'Horse Race', 'co-caro': 'Gomoku',
+      'bai-mau': 'Color Cards', 'lo-to': 'Bingo', 'ban-ca': 'Fish Hunter', 'day-xu': 'Coin Pusher', 'gap-thu': 'Claw Machine', 'xuc-ve': 'Ticket Scooper'}
+if LANG == 'en':
+    OUT = G / 'lobby-icons-en'
+    OUT.mkdir(exist_ok=True)
 F = A / 'fonts'
 CB = F / 'GrandstanderBlack-Regular.ttf'  # Cherry Bomb One draws Đ/ừ/ứ/ử/ữ/ự wrong; Coiny draws V like U
 FL = A / 'emoji-fluent-3d'
@@ -75,6 +84,8 @@ ONLY = set(sys.argv[2:])
 
 
 def make(key, label, color, draw, hot=None):
+    if LANG == 'en':
+        label = EN.get(key, label)
     if ONLY and key not in ONLY:
         ICONS[key] = label
         return
